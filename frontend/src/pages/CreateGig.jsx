@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
-import { ArrowLeft, DollarSign } from 'lucide-react';
+import { ArrowLeft, IndianRupee } from 'lucide-react';
 
 const CreateGig = () => {
     const [title, setTitle] = useState('');
@@ -67,10 +67,10 @@ const CreateGig = () => {
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">Budget</label>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Budget (₹)</label>
                         <div className="relative">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                                <DollarSign size={18} />
+                                <IndianRupee size={18} />
                             </div>
                             <input
                                 type="number"

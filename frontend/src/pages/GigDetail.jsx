@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import api from '../utils/api';
-import { ArrowLeft, DollarSign, Calendar, User, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { ArrowLeft, IndianRupee, Calendar, User, CheckCircle, XCircle, Clock } from 'lucide-react';
 import clsx from 'clsx';
 
 const GigDetail = () => {
@@ -105,7 +105,7 @@ const GigDetail = () => {
                 <div className="flex flex-wrap gap-4 text-sm text-slate-500 mb-6">
                     <div className="flex items-center"><User size={16} className="mr-1" /> Posted by {gig.ownerId.name}</div>
                     <div className="flex items-center"><Calendar size={16} className="mr-1" /> {new Date(gig.createdAt).toLocaleDateString()}</div>
-                    <div className="flex items-center font-semibold text-slate-700"><DollarSign size={16} className="mr-1 text-primary-500" /> Budget: ${gig.budget}</div>
+                    <div className="flex items-center font-semibold text-slate-700"><IndianRupee size={16} className="mr-1 text-primary-500" /> Budget: ₹{gig.budget}</div>
                 </div>
 
                 <div className="prose max-w-none text-slate-600">
@@ -130,7 +130,7 @@ const GigDetail = () => {
                                 )}>
                                     <div className="flex-1">
                                         <div className="flex items-center gap-2 mb-1">
-                                            <span className="font-bold text-lg text-slate-900">${bid.price}</span>
+                                            <span className="font-bold text-lg text-slate-900">₹{bid.price}</span>
                                             {bid.status === 'hired' && <span className="bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full font-bold">HIRED</span>}
                                             {bid.status === 'rejected' && <span className="bg-red-100 text-red-800 text-xs px-2 py-0.5 rounded-full font-bold">REJECTED</span>}
                                         </div>
@@ -190,10 +190,10 @@ const GigDetail = () => {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-slate-700 mb-1">Your Price ($)</label>
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">Your Price (₹)</label>
                                         <div className="relative">
                                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                                                <DollarSign size={18} />
+                                                <IndianRupee size={18} />
                                             </div>
                                             <input
                                                 type="number"

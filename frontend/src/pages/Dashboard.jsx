@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../utils/api';
-import { Search, MapPin, DollarSign, Clock, ArrowRight } from 'lucide-react';
+import { Search, MapPin, IndianRupee, Clock, ArrowRight } from 'lucide-react';
 
 const Dashboard = () => {
     const [gigs, setGigs] = useState([]);
@@ -81,7 +81,7 @@ const Dashboard = () => {
                                     </p>
                                     <div className="mt-auto pt-4 border-t border-slate-50 flex items-center justify-between text-sm">
                                         <div className="flex items-center text-slate-700 font-medium">
-                                            <DollarSign size={16} className="text-primary-500 mr-1" />
+                                            <IndianRupee size={16} className="text-primary-500 mr-1" />
                                             {gig.budget.toLocaleString()}
                                         </div>
                                         <div className="flex items-center text-slate-500">
