@@ -76,3 +76,52 @@ This logic is handled on the backend.
 ---
 
 
+
+---
+
+## Setup & and Installation
+
+### 1. Prerequisites
+- Node.js installed
+- MongoDB installed and running locally
+
+### 2. Installation
+Clone the repository and install dependencies for **both** backend and frontend:
+
+```bash
+# Install Backend Dependencies
+cd backend
+npm install
+
+# Install Frontend Dependencies
+cd ../frontend
+npm install
+```
+
+### 3. Environment Setup
+Create a `.env` file in the `backend` folder with the following values:
+
+```env
+PORT=5000
+MONGO_URI=mongodb://localhost:27017/gigflow
+JWT_SECRET=mycustomsecret123
+NODE_ENV=development
+```
+
+### 4. Running the Project
+You need to run both the backend and frontend servers.
+
+**Option 1: Two Terminals**
+Terminal 1 (Backend):
+```bash
+cd backend
+npm run dev
+```
+
+Terminal 2 (Frontend):
+```bash
+cd frontend
+npm run dev
+```
+
+The frontend will run on `http://localhost:5173` and the backend on `http://localhost:5000`.

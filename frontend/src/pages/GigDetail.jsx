@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import api from '../utils/api';
 import { ArrowLeft, IndianRupee, Calendar, User, CheckCircle, XCircle, Clock } from 'lucide-react';
 import clsx from 'clsx';
+import { toast } from 'react-hot-toast';
 
 const GigDetail = () => {
     const { id } = useParams();
@@ -22,7 +23,9 @@ const GigDetail = () => {
     const [bidSuccess, setBidSuccess] = useState(false);
 
     // Hire State
+    // Hire State
     const [hiringId, setHiringId] = useState(null);
+    const [confirmHireId, setConfirmHireId] = useState(null);
 
     const fetchGigDetails = async () => {
         try {
@@ -64,15 +67,13 @@ const GigDetail = () => {
     };
 
     const handleHire = async (bidId) => {
-        if (!window.confirm('Are you sure you want to hire this freelancer? This will reject all other bids.')) return;
-
-        setHiringId(bidId);
+        // Optimistic UI update or load state handled by hiringId
         try {
             await api.patch(`/bids/${bidId}/hire`);
-            // Refresh data
+            toast.success('Freelancer hired successfully!');
             fetchGigDetails();
         } catch (err) {
-            alert(err.response?.data?.message || 'Error hiring freelancer');
+            toast.error(err.response?.data?.message || 'Error hiring freelancer');
         }
         setHiringId(null);
     };
@@ -139,13 +140,38 @@ const GigDetail = () => {
                                     </div>
 
                                     {!isAssigned && bid.status === 'pending' && (
-                                        <button
-                                            onClick={() => handleHire(bid._id)}
-                                            disabled={hiringId !== null}
-                                            className="btn-primary bg-green-600 hover:bg-green-700 whitespace-nowrap"
-                                        >
-                                            {hiringId === bid._id ? 'Hiring...' : 'Hire Now'}
-                                        </button>
+                                        <div className="flex items-center gap-2">
+                                            {confirmHireId === bid._id ? (
+                                                <>
+                                                    <span className="text-sm font-medium text-slate-700 mr-2">Are you sure?</span>
+                                                    <button
+                                                        onClick={() => {
+                                                            setHiringId(bid._id);
+                                                            handleHire(bid._id);
+                                                            setConfirmHireId(null);
+                                                        }}
+                                                        disabled={hiringId !== null}
+                                                        className="px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors"
+                                                    >
+                                                        {hiringId === bid._id ? 'Hiring...' : 'Yes, Hire'}
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setConfirmHireId(null)}
+                                                        disabled={hiringId !== null}
+                                                        className="px-3 py-1.5 bg-slate-200 text-slate-700 text-sm font-medium rounded-lg hover:bg-slate-300 transition-colors"
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                </>
+                                            ) : (
+                                                <button
+                                                    onClick={() => setConfirmHireId(bid._id)}
+                                                    className="btn-primary bg-green-600 hover:bg-green-700 whitespace-nowrap"
+                                                >
+                                                    Hire Now
+                                                </button>
+                                            )}
+                                        </div>
                                     )}
                                 </div>
                             ))}

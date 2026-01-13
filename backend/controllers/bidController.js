@@ -70,25 +70,21 @@ const getBidsByGig = asyncHandler(async (req, res) => {
 const hireFreelancer = asyncHandler(async (req, res) => {
     const bidId = req.params.bidId;
 
-    // Start session for atomicity
-    const session = await mongoose.startSession();
-    session.startTransaction();
-
+    // Simplified without transaction for standalone MongoDB
     try {
-        const bid = await Bid.findById(bidId).session(session);
+        const bid = await Bid.findById(bidId);
 
         if (!bid) {
             throw new Error('Bid not found');
         }
 
-        const gig = await Gig.findById(bid.gigId).session(session);
+        const gig = await Gig.findById(bid.gigId);
 
         if (!gig) {
             throw new Error('Gig not found');
         }
 
-        // Auth check: Only owner can hire
-        // Note: req.user is set by protect middleware, not part of session, but valid
+        // Auth check
         if (gig.ownerId.toString() !== req.user._id.toString()) {
             res.status(401);
             throw new Error('Not authorized to hire for this gig');
@@ -101,36 +97,30 @@ const hireFreelancer = asyncHandler(async (req, res) => {
 
         // 1. Update Gig status
         gig.status = 'assigned';
-        await gig.save({ session });
+        await gig.save();
 
         // 2. Update Chosen Bid status
         bid.status = 'hired';
-        await bid.save({ session });
+        await bid.save();
 
         // 3. Reject all other bids for this gig
         await Bid.updateMany(
             { gigId: gig._id, _id: { $ne: bidId } },
             { status: 'rejected' }
-        ).session(session);
+        );
 
-        await session.commitTransaction();
+        const message = `You have been hired for the gig: ${gig.title}!`;
 
-        // Bonus 2: Real-time notification
         req.io.to(bid.freelancerId.toString()).emit('notification', {
-            message: `You have been hired for the gig: ${gig.title}!`
+            message: message
         });
 
         res.json({ message: 'Freelancer hired successfully', gig, bid });
 
     } catch (error) {
-        await session.abortTransaction();
-        console.error('Transaction aborted:', error);
-
-        // Retain original error status if set, else 500 or 400
+        console.error('Hiring error:', error);
         if (res.statusCode === 200) res.status(500);
         throw error;
-    } finally {
-        session.endSession();
     }
 });
 

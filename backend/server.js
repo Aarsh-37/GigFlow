@@ -8,6 +8,7 @@ import authRoutes from './routes/authRoutes.js';
 import gigRoutes from './routes/gigRoutes.js';
 import bidRoutes from './routes/bidRoutes.js';
 
+
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 
@@ -52,7 +53,6 @@ app.use(cookieParser());
 app.use('/api/auth', authRoutes);
 app.use('/api/gigs', gigRoutes);
 app.use('/api/bids', bidRoutes);
-
 app.get('/', (req, res) => {
     res.send('API is running...');
 });

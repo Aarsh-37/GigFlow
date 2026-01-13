@@ -5,6 +5,7 @@ import { logout } from '../slices/authSlice'; // Local state cleanup
 import api from '../utils/api'; // API for server logout
 import { LogOut, PlusCircle, User, Briefcase } from 'lucide-react';
 
+
 const Navbar = () => {
     const { userInfo } = useSelector((state) => state.auth);
     const dispatch = useDispatch();
@@ -37,6 +38,7 @@ const Navbar = () => {
                                     <PlusCircle size={20} />
                                     <span className="hidden sm:inline">Post Gig</span>
                                 </Link>
+
                                 <div className="flex items-center gap-4 ml-4 pl-4 border-l border-slate-200">
                                     <div className="flex items-center gap-2">
                                         <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold">
