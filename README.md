@@ -102,10 +102,10 @@ npm install
 Create a `.env` file in the `backend` folder with the following values:
 
 ```env
-PORT=5000
-MONGO_URI=mongodb://localhost:27017/gigflow
-JWT_SECRET=mycustomsecret123
-NODE_ENV=development
+PORT= Any Port here we have taken 5000
+MONGO_URI=connect with your Mongo
+JWT_SECRET= makeyourOwn
+NODE_ENV=development  / production for deployment purpose
 ```
 
 ### 4. Running the Project
