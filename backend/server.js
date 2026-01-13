@@ -17,6 +17,9 @@ dotenv.config();
 connectDB();
 
 const app = express();
+// Trust proxy is required for secure cookies on Render/Heroku
+app.set('trust proxy', 1);
+
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
     cors: {
@@ -48,7 +51,8 @@ const corsOptions = {
     origin: [
         'http://localhost:5173',
         'http://localhost:5174',
-        process.env.FRONTEND_URL
+        process.env.FRONTEND_URL,
+        process.env.FRONTEND_URL ? process.env.FRONTEND_URL.replace(/\/$/, '') : null
     ].filter(Boolean),
     credentials: true,
 };
