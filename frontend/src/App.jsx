@@ -12,6 +12,8 @@ import { useEffect } from 'react';
 import { Toaster, toast } from 'react-hot-toast';
 import socket from './socket';
 import { addNotification, fetchNotifications } from './slices/notificationSlice';
+import { setCredentials } from './slices/authSlice';
+import api from './utils/api';
 import Profile from './pages/Profile';
 import AdminPanel from './pages/AdminPanel';
 
@@ -25,6 +27,24 @@ function App() {
   const { userInfo } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
 
+  // Initial session recovery - runs only once when the app loads
+  useEffect(() => {
+    const checkAuth = async () => {
+      // Only check if we don't have userInfo yet (bridging initial load)
+      if (!userInfo) {
+        try {
+          const { data } = await api.get('/auth/me');
+          dispatch(setCredentials(data));
+        } catch (error) {
+          // No active session or token expired
+          console.log('No active session found');
+        }
+      }
+    };
+    checkAuth();
+  }, []); // Empty dependency array = run only on mount
+
+  // Socket and Notifications logic - runs when userInfo changes
   useEffect(() => {
     if (userInfo) {
       socket.emit('join', userInfo._id);
