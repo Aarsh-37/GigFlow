@@ -3,8 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../slices/authSlice'; // Local state cleanup
 import api from '../utils/api'; // API for server logout
+<<<<<<< HEAD
 import { LogOut, PlusCircle, User, Briefcase, Bell, Home } from 'lucide-react';
 import NotificationDropdown from './NotificationDropdown';
+=======
+import { LogOut, PlusCircle, User, Briefcase } from 'lucide-react';
+>>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
 
 
 const Navbar = () => {
@@ -41,6 +45,7 @@ const Navbar = () => {
                                 </Link>
 
                                 <div className="flex items-center gap-4 ml-4 pl-4 border-l border-slate-200">
+<<<<<<< HEAD
                                     <Link to="/" className="text-slate-400 hover:text-primary-600 transition-colors" title="Home">
                                         <Home size={20} />
                                     </Link>
@@ -57,6 +62,14 @@ const Navbar = () => {
                                         </div>
                                     </Link>
 
+=======
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold">
+                                            {userInfo.name.charAt(0).toUpperCase()}
+                                        </div>
+                                        <span className="hidden md:block font-medium text-slate-700">{userInfo.name}</span>
+                                    </div>
+>>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
                                     <button
                                         onClick={handleLogout}
                                         className="text-slate-400 hover:text-red-500 transition-colors"

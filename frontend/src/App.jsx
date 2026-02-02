@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Login from './pages/Login';
 import Register from './pages/Register';
+<<<<<<< HEAD
 import GigsFeed from './pages/GigsFeed';
 import Dashboard from './pages/Dashboard';
 import CreateGig from './pages/CreateGig';
@@ -16,6 +17,16 @@ import { setCredentials } from './slices/authSlice';
 import api from './utils/api';
 import Profile from './pages/Profile';
 import AdminPanel from './pages/AdminPanel';
+=======
+import Dashboard from './pages/Dashboard';
+import CreateGig from './pages/CreateGig';
+import GigDetail from './pages/GigDetail';
+import { useSelector } from 'react-redux';
+
+import { useEffect } from 'react';
+import { Toaster, toast } from 'react-hot-toast';
+import socket from './socket';
+>>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
 
 // Protected Route Wrapper
 const PrivateRoute = ({ children }) => {
@@ -25,6 +36,7 @@ const PrivateRoute = ({ children }) => {
 
 function App() {
   const { userInfo } = useSelector((state) => state.auth);
+<<<<<<< HEAD
   const dispatch = useDispatch();
 
   // Initial session recovery - runs only once when the app loads
@@ -52,6 +64,14 @@ function App() {
 
       socket.on('notification', (data) => {
         dispatch(addNotification(data));
+=======
+
+  useEffect(() => {
+    if (userInfo) {
+      socket.emit('join', userInfo._id);
+
+      socket.on('notification', (data) => {
+>>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
         toast.success(data.message, {
           duration: 5000,
           position: 'top-right',
@@ -62,7 +82,11 @@ function App() {
         socket.off('notification');
       };
     }
+<<<<<<< HEAD
   }, [userInfo, dispatch]);
+=======
+  }, [userInfo]);
+>>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
@@ -70,11 +94,16 @@ function App() {
       <Navbar />
       <main className="flex-grow py-8 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8">
         <Routes>
+<<<<<<< HEAD
           <Route path="/" element={<GigsFeed />} />
+=======
+          <Route path="/" element={<Dashboard />} />
+>>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
 
           <Route
+<<<<<<< HEAD
             path="/dashboard"
             element={
               <PrivateRoute>
@@ -99,6 +128,8 @@ function App() {
             }
           />
           <Route
+=======
+>>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
             path="/gigs/create"
             element={
               <PrivateRoute>

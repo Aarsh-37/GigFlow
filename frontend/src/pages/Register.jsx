@@ -134,6 +134,7 @@ const Register = () => {
                             )}
                         </button>
                     </form>
+<<<<<<< HEAD
 
                     <div className="mt-6 relative">
                         <div className="absolute inset-0 flex items-center">
@@ -170,6 +171,8 @@ const Register = () => {
                             Google
                         </a>
                     </div>
+=======
+>>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
                 </div>
                 <div className="text-center text-sm">
                     <span className="text-slate-500">Already have an account? </span>

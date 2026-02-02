@@ -7,7 +7,10 @@ const CreateGig = () => {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [budget, setBudget] = useState('');
+<<<<<<< HEAD
     const [bidDeadline, setBidDeadline] = useState('');
+=======
+>>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
@@ -17,8 +20,13 @@ const CreateGig = () => {
         e.preventDefault();
         setLoading(true);
         try {
+<<<<<<< HEAD
             await api.post('/gigs', { title, description, budget, bidDeadline });
             navigate('/dashboard');
+=======
+            await api.post('/gigs', { title, description, budget });
+            navigate('/');
+>>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
         } catch (err) {
             setError(err.response?.data?.message || err.message);
         }
@@ -84,6 +92,7 @@ const CreateGig = () => {
                         </div>
                     </div>
 
+<<<<<<< HEAD
                     <div>
                         <label className="block text-sm font-medium text-slate-700 mb-1">Bid Deadline (Optional)</label>
                         <input
@@ -96,6 +105,8 @@ const CreateGig = () => {
                         <p className="text-[10px] text-slate-400 mt-1">Gigs will automatically stop accepting bids after this date.</p>
                     </div>
 
+=======
+>>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
                     <div className="pt-4">
                         <button
                             type="submit"

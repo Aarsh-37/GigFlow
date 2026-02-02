@@ -2,7 +2,10 @@ import asyncHandler from 'express-async-handler';
 import mongoose from 'mongoose';
 import Bid from '../models/Bid.js';
 import Gig from '../models/Gig.js';
+<<<<<<< HEAD
 import createNotification from '../utils/notificationUtils.js';
+=======
+>>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
 
 // @desc    Place a bid
 // @route   POST /api/bids
@@ -26,11 +29,14 @@ const placeBid = asyncHandler(async (req, res) => {
         throw new Error('This gig is no longer open');
     }
 
+<<<<<<< HEAD
     if (gig.bidDeadline && new Date(gig.bidDeadline) < new Date()) {
         res.status(400);
         throw new Error('The bid deadline for this gig has passed');
     }
 
+=======
+>>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
     const existingBid = await Bid.findOne({ gigId, freelancerId: req.user._id });
     if (existingBid) {
         res.status(400);
@@ -44,6 +50,7 @@ const placeBid = asyncHandler(async (req, res) => {
         price
     });
 
+<<<<<<< HEAD
     await createNotification(req.io, {
         userId: gig.ownerId,
         message: `New bid placed on your gig: ${gig.title}`,
@@ -56,6 +63,8 @@ const placeBid = asyncHandler(async (req, res) => {
         req.io.to(req.user._id.toString()).emit('dashboard_update');
     }
 
+=======
+>>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
     res.status(201).json(bid);
 });
 
@@ -113,6 +122,7 @@ const hireFreelancer = asyncHandler(async (req, res) => {
             throw new Error('Gig is already assigned or closed');
         }
 
+<<<<<<< HEAD
         // 0. Payment Simulation: Check and Move Funds to Escrow
         const owner = await User.findById(req.user._id);
         if (owner.balance < bid.price) {
@@ -125,6 +135,8 @@ const hireFreelancer = asyncHandler(async (req, res) => {
 
         gig.escrowAmount = bid.price;
 
+=======
+>>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
         // 1. Update Gig status
         gig.status = 'assigned';
         await gig.save();
@@ -141,6 +153,7 @@ const hireFreelancer = asyncHandler(async (req, res) => {
 
         const message = `You have been hired for the gig: ${gig.title}!`;
 
+<<<<<<< HEAD
         await createNotification(req.io, {
             userId: bid.freelancerId,
             message,
@@ -153,6 +166,12 @@ const hireFreelancer = asyncHandler(async (req, res) => {
             req.io.to(req.user._id.toString()).emit('dashboard_update');
         }
 
+=======
+        req.io.to(bid.freelancerId.toString()).emit('notification', {
+            message: message
+        });
+
+>>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
         res.json({ message: 'Freelancer hired successfully', gig, bid });
 
     } catch (error) {
@@ -162,6 +181,7 @@ const hireFreelancer = asyncHandler(async (req, res) => {
     }
 });
 
+<<<<<<< HEAD
 // @desc    Update a bid
 // @route   PATCH /api/bids/:id
 // @access  Private (Owner only)
@@ -219,3 +239,6 @@ const withdrawBid = asyncHandler(async (req, res) => {
 });
 
 export { placeBid, getBidsByGig, hireFreelancer, updateBid, withdrawBid };
+=======
+export { placeBid, getBidsByGig, hireFreelancer };
+>>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f

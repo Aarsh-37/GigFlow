@@ -1,4 +1,5 @@
 import express from 'express';
+<<<<<<< HEAD
 import {
     getGigs,
     getGigById,
@@ -23,5 +24,14 @@ router.route('/:id')
 router.patch('/:id/start', protect, isGigOwner, startGig);
 router.patch('/:id/complete', protect, isGigOwner, completeGig);
 router.patch('/:id/close', protect, isGigOwner, closeGig);
+=======
+import { getGigs, getGigById, createGig } from '../controllers/gigController.js';
+import { protect } from '../middleware/authMiddleware.js';
+
+const router = express.Router();
+
+router.route('/').get(getGigs).post(protect, createGig);
+router.route('/:id').get(getGigById);
+>>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
 
 export default router;

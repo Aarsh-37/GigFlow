@@ -1,11 +1,19 @@
 import React, { useEffect, useState } from 'react';
+<<<<<<< HEAD
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
+=======
+import { useParams, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+>>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
 import api from '../utils/api';
 import { ArrowLeft, IndianRupee, Calendar, User, CheckCircle, XCircle, Clock } from 'lucide-react';
 import clsx from 'clsx';
 import { toast } from 'react-hot-toast';
+<<<<<<< HEAD
 import Chat from '../components/Chat';
+=======
+>>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
 
 const GigDetail = () => {
     const { id } = useParams();
@@ -23,11 +31,15 @@ const GigDetail = () => {
     const [bidError, setBidError] = useState(null);
     const [bidSuccess, setBidSuccess] = useState(false);
 
+<<<<<<< HEAD
     // Review State
     const [reviewRating, setReviewRating] = useState(5);
     const [reviewComment, setReviewComment] = useState('');
     const [reviewLoading, setReviewLoading] = useState(false);
 
+=======
+    // Hire State
+>>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
     // Hire State
     const [hiringId, setHiringId] = useState(null);
     const [confirmHireId, setConfirmHireId] = useState(null);
@@ -72,6 +84,10 @@ const GigDetail = () => {
     };
 
     const handleHire = async (bidId) => {
+<<<<<<< HEAD
+=======
+        // Optimistic UI update or load state handled by hiringId
+>>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
         try {
             await api.patch(`/bids/${bidId}/hire`);
             toast.success('Freelancer hired successfully!');
@@ -82,6 +98,7 @@ const GigDetail = () => {
         setHiringId(null);
     };
 
+<<<<<<< HEAD
     const handleStatusTransition = async (transition) => {
         try {
             await api.patch(`/gigs/${id}/${transition}`);
@@ -127,11 +144,27 @@ const GigDetail = () => {
                 className="flex items-center text-slate-500 hover:text-slate-900 transition-colors font-medium"
             >
                 <ArrowLeft size={18} className="mr-1" /> Back
+=======
+    if (loading) return <div className="p-8 text-center">Loading...</div>;
+    if (!gig) return <div className="p-8 text-center">Gig not found</div>;
+
+    const isOwner = userInfo && gig.ownerId && userInfo._id === gig.ownerId._id;
+    const isAssigned = gig.status === 'assigned';
+
+    return (
+        <div className="max-w-4xl mx-auto space-y-8">
+            <button
+                onClick={() => navigate(-1)}
+                className="flex items-center text-slate-500 hover:text-slate-900 transition-colors"
+            >
+                <ArrowLeft size={18} className="mr-1" /> Back to Dashboard
+>>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
             </button>
 
             {/* Gig Header Card */}
             <div className="card p-8 bg-white shadow-xl shadow-slate-200/50 rounded-2xl border-0 overflow-hidden relative">
                 <div className={clsx(
+<<<<<<< HEAD
                     "absolute top-0 right-0 px-4 py-2 rounded-bl-xl font-bold uppercase text-[10px] tracking-widest",
                     gig.status === 'open' ? "bg-green-100 text-green-700" :
                         gig.status === 'assigned' ? "bg-primary-100 text-primary-700" :
@@ -154,10 +187,28 @@ const GigDetail = () => {
 
                 <div className="prose max-w-none text-slate-600">
                     <h3 className="text-lg font-bold text-slate-900 mb-2">Project Brief</h3>
+=======
+                    "absolute top-0 right-0 px-4 py-2 rounded-bl-xl font-bold uppercase text-xs tracking-wider",
+                    gig.status === 'open' ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-600"
+                )}>
+                    {gig.status}
+                </div>
+
+                <h1 className="text-3xl font-display font-bold text-slate-900 mb-2">{gig.title}</h1>
+                <div className="flex flex-wrap gap-4 text-sm text-slate-500 mb-6">
+                    <div className="flex items-center"><User size={16} className="mr-1" /> Posted by {gig.ownerId.name}</div>
+                    <div className="flex items-center"><Calendar size={16} className="mr-1" /> {new Date(gig.createdAt).toLocaleDateString()}</div>
+                    <div className="flex items-center font-semibold text-slate-700"><IndianRupee size={16} className="mr-1 text-primary-500" /> Budget: ₹{gig.budget}</div>
+                </div>
+
+                <div className="prose max-w-none text-slate-600">
+                    <h3 className="text-lg font-semibold text-slate-900 mb-2">Description</h3>
+>>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
                     <p className="whitespace-pre-line leading-relaxed">{gig.description}</p>
                 </div>
             </div>
 
+<<<<<<< HEAD
             {/* Chat & Lifecycle Section */}
             {userInfo && (isOwner || bids.some(b => b.freelancerId._id === userInfo._id && b.status === 'hired')) && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -236,6 +287,10 @@ const GigDetail = () => {
 
             {/* Owner View: Bids Management */}
             {isOwner && gig.status === 'open' && (
+=======
+            {/* Owner View: Bids Management */}
+            {isOwner && (
+>>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
                 <div className="space-y-4">
                     <h2 className="text-2xl font-display font-bold text-slate-900">Received Bids ({bids.length})</h2>
                     {bids.length === 0 ? (
@@ -258,7 +313,11 @@ const GigDetail = () => {
                                         <p className="text-slate-600 text-sm bg-slate-50 p-3 rounded-lg border border-slate-100 italic">"{bid.message}"</p>
                                     </div>
 
+<<<<<<< HEAD
                                     {bid.status === 'pending' && (
+=======
+                                    {!isAssigned && bid.status === 'pending' && (
+>>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
                                         <div className="flex items-center gap-2">
                                             {confirmHireId === bid._id ? (
                                                 <>
@@ -310,7 +369,11 @@ const GigDetail = () => {
                             <p className="text-green-700">The client has been notified of your proposal.</p>
                         </div>
                     ) : isAssigned ? (
+<<<<<<< HEAD
                         <div className="card p-8 bg-slate-100 text-center text-slate-500 font-medium">
+=======
+                        <div className="card p-8 bg-slate-100 text-center text-slate-500">
+>>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
                             <XCircle size={48} className="mx-auto text-slate-400 mb-4" />
                             <h3 className="text-xl font-bold text-slate-600">This gig is closed</h3>
                             <p>A freelancer has already been hired for this project.</p>
@@ -318,14 +381,22 @@ const GigDetail = () => {
                     ) : (
                         <div className="card p-8 bg-white shadow-lg border-0">
                             {bidError && (
+<<<<<<< HEAD
                                 <div className="mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm font-medium">
+=======
+                                <div className="mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
+>>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
                                     {bidError}
                                 </div>
                             )}
                             <form onSubmit={handlePlaceBid} className="space-y-6">
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <div className="md:col-span-2">
+<<<<<<< HEAD
                                         <label className="block text-sm font-bold text-slate-700 mb-1">Proposal Message</label>
+=======
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">Proposal Message</label>
+>>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
                                         <textarea
                                             required
                                             className="input-field h-32 resize-none"
@@ -335,7 +406,11 @@ const GigDetail = () => {
                                         />
                                     </div>
                                     <div>
+<<<<<<< HEAD
                                         <label className="block text-sm font-bold text-slate-700 mb-1">Your Price (₹)</label>
+=======
+                                        <label className="block text-sm font-medium text-slate-700 mb-1">Your Price (₹)</label>
+>>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
                                         <div className="relative">
                                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                                                 <IndianRupee size={18} />
@@ -343,7 +418,11 @@ const GigDetail = () => {
                                             <input
                                                 type="number"
                                                 required
+<<<<<<< HEAD
                                                 className="input-field pl-10 font-bold"
+=======
+                                                className="input-field pl-10"
+>>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
                                                 placeholder="500"
                                                 value={price}
                                                 onChange={(e) => setPrice(e.target.value)}
@@ -355,7 +434,11 @@ const GigDetail = () => {
                                     <button
                                         type="submit"
                                         disabled={bidLoading}
+<<<<<<< HEAD
                                         className="btn-primary px-8 py-3"
+=======
+                                        className="btn-primary px-8"
+>>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
                                     >
                                         {bidLoading ? 'Sending Proposal...' : 'Submit Proposal'}
                                     </button>

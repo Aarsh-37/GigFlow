@@ -1,8 +1,11 @@
 import asyncHandler from 'express-async-handler';
 import Gig from '../models/Gig.js';
+<<<<<<< HEAD
 import Bid from '../models/Bid.js';
 import User from '../models/User.js';
 import createNotification from '../utils/notificationUtils.js';
+=======
+>>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
 
 // @desc    Get all gigs
 // @route   GET /api/gigs
@@ -43,14 +46,21 @@ const getGigById = asyncHandler(async (req, res) => {
 // @route   POST /api/gigs
 // @access  Private
 const createGig = asyncHandler(async (req, res) => {
+<<<<<<< HEAD
     const { title, description, budget, bidDeadline } = req.body;
+=======
+    const { title, description, budget } = req.body;
+>>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
 
     const gig = new Gig({
         ownerId: req.user._id,
         title,
         description,
         budget,
+<<<<<<< HEAD
         bidDeadline,
+=======
+>>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
         status: 'open'
     });
 
@@ -58,6 +68,7 @@ const createGig = asyncHandler(async (req, res) => {
     res.status(201).json(createdGig);
 });
 
+<<<<<<< HEAD
 // @desc    Start a gig (Owner only)
 // @route   PATCH /api/gigs/:id/start
 // @access  Private
@@ -147,3 +158,6 @@ const closeGig = asyncHandler(async (req, res) => {
 });
 
 export { getGigs, getGigById, createGig, startGig, completeGig, closeGig };
+=======
+export { getGigs, getGigById, createGig };
+>>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
