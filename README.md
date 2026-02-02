@@ -53,6 +53,8 @@ GigFlow is a high-performance, full-stack freelancer marketplace built to demons
 - **MongoDB** (Local or Atlas)
 
 ### 2. Installation
+Clone the repository and install dependencies for **both** backend and frontend:
+
 ```bash
 # Clone the repository
 git clone https://github.com/Aarsh-37/GigFlow.git
@@ -76,13 +78,17 @@ FRONTEND_URL=http://localhost:5173
 # Optional: Google OAuth
 GOOGLE_CLIENT_ID=your_id
 
-### 4. Running the Development environment
+### 4. Running the Project
+You need to run both the backend and frontend servers.
+
 **Backend:**
 ```bash
 cd backend
 npm run dev
 ```
+
 **Frontend:**
+```bash
 cd frontend
 npm run dev
 ```

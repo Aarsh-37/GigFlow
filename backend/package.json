@@ -6,25 +6,17 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
-<<<<<<< HEAD
     "dev": "nodemon server.js",
     "test": "cross-env NODE_ENV=test jest --watchAll"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "cloudinary": "^1.41.3",
-=======
-    "dev": "nodemon server.js"
-  },
-  "dependencies": {
-    "bcryptjs": "^3.0.3",
->>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "express-async-handler": "^1.2.0",
-<<<<<<< HEAD
     "express-rate-limit": "^8.2.1",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
@@ -42,13 +34,5 @@
     "jest": "^30.2.0",
     "nodemon": "^3.1.11",
     "supertest": "^7.2.2"
-=======
-    "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.1.2",
-    "socket.io": "^4.8.3"
-  },
-  "devDependencies": {
-    "nodemon": "^3.1.11"
->>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
   }
 }

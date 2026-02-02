@@ -4,7 +4,6 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import connectDB from './config/db.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
-<<<<<<< HEAD
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import authRoutes from './routes/authRoutes.js';
@@ -18,11 +17,6 @@ import chatRoutes from './routes/chatRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import passport from 'passport';
 import configurePassport from './config/passportConfig.js';
-=======
-import authRoutes from './routes/authRoutes.js';
-import gigRoutes from './routes/gigRoutes.js';
-import bidRoutes from './routes/bidRoutes.js';
->>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
 
 
 import { createServer } from 'http';
@@ -32,16 +26,12 @@ dotenv.config();
 
 connectDB();
 
-<<<<<<< HEAD
 configurePassport();
 
-=======
->>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
 const app = express();
 // Trust proxy is required for secure cookies on Render/Heroku
 app.set('trust proxy', 1);
 
-<<<<<<< HEAD
 // Security Middlewares
 app.use(helmet());
 
@@ -61,8 +51,6 @@ const authLimiter = rateLimit({
 });
 app.use('/api/auth', authLimiter);
 
-=======
->>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
     cors: {
@@ -82,14 +70,11 @@ io.on('connection', (socket) => {
         socket.join(userId);
         console.log(`User ${userId} joined room`);
     });
-<<<<<<< HEAD
 
     socket.on('join_gig', (gigId) => {
         socket.join(`gig_${gigId}`);
         console.log(`User joined gig room: gig_${gigId}`);
     });
-=======
->>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
 });
 
 // Middleware to make io available in controllers
@@ -112,23 +97,18 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-<<<<<<< HEAD
 app.use(passport.initialize());
-=======
->>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
 
 app.use('/api/auth', authRoutes);
 app.use('/api/gigs', gigRoutes);
 app.use('/api/bids', bidRoutes);
-<<<<<<< HEAD
 app.use('/api/users', userRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/admin', adminRoutes);
-=======
->>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
+
 app.get('/', (req, res) => {
     res.send('API is running...');
 });

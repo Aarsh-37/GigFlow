@@ -6,7 +6,6 @@ import {
     getUserProfile
 } from '../controllers/authController.js';
 import { protect } from '../middleware/authMiddleware.js';
-<<<<<<< HEAD
 import passport from 'passport';
 import generateToken from '../utils/generateToken.js';
 import { validate, registerSchema, loginSchema } from '../middleware/validationMiddleware.js';
@@ -30,14 +29,4 @@ router.get('/google/callback',
     }
 );
 
-=======
-
-const router = express.Router();
-
-router.post('/register', registerUser);
-router.post('/login', authUser);
-router.post('/logout', logoutUser);
-router.get('/me', protect, getUserProfile);
-
->>>>>>> 9f1b36aefc5edba50be4def76c633c15eddff02f
 export default router;
