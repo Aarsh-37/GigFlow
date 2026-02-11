@@ -102,7 +102,5 @@ cd backend
 npm test
 ```
 
----
 
-## 📄 License
-This project is part of a professional internship assignment. All logic and engineering patterns are original implementations.
+
