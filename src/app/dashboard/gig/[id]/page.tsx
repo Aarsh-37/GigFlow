@@ -3,11 +3,12 @@
 import { useGigDetails, useGigBids, useSubmitBid, useHireFreelancer } from '@/hooks/useBids';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store';
-import { Loader2, DollarSign, UserIcon, CheckCircle, XCircle } from 'lucide-react';
+import { Loader2, DollarSign, CheckCircle, XCircle, FileText, ArrowLeft } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 const bidSchema = z.object({
   price: z.number().min(1, 'Price is required'),
@@ -33,14 +34,22 @@ export default function GigDetailsPage({ params }: { params: { id: string } }) {
 
   if (isLoadingGig || isLoadingBids) {
     return (
-      <div className="flex justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      <div className="flex justify-center items-center py-32">
+        <Loader2 className="h-10 w-10 text-[#1A62FF] animate-spin opacity-50" />
       </div>
     );
   }
 
   if (!gig) {
-    return <div>Gig not found.</div>;
+    return (
+      <div className="text-center py-20 bg-gray-50 rounded-[2rem] border border-gray-100">
+        <h3 className="text-xl font-bold text-gray-900">Gig Not Found</h3>
+        <p className="text-gray-500 mt-2">This opportunity might have been removed or never existed.</p>
+        <Link href="/dashboard/explore" className="text-[#1A62FF] font-bold mt-4 inline-block hover:underline">
+          Return to Explore
+        </Link>
+      </div>
+    );
   }
 
   const isClient = user?.id === gig.client_id;
@@ -60,113 +69,126 @@ export default function GigDetailsPage({ params }: { params: { id: string } }) {
     if (!user) return;
     try {
       await hireFreelancer.mutateAsync({ gigId, bidId, clientId: user.id });
-      // In Phase 6, we will route them to chat here!
     } catch (error) {
       console.error('Failed to hire freelancer', error);
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="max-w-5xl mx-auto space-y-8 pb-10">
+      <Link href="/dashboard/explore" className="inline-flex items-center gap-2 text-[#1A62FF] font-bold text-[10px] tracking-widest uppercase mb-6 hover:underline">
+        <ArrowLeft className="h-4 w-4" /> Back to Explore
+      </Link>
+      
       {/* Gig Header */}
-      <div className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-3xl p-8 shadow-sm">
-        <div className="flex justify-between items-start">
-          <span className="inline-flex items-center rounded-full bg-blue-50 dark:bg-blue-900/40 px-3 py-1 text-sm font-semibold text-blue-700 dark:text-blue-400">
-            {gig.category}
-          </span>
-          <div className="flex items-center gap-2">
-            <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
-              gig.status === 'open' ? 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-400' :
-              gig.status === 'in_progress' ? 'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-400' :
-              'bg-gray-100 text-gray-800 dark:bg-zinc-800 dark:text-gray-300'
-            }`}>
-              {gig.status.replace('_', ' ').toUpperCase()}
+      <div className="bg-white rounded-[2rem] p-10 md:p-12 shadow-[0_2px_20px_rgba(0,0,0,0.02)] border border-gray-100">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
+          <div>
+            <span className="inline-flex items-center rounded-lg bg-[#EAEFFF] px-3.5 py-1.5 text-[10px] font-black text-[#1A62FF] uppercase tracking-widest mb-4">
+              {gig.category}
             </span>
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-[#111827] leading-[1.1]">
+              {gig.title}
+            </h1>
+          </div>
+          <div className="text-left md:text-right flex-shrink-0">
+             <span className="text-[10px] font-bold tracking-widest text-gray-400 uppercase block mb-1">Fixed Budget</span>
+             <span className="text-4xl font-extrabold text-[#1A62FF] tracking-tight">${gig.budget.toLocaleString()}</span>
           </div>
         </div>
         
-        <h1 className="mt-4 text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
-          {gig.title}
-        </h1>
-        
-        <div className="mt-6 border-t border-gray-100 dark:border-zinc-800 pt-6">
-          <p className="text-gray-600 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
-            {gig.description}
-          </p>
-        </div>
-        
-        <div className="mt-8 flex items-center justify-between bg-gray-50 dark:bg-zinc-950 p-6 rounded-2xl border border-gray-100 dark:border-zinc-800">
-          <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-indigo-500 to-blue-500 flex items-center justify-center text-white text-lg font-bold shadow-inner">
+        <div className="flex items-center gap-4 py-6 border-y border-gray-100 my-8">
+            <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center text-gray-400 font-bold border border-gray-200">
               {gig.client?.full_name?.charAt(0) || 'C'}
             </div>
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Posted by</p>
-              <p className="font-semibold text-gray-900 dark:text-white">{gig.client?.full_name}</p>
+              <p className="text-[10px] font-bold tracking-widest text-gray-400 uppercase">Posted by Client</p>
+              <p className="font-bold text-gray-900">{gig.client?.full_name}</p>
             </div>
-          </div>
-          <div className="text-right">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Fixed Budget</p>
-            <p className="text-2xl font-bold text-gray-900 dark:text-white">${gig.budget}</p>
-          </div>
+            
+            <div className="ml-auto flex items-center gap-2">
+               <div className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                  gig.status === 'open' ? 'bg-green-50 text-green-700 ring-1 ring-green-600/20' :
+                  gig.status === 'in_progress' ? 'bg-orange-50 text-orange-700 ring-1 ring-orange-600/20' :
+                  'bg-gray-100 text-gray-600 ring-1 ring-gray-500/20'
+                }`}>
+                  {gig.status.replace('_', ' ')}
+                </div>
+            </div>
+        </div>
+
+        <div>
+          <h3 className="flex items-center gap-2 text-[13px] font-bold text-gray-900 mb-4 uppercase tracking-wider">
+            <FileText className="h-4 w-4 text-[#1A62FF]" /> Project Description
+          </h3>
+          <p className="text-[15px] font-medium text-gray-600 leading-relaxed whitespace-pre-wrap">
+            {gig.description}
+          </p>
         </div>
       </div>
 
       {/* Client View: Show Bids */}
       {isClient && (
-        <div className="space-y-6">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Freelancer Bids ({bids?.length || 0})</h2>
+        <div className="bg-[#F8F9FA] rounded-[2rem] p-10 md:p-12 border border-gray-200/50">
+          <div className="flex items-center justify-between mb-8">
+             <h2 className="text-2xl font-bold text-gray-900">Proposals Received</h2>
+             <span className="bg-gray-200 text-gray-700 font-bold px-3 py-1 rounded-full text-sm">{bids?.length || 0}</span>
+          </div>
           
           {bids?.length === 0 ? (
-            <div className="bg-gray-50 dark:bg-zinc-900/50 rounded-2xl p-8 text-center border border-dashed border-gray-300 dark:border-zinc-800">
-              <p className="text-gray-500 dark:text-gray-400">No bids yet. Check back soon!</p>
+            <div className="bg-white rounded-2xl p-12 text-center border border-gray-100 shadow-sm">
+              <p className="text-[15px] font-bold text-gray-400">No proposals yet. Waiting for talent...</p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-6">
               {bids?.map(bid => (
-                <div key={bid.id} className={`bg-white dark:bg-zinc-900 border rounded-2xl p-6 shadow-sm transition-all ${
-                  bid.status === 'accepted' ? 'border-green-500 ring-1 ring-green-500 shadow-green-50 dark:shadow-none' : 
-                  bid.status === 'rejected' ? 'border-red-200 dark:border-red-900/30 opacity-70' :
-                  'border-gray-200 dark:border-zinc-800 hover:border-blue-300'
+                <div key={bid.id} className={`bg-white rounded-3xl p-8 transition-all ${
+                  bid.status === 'accepted' ? 'border-[#1A62FF] ring-2 ring-[#1A62FF]/20 shadow-[0_4px_20px_rgba(26,98,255,0.1)]' : 
+                  bid.status === 'rejected' ? 'border-red-100 opacity-60' :
+                  'border border-gray-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] hover:border-blue-200 hover:shadow-md'
                 }`}>
-                  <div className="flex justify-between items-start gap-6">
-                    <div className="flex gap-4">
-                      <div className="h-12 w-12 rounded-full bg-zinc-200 dark:bg-zinc-700 flex-shrink-0 flex items-center justify-center font-bold text-zinc-600 dark:text-zinc-300">
+                  <div className="flex flex-col md:flex-row justify-between items-start gap-8">
+                    <div className="flex gap-5 items-start max-w-xl">
+                      <div className="h-12 w-12 rounded-full bg-slate-100 flex-shrink-0 flex items-center justify-center font-bold text-gray-500 border border-gray-200">
                         {bid.freelancer?.full_name?.charAt(0)}
                       </div>
                       <div>
-                        <h4 className="font-bold text-gray-900 dark:text-white text-lg">
+                        <h4 className="font-bold text-gray-900 text-lg">
                           {bid.freelancer?.full_name}
                         </h4>
-                        <p className="mt-2 text-gray-600 dark:text-gray-300 text-sm italic">"{bid.message}"</p>
+                        <div className="mt-4 p-5 bg-[#F8FAFD] rounded-2xl border border-blue-50/50 relative">
+                           <div className="absolute top-0 transform -translate-y-1/2 left-6 px-2 bg-[#F8FAFD] text-[10px] font-bold tracking-widest text-[#1A62FF] uppercase">Cover Letter</div>
+                           <p className="text-[14px] font-medium text-gray-600 leading-relaxed italic">"{bid.message}"</p>
+                        </div>
                       </div>
                     </div>
                     
-                    <div className="text-right flex flex-col items-end gap-3 flex-shrink-0">
-                      <span className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                        ${bid.price}
+                    <div className="flex flex-col items-end gap-3 flex-shrink-0">
+                      <span className="text-[10px] font-bold tracking-widest text-gray-400 uppercase">Proposed Rate</span>
+                      <span className="text-3xl font-extrabold text-[#111827]">
+                        ${bid.price.toLocaleString()}
                       </span>
                       
                       {bid.status === 'pending' && gig.status === 'open' && (
                         <button
                           onClick={() => onHire(bid.id)}
                           disabled={hireFreelancer.isPending}
-                          className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-bold rounded-xl shadow-sm transition-colors disabled:opacity-50 flex items-center gap-2"
+                          className="mt-4 px-6 py-3 bg-[#1A62FF] hover:bg-blue-700 text-white text-sm font-bold rounded-xl shadow-[0_4px_14px_rgba(26,98,255,0.3)] transition-colors disabled:opacity-50 flex items-center gap-2"
                         >
                           {hireFreelancer.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle className="h-4 w-4" />}
-                          Hire Now
+                          Hire Freelancer
                         </button>
                       )}
                       
                       {bid.status === 'accepted' && (
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-400 font-bold text-sm">
+                        <span className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#EAEFFF] text-[#1A62FF] font-bold text-sm">
                           <CheckCircle className="h-4 w-4" /> Hired
                         </span>
                       )}
                       
                       {bid.status === 'rejected' && (
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-400 font-bold text-sm">
-                          <XCircle className="h-4 w-4" /> Rejected
+                        <span className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gray-100 text-gray-500 font-bold text-sm">
+                          <XCircle className="h-4 w-4" /> Declined
                         </span>
                       )}
                     </div>
@@ -180,71 +202,82 @@ export default function GigDetailsPage({ params }: { params: { id: string } }) {
 
       {/* Freelancer View: Bidding */}
       {!isClient && (
-        <div className="bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-3xl p-8 shadow-sm">
-          {hasBid ? (
-            <div className={`p-6 rounded-2xl border ${
-              userBid.status === 'accepted' ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-900' :
-              userBid.status === 'rejected' ? 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-900' :
-              'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-900'
-            }`}>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                {userBid.status === 'accepted' && <CheckCircle className="text-green-600" />}
-                {userBid.status === 'rejected' && <XCircle className="text-red-500" />}
-                {userBid.status === 'pending' && <Loader2 className="text-blue-500 animate-spin" />}
-                Your Bid Status: <span className="capitalize">{userBid.status}</span>
-              </h3>
-              <div className="mt-4 space-y-2">
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Your Proposed Price: <span className="font-bold">${userBid.price}</span></p>
-                <p className="text-sm text-gray-600 dark:text-gray-400 italic">"{userBid.message}"</p>
-              </div>
-            </div>
-          ) : gig.status !== 'open' ? (
-            <div className="text-center p-6 bg-gray-50 dark:bg-zinc-800/50 rounded-2xl">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">This gig is closed</h3>
-              <p className="text-gray-500 dark:text-gray-400">The client has already hired a freelancer for this role.</p>
-            </div>
-          ) : (
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Submit Your Proposal</h2>
-              <form onSubmit={handleSubmit(onBidSubmit)} className="space-y-6">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Your Proposed Price (USD)</label>
-                  <div className="relative max-w-xs">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <DollarSign className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input
-                      {...register('price', { valueAsNumber: true })}
-                      type="number"
-                      className="w-full pl-11 pr-4 py-3 border border-gray-300 dark:border-zinc-700 rounded-xl bg-gray-50 dark:bg-zinc-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                      placeholder="e.g. 450"
-                    />
+        <div className="bg-[#111827] rounded-[2rem] p-10 md:p-12 shadow-2xl relative overflow-hidden">
+          {/* subtle abstract gradient */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-[#1A62FF] opacity-20 blur-[100px] rounded-full translate-x-10 -translate-y-10"></div>
+          
+          <div className="relative z-10 text-white">
+            {hasBid ? (
+              <div className={`p-8 rounded-3xl border ${
+                userBid.status === 'accepted' ? 'bg-green-900/20 border-green-500/30' :
+                userBid.status === 'rejected' ? 'bg-red-900/10 border-red-500/20' :
+                'bg-blue-900/20 border-[#1A62FF]/30'
+              }`}>
+                <h3 className="text-2xl font-bold flex items-center gap-3">
+                  {userBid.status === 'accepted' && <CheckCircle className="text-green-400 h-6 w-6" />}
+                  {userBid.status === 'rejected' && <XCircle className="text-red-400 h-6 w-6" />}
+                  {userBid.status === 'pending' && <Loader2 className="text-[#1A62FF] animate-spin h-6 w-6" />}
+                  Application Status: <span className="capitalize">{userBid.status}</span>
+                </h3>
+                <div className="mt-6 flex flex-col md:flex-row gap-6">
+                  <div className="bg-black/40 p-4 rounded-xl border border-white/5 inline-block">
+                    <p className="text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-1">Your Proposed Rate</p>
+                    <p className="text-2xl font-extrabold text-white">${userBid.price.toLocaleString()}</p>
                   </div>
-                  {errors.price && <p className="mt-1 text-sm text-red-600">{errors.price.message}</p>}
+                  <div className="flex-1 bg-black/40 p-4 rounded-xl border border-white/5">
+                    <p className="text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-1">Your Cover Letter</p>
+                    <p className="text-sm font-medium text-gray-300 italic">"{userBid.message}"</p>
+                  </div>
                 </div>
+              </div>
+            ) : gig.status !== 'open' ? (
+              <div className="text-center p-12 bg-white/5 rounded-3xl border border-white/10">
+                <h3 className="text-2xl font-bold text-white mb-2">Opportunity Closed</h3>
+                <p className="text-gray-400 font-medium text-[15px]">The client has successfully hired a candidate for this role.</p>
+              </div>
+            ) : (
+              <div>
+                <h2 className="text-3xl font-bold mb-8">Submit Your Proposal</h2>
+                <form onSubmit={handleSubmit(onBidSubmit)} className="space-y-6 max-w-2xl">
+                  <div>
+                    <label className="flex items-center gap-2 text-[11px] font-bold text-gray-300 mb-3 uppercase tracking-wider">Your Proposed Rate (USD)</label>
+                    <div className="relative max-w-[200px]">
+                      <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                        <DollarSign className="h-5 w-5 text-[#1A62FF]" />
+                      </div>
+                      <input
+                        {...register('price', { valueAsNumber: true })}
+                        type="number"
+                        className="w-full pl-12 pr-5 py-4 border border-white/10 rounded-xl bg-white/5 text-white placeholder-gray-500 focus:bg-white/10 focus:border-[#1A62FF] focus:ring-2 focus:ring-[#1A62FF]/50 outline-none transition-all font-bold text-lg"
+                        placeholder="e.g. 450"
+                      />
+                    </div>
+                    {errors.price && <p className="mt-2 text-xs font-bold text-red-400">{errors.price.message}</p>}
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 dark:text-gray-100 mb-2">Cover Message</label>
-                  <textarea
-                    {...register('message')}
-                    rows={4}
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-zinc-700 rounded-xl bg-gray-50 dark:bg-zinc-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                    placeholder="Why are you the best fit for this gig? Mention your experience..."
-                  />
-                  {errors.message && <p className="mt-1 text-sm text-red-600">{errors.message.message}</p>}
-                </div>
+                  <div>
+                    <label className="flex items-center gap-2 text-[11px] font-bold text-gray-300 mb-3 uppercase tracking-wider">Cover Letter</label>
+                    <textarea
+                      {...register('message')}
+                      rows={5}
+                      className="w-full px-5 py-4 border border-white/10 rounded-xl bg-white/5 text-white placeholder-gray-500 focus:bg-white/10 focus:border-[#1A62FF] focus:ring-2 focus:ring-[#1A62FF]/50 outline-none transition-all font-medium resize-none"
+                      placeholder="Why are you the perfect fit for this atelier opportunity? Link your portfolio..."
+                    />
+                    {errors.message && <p className="mt-2 text-xs font-bold text-red-400">{errors.message.message}</p>}
+                  </div>
 
-                <button
-                  type="submit"
-                  disabled={submitBid.isPending}
-                  className="w-full py-3 border border-transparent rounded-xl shadow-sm text-base font-bold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 flex justify-center items-center transition-colors disabled:opacity-50"
-                >
-                  {submitBid.isPending ? <Loader2 className="animate-spin mr-2 h-5 w-5" /> : null}
-                  Submit Proposal
-                </button>
-              </form>
-            </div>
-          )}
+                  <button
+                    type="submit"
+                    disabled={submitBid.isPending}
+                    className="mt-4 px-8 py-4 bg-[#1A62FF] text-white font-bold rounded-xl shadow-[0_4px_20px_rgba(26,98,255,0.4)] hover:bg-blue-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {submitBid.isPending ? <Loader2 className="animate-spin h-5 w-5" /> : null}
+                    Submit Application
+                  </button>
+                </form>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>
