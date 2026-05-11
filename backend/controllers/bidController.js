@@ -3,9 +3,7 @@ import Bid from '../models/Bid.js';
 import Gig from '../models/Gig.js';
 import User from '../models/User.js'; // Import User model for balance checks
 import createNotification from '../utils/notificationUtils.js';
-import { parse } from 'cookie'; // Import parse for cookie handling in socket connection
-import jwt from 'jsonwebtoken'; // Import jwt for socket authentication
-
+import logger from '../config/logger.js'; // Import Winston logger
 
 // @desc    Place a bid
 // @route   POST /api/bids
@@ -148,7 +146,7 @@ const hireFreelancer = asyncHandler(async (req, res) => {
         const notificationMessage = `Congratulations! You have been hired for the gig: "${gig.title}"`;
         await createNotification(req.io, {
             userId: bid.freelancerId,
-            message: notificationNotificationMessage,
+            message: notificationMessage,
             type: 'hired',
             link: `/gigs/${gig._id}`
         });
@@ -161,7 +159,7 @@ const hireFreelancer = asyncHandler(async (req, res) => {
         res.json({ message: 'Freelancer hired successfully', gig, bid });
 
     } catch (error) {
-        console.error('Hiring error:', error);
+        logger.error('Hiring error:', error); // Use logger.error
         // Avoid overriding existing status codes if set by earlier checks
         if (res.statusCode === 200) res.status(500);
         throw error; // Re-throw to be caught by global errorHandler

@@ -41,9 +41,9 @@ const getGigs = asyncHandler(async (req, res) => {
             totalPages,
             totalGigs: total
         });
-        logger.info(`Fetched ${gigs.length} gigs for page ${page}`); // Log info
+        logger.info(`Fetched ${gigs.length} gigs for page ${page}`); // Use logger.info
     } catch (error) {
-        logger.error('Error fetching gigs:', error); // Log error
+        logger.error('Error fetching gigs:', error); // Use logger.error
         res.status(500).json({ message: 'Server Error fetching gigs' });
     }
 });
@@ -78,7 +78,7 @@ const createGig = asyncHandler(async (req, res) => {
     });
 
     const createdGig = await gig.save();
-    logger.info(`Gig created: ${createdGig._id} by ${req.user._id}`); // Log info
+    logger.info(`Gig created: ${createdGig._id} by ${req.user._id}`); // Use logger.info
     res.status(201).json(createdGig);
 });
 
@@ -189,7 +189,7 @@ const closeGig = asyncHandler(async (req, res) => {
     const chosenBid = await Bid.findOne({ gigId: gig._id, status: 'hired' });
     if (!chosenBid) {
         // This case should ideally not happen if status is 'completed' but good to check
-        logger.warn(`Gig ${gig._id} marked as closed but no hired bid found.`);
+        logger.warn(`Gig ${gig._id} marked as closed but no hired bid found.`); // Use logger.warn
     }
 
     const releasedAmount = gig.escrowAmount; // Amount to be released
@@ -216,7 +216,7 @@ const closeGig = asyncHandler(async (req, res) => {
                 req.io.to(chosenBid.freelancerId.toString()).emit('dashboard_update');
             }
         } else {
-            logger.warn(`Freelancer ${chosenBid.freelancerId} not found when closing gig ${gig._id}`);
+            logger.warn(`Freelancer ${chosenBid.freelancerId} not found when closing gig ${gig._id}`); // Use logger.warn
         }
     }
 
@@ -225,7 +225,7 @@ const closeGig = asyncHandler(async (req, res) => {
         req.io.to(req.user._id.toString()).emit('dashboard_update');
     }
 
-    logger.info(`Gig ${gig._id} closed and payment processed.`);
+    logger.info(`Gig ${gig._id} closed and payment processed.`); // Use logger.info
     res.json(gig);
 });
 
