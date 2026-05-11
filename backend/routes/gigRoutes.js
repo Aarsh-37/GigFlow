@@ -1,22 +1,39 @@
 import express from 'express';
-import { body, validationResult } from 'express-validator'; // Keep my express-validator imports
+import { body, validationResult } from 'express-validator';
 import {
     getGigs,
     getGigById,
     createGig,
-    startGig, // Keep remote added routes
+    updateGig, // Import updateGig
+    deleteGig, // Import deleteGig
+    startGig,
     completeGig,
     closeGig
 } from '../controllers/gigController.js';
 import { protect } from '../middleware/authMiddleware.js';
-import { isGigOwner } from '../middleware/checkOwnership.js'; // Keep remote middleware
-// Removed: import { validate, createGigSchema } from '../middleware/validationMiddleware.js'; as I'm using express-validator
+import { isGigOwner } from '../middleware/checkOwnership.js';
 
-// My express-validator implementation for createGig
+// Validator for creating a gig (reused for updating)
 const createGigValidator = [
   body('title').trim().notEmpty().withMessage('Title is required').isLength({ max: 100 }),
   body('description').trim().notEmpty().isLength({ min: 20, max: 2000 }),
   body('budget').isFloat({ min: 1 }).withMessage('Budget must be a positive number'),
+  body('category').trim().notEmpty().withMessage('Category is required'),
+  body('bidDeadline').optional({ checkFalsy: true }).isISO8601().withMessage('Invalid bid deadline format'),
+  body('tags').optional().isArray().withMessage('Tags must be an array'),
+  body('attachments').optional().isArray().withMessage('Attachments must be an array'),
+];
+
+// Validator for updating a gig (partial updates allowed)
+const updateGigValidator = [
+  body('title').optional().trim().notEmpty().withMessage('Title is required').isLength({ max: 100 }),
+  body('description').optional().trim().notEmpty().isLength({ min: 20, max: 2000 }),
+  body('budget').optional().isFloat({ min: 1 }).withMessage('Budget must be a positive number'),
+  body('category').optional().trim().notEmpty().withMessage('Category is required'),
+  body('bidDeadline').optional({ checkFalsy: true }).isISO8601().withMessage('Invalid bid deadline format'),
+  body('tags').optional().isArray().withMessage('Tags must be an array'),
+  body('attachments').optional().isArray().withMessage('Attachments must be an array'),
+  // Status updates handled by specific endpoints, not here.
 ];
 
 const handleValidationErrors = (req, res, next) => {
@@ -29,16 +46,20 @@ const handleValidationErrors = (req, res, next) => {
 
 const router = express.Router();
 
-// Route for GET /api/gigs and POST /api/gigs
-// Using my express-validator for createGig, and keeping remote routes
+// Routes for /api/gigs
 router.route('/')
     .get(getGigs)
-    .post(protect, createGigValidator, handleValidationErrors, createGig); // Use my validator and handler
+    // Use createGigValidator for POST, handleValidationErrors, then createGig controller
+    .post(protect, createGigValidator, handleValidationErrors, createGig);
 
+// Routes for /api/gigs/:id
 router.route('/:id')
-    .get(getGigById);
+    .get(getGigById)
+    // Add PUT and DELETE routes for updating and deleting gigs
+    .put(protect, isGigOwner, updateGigValidator, handleValidationErrors, updateGig) // Use updateGigValidator
+    .delete(protect, isGigOwner, deleteGig);
 
-// Remote added routes
+// Routes for gig status transitions (protected by owner middleware)
 router.patch('/:id/start', protect, isGigOwner, startGig);
 router.patch('/:id/complete', protect, isGigOwner, completeGig);
 router.patch('/:id/close', protect, isGigOwner, closeGig);

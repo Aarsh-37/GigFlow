@@ -4,6 +4,7 @@ import Bid from '../models/Bid.js';
 import User from '../models/User.js';
 import createNotification from '../utils/notificationUtils.js';
 import logger from '../config/logger.js'; // Import Winston logger
+import { body, validationResult } from 'express-validator'; // Import for validation
 
 // @desc    Get all gigs with pagination and search
 // @route   GET /api/gigs
@@ -82,7 +83,82 @@ const createGig = asyncHandler(async (req, res) => {
     res.status(201).json(createdGig);
 });
 
-// @desc    Start a gig (Owner only)
+// @desc    Update a gig
+// @route   PUT /api/gigs/:id
+// @access  Private (Owner only)
+const updateGig = asyncHandler(async (req, res) => {
+    // Fields allowed for update, based on Gig model and roadmap suggestions
+    const { title, description, budget, bidDeadline, category, tags, attachments } = req.body;
+
+    const gig = await Gig.findById(req.params.id);
+
+    if (!gig) {
+        res.status(404);
+        throw new Error('Gig not found');
+    }
+
+    // Check if the logged-in user is the owner of the gig
+    if (gig.ownerId.toString() !== req.user._id.toString()) {
+        res.status(401);
+        throw new Error('Not authorized to update this gig');
+    }
+
+    // Only allow updates if gig is open
+    if (gig.status !== 'open') {
+        res.status(400);
+        throw new Error('Cannot update gig once it is assigned or closed');
+    }
+
+    gig.title = title || gig.title;
+    gig.description = description || gig.description;
+    gig.budget = budget !== undefined ? budget : gig.budget; // Handle budget potentially being 0 or valid number
+    gig.bidDeadline = bidDeadline || gig.bidDeadline;
+    gig.category = category || gig.category;
+    gig.tags = tags || gig.tags;
+    gig.attachments = attachments || gig.attachments;
+    // Status change should be handled by specific endpoints (start, complete, close)
+    // gig.status = status || gig.status;
+
+    const updatedGig = await gig.save();
+    logger.info(`Gig updated: ${updatedGig._id} by ${req.user._id}`);
+    res.json(updatedGig);
+});
+
+// @desc    Delete a gig
+// @route   DELETE /api/gigs/:id
+// @access  Private (Owner only)
+const deleteGig = asyncHandler(async (req, res) => {
+    const gig = await Gig.findById(req.params.id);
+
+    if (!gig) {
+        res.status(404);
+        throw new Error('Gig not found');
+    }
+
+    // Check if the logged-in user is the owner of the gig
+    if (gig.ownerId.toString() !== req.user._id.toString()) {
+        res.status(401);
+        throw new Error('Not authorized to delete this gig');
+    }
+
+    // Ensure gig is open or in a deletable state (e.g., not already closed/completed)
+    // Allow deletion if open, otherwise might need more complex logic (e.g., soft delete or admin action)
+    if (gig.status !== 'open') {
+        res.status(400);
+        throw new Error('Cannot delete gig once it is assigned or closed');
+    }
+
+    // If gig is deleted, associated bids should also be considered for deletion or soft deletion
+    await Bid.deleteMany({ gigId: gig._id }); // Delete associated bids
+
+    await gig.deleteOne(); // Use deleteOne() for Mongoose documents
+
+    logger.info(`Gig deleted: ${gig._id} by ${req.user._id}`);
+    res.json({ message: 'Gig deleted successfully' });
+});
+
+
+// Start a gig (Owner only)
 // @route   PATCH /api/gigs/:id/start
 // @access  Private
 const startGig = asyncHandler(async (req, res) => {
@@ -121,7 +197,7 @@ const startGig = asyncHandler(async (req, res) => {
     res.json(gig);
 });
 
-// @desc    Complete a gig (Owner/Client initiates)
+// Complete a gig (Owner/Client initiates)
 // @route   PATCH /api/gigs/:id/complete
 // @access  Private
 const completeGig = asyncHandler(async (req, res) => {
@@ -165,7 +241,7 @@ const completeGig = asyncHandler(async (req, res) => {
     res.json(gig);
 });
 
-// @desc    Close a gig (Final step, payment release)
+// Close a gig (Final step, payment release)
 // @route   PATCH /api/gigs/:id/close
 // @access  Private
 const closeGig = asyncHandler(async (req, res) => {
@@ -230,4 +306,4 @@ const closeGig = asyncHandler(async (req, res) => {
 });
 
 
-export { getGigs, getGigById, createGig, startGig, completeGig, closeGig };
+export { getGigs, getGigById, createGig, updateGig, deleteGig, startGig, completeGig, closeGig }; // Export new functions
