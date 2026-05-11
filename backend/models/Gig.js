@@ -3,15 +3,18 @@ import mongoose from 'mongoose';
 const gigSchema = new mongoose.Schema({
     title: {
         type: String,
-        required: true
+        required: true,
+        trim: true // Added trim for consistency
     },
     description: {
         type: String,
-        required: true
+        required: true,
+        trim: true // Added trim for consistency
     },
     budget: {
         type: Number,
-        required: true
+        required: true,
+        min: 1 // Ensure budget is positive
     },
     ownerId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -27,6 +30,29 @@ const gigSchema = new mongoose.Schema({
         type: Date
     },
     escrowAmount: {
+        type: Number,
+        default: 0
+    },
+    // New fields from roadmap
+    category: {
+        type: String,
+        enum: ['Design', 'Development', 'Writing', 'Marketing', 'Other'], // Example categories
+        required: true,
+        trim: true
+    },
+    tags: [{
+        type: String,
+        trim: true
+    }],
+    currency: {
+        type: String,
+        default: 'INR',
+        uppercase: true
+    },
+    attachments: [{
+        type: String // URLs to attachments
+    }],
+    views: {
         type: Number,
         default: 0
     }
