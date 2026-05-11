@@ -25,6 +25,12 @@ dotenv.config();
 
 connectDB();
 
+// Check for JWT_SECRET
+if (!process.env.JWT_SECRET) {
+  console.error('FATAL ERROR: JWT_SECRET environment variable is not set.');
+  process.exit(1); // Exit the process if JWT_SECRET is missing
+}
+
 configurePassport();
 
 const app = express();
