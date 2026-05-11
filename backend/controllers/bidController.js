@@ -1,9 +1,10 @@
 import asyncHandler from 'express-async-handler';
 import Bid from '../models/Bid.js';
 import Gig from '../models/Gig.js';
-import User from '../models/User.js'; // Import User model for balance checks
+import User from '../models/User.js';
 import createNotification from '../utils/notificationUtils.js';
 import logger from '../config/logger.js'; // Import Winston logger
+import { validationResult } from 'express-validator'; // Import validationResult
 
 // @desc    Place a bid
 // @route   POST /api/bids
@@ -203,6 +204,7 @@ const updateBid = asyncHandler(async (req, res) => {
     }
 
     const updatedBid = await bid.save();
+    logger.info(`Bid updated: ${updatedBid._id} by ${req.user._id}`);
     res.json(updatedBid);
 });
 
@@ -244,6 +246,7 @@ const withdrawBid = asyncHandler(async (req, res) => {
     }
 
     await bid.deleteOne();
+    logger.info(`Bid withdrawn: ${bid._id} by ${req.user._id}`);
     res.json({ message: 'Bid withdrawn successfully' });
 });
 
