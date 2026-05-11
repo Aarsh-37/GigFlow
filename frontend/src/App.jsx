@@ -1,18 +1,15 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { Toaster, toast } from 'react-hot-toast';
 import Navbar from './components/Navbar';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import CreateGig from './pages/CreateGig';
 import GigDetail from './pages/GigDetail';
-import { useSelector } from 'react-redux';
-
-import { useEffect } from 'react';
-import { Toaster, toast } from 'react-hot-toast';
 import socket from './socket';
 
-// Protected Route Wrapper
 const PrivateRoute = ({ children }) => {
   const { userInfo } = useSelector((state) => state.auth);
   return userInfo ? children : <Navigate to="/login" />;
@@ -23,6 +20,7 @@ function App() {
 
   useEffect(() => {
     if (userInfo) {
+      socket.connect();
       socket.emit('join', userInfo._id);
 
       socket.on('notification', (data) => {
@@ -34,6 +32,7 @@ function App() {
 
       return () => {
         socket.off('notification');
+        socket.disconnect();
       };
     }
   }, [userInfo]);
@@ -47,7 +46,6 @@ function App() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-
           <Route
             path="/gigs/create"
             element={

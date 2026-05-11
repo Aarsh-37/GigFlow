@@ -8,7 +8,6 @@ import authRoutes from './routes/authRoutes.js';
 import gigRoutes from './routes/gigRoutes.js';
 import bidRoutes from './routes/bidRoutes.js';
 
-
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 
@@ -52,7 +51,6 @@ const corsOptions = {
         'http://localhost:5173',
         'http://localhost:5174',
         process.env.FRONTEND_URL,
-        process.env.FRONTEND_URL ? process.env.FRONTEND_URL.replace(/\/$/, '') : null
     ].filter(Boolean),
     credentials: true,
 };

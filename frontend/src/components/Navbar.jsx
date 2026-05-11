@@ -3,10 +3,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../slices/authSlice'; // Local state cleanup
 import api from '../utils/api'; // API for server logout
-import { LogOut, PlusCircle, User, Briefcase } from 'lucide-react';
-
+import { LogOut, PlusCircle } from 'lucide-react';
 
 const Navbar = () => {
+
     const { userInfo } = useSelector((state) => state.auth);
     const dispatch = useDispatch();
     const navigate = useNavigate();

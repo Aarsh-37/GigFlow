@@ -1,5 +1,4 @@
 import asyncHandler from 'express-async-handler';
-import mongoose from 'mongoose';
 import Bid from '../models/Bid.js';
 import Gig from '../models/Gig.js';
 
@@ -35,7 +34,7 @@ const placeBid = asyncHandler(async (req, res) => {
         gigId,
         freelancerId: req.user._id,
         message,
-        price
+        price,
     });
 
     res.status(201).json(bid);
@@ -64,64 +63,48 @@ const getBidsByGig = asyncHandler(async (req, res) => {
     res.json(bids);
 });
 
-// @desc    Hire a freelancer (Atomic update)
+// @desc    Hire a freelancer
 // @route   PATCH /api/bids/:bidId/hire
 // @access  Private (Owner only)
 const hireFreelancer = asyncHandler(async (req, res) => {
-    const bidId = req.params.bidId;
-
-    // Simplified without transaction for standalone MongoDB
-    try {
-        const bid = await Bid.findById(bidId);
-
-        if (!bid) {
-            throw new Error('Bid not found');
-        }
-
-        const gig = await Gig.findById(bid.gigId);
-
-        if (!gig) {
-            throw new Error('Gig not found');
-        }
-
-        // Auth check
-        if (gig.ownerId.toString() !== req.user._id.toString()) {
-            res.status(401);
-            throw new Error('Not authorized to hire for this gig');
-        }
-
-        if (gig.status !== 'open') {
-            res.status(400);
-            throw new Error('Gig is already assigned or closed');
-        }
-
-        // 1. Update Gig status
-        gig.status = 'assigned';
-        await gig.save();
-
-        // 2. Update Chosen Bid status
-        bid.status = 'hired';
-        await bid.save();
-
-        // 3. Reject all other bids for this gig
-        await Bid.updateMany(
-            { gigId: gig._id, _id: { $ne: bidId } },
-            { status: 'rejected' }
-        );
-
-        const message = `You have been hired for the gig: ${gig.title}!`;
-
-        req.io.to(bid.freelancerId.toString()).emit('notification', {
-            message: message
-        });
-
-        res.json({ message: 'Freelancer hired successfully', gig, bid });
-
-    } catch (error) {
-        console.error('Hiring error:', error);
-        if (res.statusCode === 200) res.status(500);
-        throw error;
+    const bid = await Bid.findById(req.params.bidId);
+    if (!bid) {
+        res.status(404);
+        throw new Error('Bid not found');
     }
+
+    const gig = await Gig.findById(bid.gigId);
+    if (!gig) {
+        res.status(404);
+        throw new Error('Gig not found');
+    }
+
+    if (gig.ownerId.toString() !== req.user._id.toString()) {
+        res.status(401);
+        throw new Error('Not authorized to hire for this gig');
+    }
+
+    if (gig.status !== 'open') {
+        res.status(400);
+        throw new Error('Gig is already assigned or closed');
+    }
+
+    gig.status = 'assigned';
+    await gig.save();
+
+    bid.status = 'hired';
+    await bid.save();
+
+    await Bid.updateMany(
+        { gigId: gig._id, _id: { $ne: bid._id } },
+        { status: 'rejected' }
+    );
+
+    req.io.to(bid.freelancerId.toString()).emit('notification', {
+        message: `You have been hired for the gig: ${gig.title}!`,
+    });
+
+    res.json({ message: 'Freelancer hired successfully', gig, bid });
 });
 
 export { placeBid, getBidsByGig, hireFreelancer };

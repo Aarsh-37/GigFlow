@@ -23,7 +23,6 @@ const GigDetail = () => {
     const [bidSuccess, setBidSuccess] = useState(false);
 
     // Hire State
-    // Hire State
     const [hiringId, setHiringId] = useState(null);
     const [confirmHireId, setConfirmHireId] = useState(null);
 
@@ -246,14 +245,9 @@ const GigDetail = () => {
                     )}
                 </div>
             )}
-
-            {!userInfo && (
-                <div className="card p-8 bg-slate-50 text-center">
-                    <p className="text-slate-600 mb-4">Please <Link to="/login" className="text-primary-600 font-bold hover:underline">sign in</Link> to place a bid on this gig.</p>
-                </div>
-            )}
         </div>
     );
+
 };
 
 export default GigDetail;
