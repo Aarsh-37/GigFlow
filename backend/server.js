@@ -37,6 +37,8 @@ const app = express();
 // Trust proxy is required for secure cookies on Render/Heroku
 app.set('trust proxy', 1);
 
+import rateLimit from 'express-rate-limit';
+
 // Security Middlewares
 app.use(helmet());
 
