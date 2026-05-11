@@ -35,7 +35,7 @@ function App() {
           dispatch(setCredentials(data));
         } catch (error) {
           // No active session or token expired
-          console.log('No active session found');
+          console.error('No active session found'); // Changed to console.error
         }
       }
     };

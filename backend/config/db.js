@@ -1,11 +1,12 @@
 import mongoose from 'mongoose';
+import logger from './logger.js'; // Import the Winston logger
 
 const connectDB = async () => {
     try {
         const conn = await mongoose.connect(process.env.MONGO_URI);
-        console.log(`MongoDB Connected: ${conn.connection.host}`);
+        logger.info(`MongoDB Connected: ${conn.connection.host}`); // Use logger.info
     } catch (error) {
-        console.error(`Error: ${error.message}`);
+        logger.error(`Error: ${error.message}`); // Use logger.error
         process.exit(1);
     }
 };

@@ -17,6 +17,7 @@ import chatRoutes from './routes/chatRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import passport from 'passport';
 import configurePassport from './config/passportConfig.js';
+import logger from './config/logger.js'; // Import Winston logger
 
 import { createServer } from 'http';
 import { Server } from 'socket.io';
@@ -27,7 +28,7 @@ connectDB();
 
 // Check for JWT_SECRET
 if (!process.env.JWT_SECRET) {
-  console.error('FATAL ERROR: JWT_SECRET environment variable is not set.');
+  logger.error('FATAL ERROR: JWT_SECRET environment variable is not set.'); // Use logger.error
   process.exit(1); // Exit the process if JWT_SECRET is missing
 }
 
@@ -36,8 +37,6 @@ configurePassport();
 const app = express();
 // Trust proxy is required for secure cookies on Render/Heroku
 app.set('trust proxy', 1);
-
-import rateLimit from 'express-rate-limit';
 
 // Security Middlewares
 app.use(helmet());
@@ -71,16 +70,15 @@ const io = new Server(httpServer, {
 });
 
 io.on('connection', (socket) => {
-    // Join a room based on userId (sent from client or extracted from handshake usually, 
-    // for simplicity we'll let client emit 'join')
+    // Join a room based on userId
     socket.on('join', (userId) => {
         socket.join(userId);
-        console.log(`User ${userId} joined room`);
+        logger.info(`User ${userId} joined room`); // Use logger.info
     });
 
     socket.on('join_gig', (gigId) => {
         socket.join(`gig_${gigId}`);
-        console.log(`User joined gig room: gig_${gigId}`);
+        logger.debug(`User joined gig room: gig_${gigId}`); // Use logger.debug for detailed info
     });
 });
 
@@ -124,4 +122,4 @@ app.use(errorHandler);
 
 const port = process.env.PORT || 5000;
 
-httpServer.listen(port, () => console.log(`Server started on port ${port}`));
+httpServer.listen(port, () => logger.info(`Server started on port ${port}`)); // Use logger.info
