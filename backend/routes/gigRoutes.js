@@ -1,17 +1,18 @@
 import express from 'express';
-import { body, validationResult } from 'express-validator';
+import { body, validationResult, param } from 'express-validator'; // Import param for route parameters
 import {
     getGigs,
     getGigById,
     createGig,
-    updateGig, // Import updateGig
-    deleteGig, // Import deleteGig
+    updateGig,
+    deleteGig,
     startGig,
     completeGig,
     closeGig
 } from '../controllers/gigController.js';
 import { protect } from '../middleware/authMiddleware.js';
 import { isGigOwner } from '../middleware/checkOwnership.js';
+import logger from '../config/logger.js'; // Import Winston logger
 
 // Validator for creating a gig (reused for updating)
 const createGigValidator = [
@@ -36,6 +37,7 @@ const updateGigValidator = [
   // Status updates handled by specific endpoints, not here.
 ];
 
+// Generic validation error handler middleware
 const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -44,24 +46,36 @@ const handleValidationErrors = (req, res, next) => {
   next();
 };
 
+// Validator for gig ID parameter
+const validateGigIdParam = [
+    param('id').isMongoId().withMessage('Invalid Gig ID format'),
+    handleValidationErrors,
+];
+
+// Validator for bid ID parameter (used in routes like hire, update, withdraw)
+const validateBidIdParam = [
+    param('id').isMongoId().withMessage('Invalid Bid ID format'), // Note: using 'id' for bidId here as per existing structure
+    handleValidationErrors,
+];
+
+
 const router = express.Router();
 
 // Routes for /api/gigs
 router.route('/')
     .get(getGigs)
-    // Use createGigValidator for POST, handleValidationErrors, then createGig controller
     .post(protect, createGigValidator, handleValidationErrors, createGig);
 
 // Routes for /api/gigs/:id
 router.route('/:id')
     .get(getGigById)
     // Add PUT and DELETE routes for updating and deleting gigs
-    .put(protect, isGigOwner, updateGigValidator, handleValidationErrors, updateGig) // Use updateGigValidator
-    .delete(protect, isGigOwner, deleteGig);
+    .put(protect, isGigOwner, validateGigIdParam, updateGigValidator, handleValidationErrors, updateGig) // Validate ID and payload
+    .delete(protect, isGigOwner, validateGigIdParam, deleteGig); // Validate ID
 
 // Routes for gig status transitions (protected by owner middleware)
-router.patch('/:id/start', protect, isGigOwner, startGig);
-router.patch('/:id/complete', protect, isGigOwner, completeGig);
-router.patch('/:id/close', protect, isGigOwner, closeGig);
+router.patch('/:id/start', protect, isGigOwner, validateGigIdParam, startGig);
+router.patch('/:id/complete', protect, isGigOwner, validateGigIdParam, completeGig);
+router.patch('/:id/close', protect, isGigOwner, validateGigIdParam, closeGig);
 
 export default router;
