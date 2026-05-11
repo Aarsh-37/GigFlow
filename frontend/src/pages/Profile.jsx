@@ -7,6 +7,7 @@ import clsx from 'clsx';
 import { toast } from 'react-hot-toast';
 import { fetchUserGigs, fetchUserBids, withdrawBid } from '../slices/profileSlice'; // Import withdrawBid thunk
 import { fetchUserProfile } from '../slices/profileSlice'; // Assuming a slice for user profile details
+import { deleteGig } from '../slices/gigSlice'; // Import deleteGig thunk
 
 const Profile = () => {
     const { id } = useParams(); // Could use this if profile route was /users/:id/profile
