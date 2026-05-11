@@ -18,6 +18,8 @@ import adminRoutes from './routes/adminRoutes.js';
 import passport from 'passport';
 import configurePassport from './config/passportConfig.js';
 import logger from './config/logger.js'; // Import Winston logger
+import jwt from 'jsonwebtoken'; // Import JWT for verification
+import { parse } from 'cookie'; // Import parse for cookie handling
 
 import { createServer } from 'http';
 import { Server } from 'socket.io';
@@ -69,16 +71,44 @@ const io = new Server(httpServer, {
     }
 });
 
+// Socket.IO Authentication Middleware
+io.use((socket, next) => {
+    logger.debug('Socket.IO authentication middleware started.');
+    const cookies = parse(socket.handshake.headers.cookie || '');
+    const token = cookies.jwt;
+
+    if (!token) {
+        logger.warn('Socket connection rejected: No JWT token found in cookies.');
+        return next(new Error('Authentication error: No token provided.'));
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        // Attach user ID to the socket object
+        socket.userId = decoded.userId;
+        logger.info(`Socket authenticated successfully. User ID: ${socket.userId}`);
+        next();
+    } catch (error) {
+        logger.warn(`Socket authentication failed: ${error.message}`);
+        next(new Error('Authentication error: Invalid token.'));
+    }
+});
+
 io.on('connection', (socket) => {
-    // Join a room based on userId
-    socket.on('join', (userId) => {
-        socket.join(userId);
-        logger.info(`User ${userId} joined room`); // Use logger.info
-    });
+    logger.info(`A user connected: ${socket.userId}`); // Use socket.userId now
+
+    // Join a room based on authenticated userId
+    socket.join(socket.userId);
+    logger.info(`Socket ${socket.id} joined room for user ${socket.userId}`);
 
     socket.on('join_gig', (gigId) => {
         socket.join(`gig_${gigId}`);
-        logger.debug(`User joined gig room: gig_${gigId}`); // Use logger.debug for detailed info
+        logger.debug(`Socket ${socket.id} joined gig room: gig_${gigId}`);
+    });
+
+    socket.on('disconnect', () => {
+        logger.info(`User ${socket.userId} disconnected from socket ${socket.id}`);
+        // Potentially clean up rooms or user presence here if needed
     });
 });
 
