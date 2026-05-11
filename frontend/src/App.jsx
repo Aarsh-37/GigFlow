@@ -13,7 +13,7 @@ import socket from './socket';
 import { addNotification, fetchNotifications } from './slices/notificationSlice';
 import { setCredentials } from './slices/authSlice';
 import api from './utils/api';
-import Profile from './pages/Profile';
+import Profile from './pages/Profile'; // Import the new Profile component
 import AdminPanel from './pages/AdminPanel';
 
 const PrivateRoute = ({ children }) => {
@@ -89,7 +89,7 @@ function App() {
               </PrivateRoute>
             }
           />
-          <Route
+          <Route // Added Profile route
             path="/profile"
             element={
               <PrivateRoute>
