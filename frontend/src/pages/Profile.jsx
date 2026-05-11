@@ -5,15 +5,16 @@ import api from '../utils/api';
 import { ArrowLeft, IndianRupee, Calendar, User, CheckCircle, XCircle, Clock, Briefcase, DollarSign, Award, Edit } from 'lucide-react'; // Added icons for profile
 import clsx from 'clsx';
 import { toast } from 'react-hot-toast';
-import { fetchUserGigs, fetchUserBids } from '../slices/profileSlice'; // Assuming these thunks will be created
-import { fetchUserProfile } from '../slices/userSlice'; // Assuming a slice for user profile details
+import { fetchUserGigs, fetchUserBids } from '../slices/profileSlice'; // Import thunks from profileSlice
+import { fetchUserProfile } from '../slices/profileSlice'; // Import thunk from profileSlice (assuming combined slice)
 
 const Profile = () => {
     const { id } = useParams(); // Could use this if profile route was /users/:id/profile
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const { userInfo } = useSelector((state) => state.auth);
-    const { userProfile, userGigs, userBids, profileStatus, profileError } = useSelector((state) => state.profile); // Assuming a combined 'profile' slice
+    // Assuming profileSlice manages userProfile, userGigs, userBids, status, error
+    const { userProfile, userGigs, userBids, status, error } = useSelector((state) => state.profile);
 
     // State for local management if needed, e.g., for editing
     const [isEditing, setIsEditing] = useState(false);
@@ -28,30 +29,49 @@ const Profile = () => {
 
     useEffect(() => {
         if (userIdToFetch) {
-            dispatch(fetchUserProfile(userIdToFetch)); // Fetch user details
-            dispatch(fetchUserGigs(userIdToFetch));   // Fetch gigs posted by user
-            dispatch(fetchUserBids(userIdToFetch));   // Fetch bids submitted by user
+            // Dispatch thunks to fetch data
+            dispatch(fetchUserProfile(userIdToFetch));
+            dispatch(fetchUserGigs(userIdToFetch));
+            dispatch(fetchUserBids(userIdToFetch));
         } else {
-            // If no userInfo, redirect to login or show public profile if allowed
-            // For now, assuming /profile is always private
+            // If no userInfo, redirect to login
             navigate('/login');
         }
     }, [dispatch, userIdToFetch, navigate]);
 
-    // Handle loading and error states
-    if (profileStatus === 'loading') {
+    // Handle loading and error states based on status from profileSlice
+    if (status === 'loading') {
         return <div className="text-center text-lg text-gray-500">Loading profile...</div>;
     }
-    if (profileStatus === 'failed') {
-        return <div className="text-center text-lg text-red-500 font-bold">Error: {profileError || 'Could not load profile'}</div>;
+    if (status === 'failed') {
+        return <div className="text-center text-lg text-red-500 font-bold">Error: {error || 'Could not load profile'}</div>;
     }
-    if (!userProfile) {
+    if (!userProfile) { // Should ideally be caught by 'failed' or 'loading' state
         return <div className="text-center text-lg text-gray-500">Profile not found.</div>;
     }
 
     // Prepare skills for display/editing
     const skillsArray = Array.isArray(userProfile.skills) ? userProfile.skills : (userProfile.skills || '').split(',').map(s => s.trim()).filter(Boolean);
     const skillsString = skillsArray.join(', ');
+
+    // Initialize editing state if editing is initiated
+    useEffect(() => {
+        if (isEditing) {
+            setName(userProfile.name);
+            setBio(userProfile.bio);
+            setSkills(skillsString);
+            setProfilePic(userProfile.profilePic);
+        }
+    }, [isEditing, userProfile, skillsString]);
+
+    // Placeholder for save changes functionality
+    const handleSaveChanges = async (e) => {
+        e.preventDefault();
+        // TODO: Implement API call to update profile
+        toast.info('Save changes functionality not yet implemented.');
+        setIsEditing(false); // Exit editing mode
+    };
+
 
     return (
         <div className="max-w-4xl mx-auto space-y-8 pb-12">
@@ -86,15 +106,11 @@ const Profile = () => {
                     </div>
                 </div>
 
-                {/* Editable Section - Placeholder */}
-                <button className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors" onClick={() => setIsEditing(true)}>
-                     <Edit size={20} />
-                </button>
-                 {isEditing && (
+                {/* Editable Section */}
+                {isEditing ? (
                     <div className="mt-6 pt-6 border-t border-slate-100">
                         <h2 className="text-xl font-bold text-slate-900 mb-4">Edit Profile</h2>
-                        {/* Edit form fields for name, bio, skills, profilePic */}
-                        <form className="space-y-4">
+                        <form onSubmit={handleSaveChanges} className="space-y-4">
                             <div>
                                 <label className="block text-sm font-bold text-slate-700 mb-1">Name</label>
                                 <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="input-field" />
@@ -117,12 +133,27 @@ const Profile = () => {
                             </div>
                         </form>
                     </div>
-                )}
-
-                {!isEditing && (
+                ) : (
                     <div className="mt-6 pt-6 border-t border-slate-100">
-                        <h2 className="text-xl font-bold text-slate-900 mb-4">About</h2>
+                        <div className="flex justify-between items-center">
+                            <h2 className="text-xl font-bold text-slate-900">About</h2>
+                            <button className="text-slate-400 hover:text-slate-600 transition-colors" onClick={() => setIsEditing(true)}>
+                                <Edit size={20} />
+                            </button>
+                        </div>
                         <p className="text-slate-600 whitespace-pre-line">{userProfile.bio || 'No bio provided.'}</p>
+                        <div className="mt-4">
+                            <h3 className="text-lg font-bold text-slate-900 mb-2">Skills</h3>
+                            {skillsArray.length > 0 ? (
+                                <div className="flex flex-wrap gap-2">
+                                    {skillsArray.map(skill => (
+                                        <span key={skill} className="bg-primary-100 text-primary-700 text-xs font-bold px-3 py-1 rounded-full">{skill}</span>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-slate-400 italic">No skills listed.</p>
+                            )}
+                        </div>
                     </div>
                 )}
             </div>
