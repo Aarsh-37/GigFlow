@@ -34,7 +34,7 @@ const LandingPage = () => {
                 {/* Value Proposition Section */}
                 <section className="py-16">
                     <h2 className="text-4xl font-display font-bold text-slate-900 mb-12 text-center">Why Choose GigFlow?</h2>
-                    <div className="grid grid-cols-1 md:grid-grid-cols-3 gap-12 max-w-5xl mx-auto">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-5xl mx-auto">
                         <div className="flex flex-col items-center p-6 card bg-white shadow-md rounded-xl">
                             <IndianRupee size={40} className="text-primary-500 mb-4" />
                             <h3 className="text-xl font-bold text-slate-900 mb-2">Secure Payments</h3>
