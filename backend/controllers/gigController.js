@@ -1,5 +1,8 @@
 import asyncHandler from 'express-async-handler';
 import Gig from '../models/Gig.js';
+import Bid from '../models/Bid.js';
+import User from '../models/User.js';
+import createNotification from '../utils/notificationUtils.js';
 
 // @desc    Get all gigs
 // @route   GET /api/gigs
@@ -40,13 +43,14 @@ const getGigById = asyncHandler(async (req, res) => {
 // @route   POST /api/gigs
 // @access  Private
 const createGig = asyncHandler(async (req, res) => {
-    const { title, description, budget } = req.body;
+    const { title, description, budget, bidDeadline } = req.body;
 
     const gig = new Gig({
         ownerId: req.user._id,
         title,
         description,
         budget,
+        bidDeadline,
         status: 'open'
     });
 
@@ -54,4 +58,92 @@ const createGig = asyncHandler(async (req, res) => {
     res.status(201).json(createdGig);
 });
 
-export { getGigs, getGigById, createGig };
+// @desc    Start a gig (Owner only)
+// @route   PATCH /api/gigs/:id/start
+// @access  Private
+const startGig = asyncHandler(async (req, res) => {
+    const gig = await Gig.findById(req.params.id);
+
+    if (gig.status !== 'assigned') {
+        res.status(400);
+        throw new Error('Gig must be assigned before starting');
+    }
+
+    gig.status = 'in-progress';
+    await gig.save();
+
+    // Refresh actor's dashboard
+    if (req.io) {
+        req.io.to(req.user._id.toString()).emit('dashboard_update');
+    }
+
+    res.json(gig);
+});
+
+// @desc    Complete a gig (Owner/Client initiates)
+// @route   PATCH /api/gigs/:id/complete
+// @access  Private
+const completeGig = asyncHandler(async (req, res) => {
+    const gig = await Gig.findById(req.params.id);
+
+    if (gig.status !== 'in-progress') {
+        res.status(400);
+        throw new Error('Gig must be in-progress before completing');
+    }
+
+    gig.status = 'completed';
+    await gig.save();
+
+    // Refresh actor's dashboard
+    if (req.io) {
+        req.io.to(req.user._id.toString()).emit('dashboard_update');
+    }
+
+    res.json(gig);
+});
+
+// @desc    Close a gig (Final step)
+// @route   PATCH /api/gigs/:id/close
+// @access  Private
+const closeGig = asyncHandler(async (req, res) => {
+    const gig = await Gig.findById(req.params.id);
+
+    if (gig.status !== 'completed') {
+        res.status(400);
+        throw new Error('Gig must be completed before closing');
+    }
+
+    gig.status = 'closed';
+    await gig.save();
+
+    // Increment completedGigsCount for freelancer
+    const chosenBid = await Bid.findOne({ gigId: gig._id, status: 'hired' });
+    if (chosenBid) {
+        await User.findByIdAndUpdate(chosenBid.freelancerId, {
+            $inc: {
+                completedGigsCount: 1,
+                balance: gig.escrowAmount
+            }
+        });
+
+        const releasedAmount = gig.escrowAmount;
+        gig.escrowAmount = 0;
+        await gig.save();
+
+        await createNotification(req.io, {
+            userId: chosenBid.freelancerId,
+            message: `The gig "${gig.title}" has been closed. ₹${releasedAmount} has been released to your balance!`,
+            type: 'gig_closed',
+            link: `/gigs/${gig._id}`
+        });
+    }
+
+    // Refresh actor's dashboard (freelancer)
+    if (req.io) {
+        req.io.to(req.user._id.toString()).emit('dashboard_update');
+    }
+
+    res.json(gig);
+});
+
+export { getGigs, getGigById, createGig, startGig, completeGig, closeGig };

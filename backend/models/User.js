@@ -4,31 +4,72 @@ import bcrypt from 'bcryptjs';
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: true
+        required: true,
+        trim: true // Added trim for consistency
     },
     email: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
+        lowercase: true // Added lowercase for consistency
     },
     password: {
         type: String,
-        required: true
+        // required: true, // Removed as googleId can bypass password
+    },
+    googleId: { // Added from remote
+        type: String,
+        unique: true,
+        sparse: true
+    },
+    bio: { // Added from remote
+        type: String,
+        default: ''
+    },
+    skills: { // Added from remote
+        type: [String],
+        default: []
+    },
+    profilePic: { // Added from remote
+        type: String,
+        default: ''
+    },
+    completedGigsCount: { // Added from remote
+        type: Number,
+        default: 0
+    },
+    averageRating: { // Added from remote
+        type: Number,
+        default: 0
+    },
+    balance: { // Added from remote (for payment simulation)
+        type: Number,
+        default: 10000
+    },
+    role: { // Added from remote
+        type: String,
+        enum: ['client', 'freelancer', 'both', 'admin'], // Expanded roles
+        default: 'both' // Default to 'both' for new users
     }
 }, {
     timestamps: true
 });
 
-userSchema.pre('save', async function (next) {
+userSchema.pre('save', async function (next) { // Added next parameter
     if (!this.isModified('password')) {
         return next();
     }
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
+    // Only hash password if it exists (for users logging in via Google)
+    if (this.password) {
+        const salt = await bcrypt.genSalt(10);
+        this.password = await bcrypt.hash(this.password, salt);
+    }
     next();
 });
 
 userSchema.methods.matchPassword = async function (enteredPassword) {
+    // Only compare if a password exists (for google auth users, this will be false)
+    if (!this.password) return false;
     return await bcrypt.compare(enteredPassword, this.password);
 };
 

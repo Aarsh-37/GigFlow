@@ -20,8 +20,15 @@ const gigSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['open', 'assigned'],
+        enum: ['open', 'assigned', 'in-progress', 'completed', 'closed'],
         default: 'open'
+    },
+    bidDeadline: {
+        type: Date
+    },
+    escrowAmount: {
+        type: Number,
+        default: 0
     }
 }, {
     timestamps: true

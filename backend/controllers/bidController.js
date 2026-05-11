@@ -1,6 +1,11 @@
 import asyncHandler from 'express-async-handler';
 import Bid from '../models/Bid.js';
 import Gig from '../models/Gig.js';
+import User from '../models/User.js'; // Import User model for balance checks
+import createNotification from '../utils/notificationUtils.js';
+import { parse } from 'cookie'; // Import parse for cookie handling in socket connection
+import jwt from 'jsonwebtoken'; // Import jwt for socket authentication
+
 
 // @desc    Place a bid
 // @route   POST /api/bids
@@ -24,6 +29,11 @@ const placeBid = asyncHandler(async (req, res) => {
         throw new Error('This gig is no longer open');
     }
 
+    if (gig.bidDeadline && new Date(gig.bidDeadline) < new Date()) {
+        res.status(400);
+        throw new Error('The bid deadline for this gig has passed');
+    }
+
     const existingBid = await Bid.findOne({ gigId, freelancerId: req.user._id });
     if (existingBid) {
         res.status(400);
@@ -36,6 +46,18 @@ const placeBid = asyncHandler(async (req, res) => {
         message,
         price,
     });
+
+    await createNotification(req.io, {
+        userId: gig.ownerId,
+        message: `New bid placed on your gig: ${gig.title}`,
+        type: 'bid_placed',
+        link: `/gigs/${gig._id}`
+    });
+
+    // Refresh sender's dashboard too
+    if (req.io) {
+        req.io.to(gig.ownerId.toString()).emit('dashboard_update'); // Emit to gig owner's room
+    }
 
     res.status(201).json(bid);
 });
@@ -57,7 +79,7 @@ const getBidsByGig = asyncHandler(async (req, res) => {
     }
 
     const bids = await Bid.find({ gigId: req.params.gigId })
-        .populate('freelancerId', 'name email')
+        .populate('freelancerId', 'name email profilePic rating skills') // Populate more freelancer details
         .sort({ createdAt: -1 });
 
     res.json(bids);
@@ -67,10 +89,139 @@ const getBidsByGig = asyncHandler(async (req, res) => {
 // @route   PATCH /api/bids/:bidId/hire
 // @access  Private (Owner only)
 const hireFreelancer = asyncHandler(async (req, res) => {
-    const bid = await Bid.findById(req.params.bidId);
+    const bidId = req.params.bidId;
+
+    try {
+        // Find bid and gig
+        const bid = await Bid.findById(bidId);
+        if (!bid) throw new Error('Bid not found');
+
+        const gig = await Gig.findById(bid.gigId);
+        if (!gig) throw new Error('Gig not found');
+
+        // Authentication and Authorization checks
+        if (gig.ownerId.toString() !== req.user._id.toString()) {
+            res.status(401);
+            throw new Error('Not authorized to hire for this gig');
+        }
+        if (gig.status !== 'open') {
+            res.status(400);
+            throw new Error('Gig is not open for hiring');
+        }
+
+        // Ensure freelancer is not the owner
+        if (bid.freelancerId.toString() === req.user._id.toString()) {
+             res.status(400);
+             throw new Error('You cannot hire yourself');
+        }
+
+        // --- Core Hiring Logic ---
+
+        // 1. Payment Simulation: Check balance and move funds to escrow
+        const owner = await User.findById(req.user._id);
+        if (!owner) throw new Error('Hiring user not found');
+        if (owner.balance < bid.price) {
+            res.status(400);
+            throw new Error('Insufficient balance to hire for this gig');
+        }
+        owner.balance -= bid.price;
+        await owner.save();
+
+        // Update gig escrow amount
+        gig.escrowAmount = bid.price;
+
+        // 2. Update Gig status to 'assigned'
+        gig.status = 'assigned';
+        await gig.save();
+
+        // 3. Update Chosen Bid status to 'hired'
+        bid.status = 'hired';
+        await bid.save();
+
+        // 4. Reject all other bids for this gig
+        await Bid.updateMany(
+            { gigId: gig._id, _id: { $ne: bidId } },
+            { status: 'rejected' }
+        );
+
+        // 5. Notify hired freelancer
+        const notificationMessage = `Congratulations! You have been hired for the gig: "${gig.title}"`;
+        await createNotification(req.io, {
+            userId: bid.freelancerId,
+            message: notificationNotificationMessage,
+            type: 'hired',
+            link: `/gigs/${gig._id}`
+        });
+
+        // 6. Refresh client's dashboard (emit to client's room)
+        if (req.io) {
+            req.io.to(req.user._id.toString()).emit('dashboard_update');
+        }
+
+        res.json({ message: 'Freelancer hired successfully', gig, bid });
+
+    } catch (error) {
+        console.error('Hiring error:', error);
+        // Avoid overriding existing status codes if set by earlier checks
+        if (res.statusCode === 200) res.status(500);
+        throw error; // Re-throw to be caught by global errorHandler
+    }
+});
+
+// @desc    Update a bid (Freelancer)
+// @route   PATCH /api/bids/:id
+// @access  Private (Bidder only)
+const updateBid = asyncHandler(async (req, res) => {
+    const { message, price } = req.body;
+    const bid = await Bid.findById(req.params.id);
+
     if (!bid) {
         res.status(404);
         throw new Error('Bid not found');
+    }
+
+    if (bid.freelancerId.toString() !== req.user._id.toString()) {
+        res.status(401);
+        throw new Error('Not authorized to update this bid');
+    }
+
+    const gig = await Gig.findById(bid.gigId);
+    if (!gig) {
+         res.status(404);
+         throw new Error('Gig not found');
+    }
+    if (gig.status !== 'open') {
+        res.status(400);
+        throw new Error('Cannot update bid: Gig is no longer open');
+    }
+
+    bid.message = message !== undefined ? message : bid.message;
+    bid.price = price !== undefined ? Number(price) : bid.price;
+
+    // Recalculate validations if necessary (e.g., price positive)
+    if (bid.price <= 0) {
+        res.status(400);
+        throw new Error('Price must be a positive number');
+    }
+
+    const updatedBid = await bid.save();
+    res.json(updatedBid);
+});
+
+// @desc    Withdraw a bid
+// @route   DELETE /api/bids/:id
+// @access  Private (Bidder only)
+const withdrawBid = asyncHandler(async (req, res) => {
+    const bid = await Bid.findById(req.params.id);
+
+    if (!bid) {
+        res.status(404);
+        throw new Error('Bid not found');
+    }
+
+    if (bid.freelancerId.toString() !== req.user._id.toString()) {
+        res.status(401);
+        throw new Error('Not authorized to withdraw this bid');
     }
 
     const gig = await Gig.findById(bid.gigId);
@@ -78,33 +229,24 @@ const hireFreelancer = asyncHandler(async (req, res) => {
         res.status(404);
         throw new Error('Gig not found');
     }
-
-    if (gig.ownerId.toString() !== req.user._id.toString()) {
-        res.status(401);
-        throw new Error('Not authorized to hire for this gig');
-    }
-
     if (gig.status !== 'open') {
         res.status(400);
-        throw new Error('Gig is already assigned or closed');
+        throw new Error('Cannot withdraw bid: Gig is no longer open');
     }
 
-    gig.status = 'assigned';
-    await gig.save();
-
-    bid.status = 'hired';
-    await bid.save();
-
-    await Bid.updateMany(
-        { gigId: gig._id, _id: { $ne: bid._id } },
-        { status: 'rejected' }
-    );
-
-    req.io.to(bid.freelancerId.toString()).emit('notification', {
-        message: `You have been hired for the gig: ${gig.title}!`,
+    // Notify gig owner about withdrawal
+    await createNotification(req.io, {
+        userId: gig.ownerId,
+        message: `A freelancer has withdrawn their bid for gig: "${gig.title}".`,
+        type: 'bid_withdrawn',
+        link: `/gigs/${gig._id}`
     });
+     if (req.io) {
+        req.io.to(gig.ownerId.toString()).emit('dashboard_update'); // Emit to gig owner's room
+    }
 
-    res.json({ message: 'Freelancer hired successfully', gig, bid });
+    await bid.deleteOne();
+    res.json({ message: 'Bid withdrawn successfully' });
 });
 
-export { placeBid, getBidsByGig, hireFreelancer };
+export { placeBid, getBidsByGig, hireFreelancer, updateBid, withdrawBid };
