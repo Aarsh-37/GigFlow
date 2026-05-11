@@ -13,8 +13,9 @@ import socket from './socket';
 import { addNotification, fetchNotifications } from './slices/notificationSlice';
 import { setCredentials } from './slices/authSlice';
 import api from './utils/api';
-import Profile from './pages/Profile'; // Import the new Profile component
+import Profile from './pages/Profile';
 import AdminPanel from './pages/AdminPanel';
+import LandingPage from './pages/LandingPage'; // Import the LandingPage component
 
 const PrivateRoute = ({ children }) => {
   const { userInfo } = useSelector((state) => state.auth);
@@ -70,7 +71,7 @@ function App() {
       <Navbar />
       <main className="flex-grow py-8 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8">
         <Routes>
-          <Route path="/" element={<GigsFeed />} />
+          <Route path="/" element={<LandingPage />} /> {/* Route for Landing Page */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route
@@ -89,7 +90,7 @@ function App() {
               </PrivateRoute>
             }
           />
-          <Route // Added Profile route
+          <Route
             path="/profile"
             element={
               <PrivateRoute>
