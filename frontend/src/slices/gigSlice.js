@@ -74,9 +74,10 @@ const gigSlice = createSlice({
             })
             .addCase(fetchGigs.fulfilled, (state, action) => {
                 state.loading = false;
-                state.gigs = action.payload.gigs || action.payload || [];
-                state.totalPages = action.payload.totalPages || 1;
-                state.totalGigs = action.payload.totalGigs || state.gigs.length;
+                const payload = action.payload || {};
+                state.gigs = Array.isArray(payload.gigs) ? payload.gigs : (Array.isArray(payload) ? payload : []);
+                state.totalPages = payload.totalPages || 1;
+                state.totalGigs = payload.totalGigs || state.gigs.length;
             })
             .addCase(fetchGigs.rejected, (state, action) => {
                 state.loading = false;

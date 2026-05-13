@@ -191,7 +191,7 @@ const GigsFeed = () => {
                                         {gig.category}
                                     </span>
                                     <div className="flex items-center gap-1 text-indigo-600 font-black text-lg">
-                                        <IndianRupee size={16} /> {gig.budget.toLocaleString()}
+                                        <IndianRupee size={16} /> {gig.budget?.toLocaleString() || '0'}
                                     </div>
                                 </div>
                                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-indigo-600 transition-colors line-clamp-1">
@@ -202,7 +202,7 @@ const GigsFeed = () => {
                                 </p>
                                 
                                 <div className="flex flex-wrap gap-2 mb-8">
-                                    {gig.tags?.slice(0, 3).map(tag => (
+                                    {(gig.tags || []).slice(0, 3).map(tag => (
                                         <span key={tag} className="px-2 py-1 bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-[10px] font-bold rounded-md">
                                             #{tag}
                                         </span>
@@ -211,18 +211,18 @@ const GigsFeed = () => {
 
                                 <div className="mt-auto pt-6 border-t border-gray-50 dark:border-gray-700 flex items-center justify-between">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center font-bold text-gray-500">
+                                        <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center font-bold text-gray-500 overflow-hidden">
                                             {gig.ownerId?.avatar ? (
-                                                <img src={gig.ownerId.avatar} alt="" className="w-full h-full rounded-full object-cover" />
+                                                <img src={gig.ownerId.avatar} alt="" className="w-full h-full object-cover" />
                                             ) : (
-                                                gig.ownerId?.name?.charAt(0)
+                                                gig.ownerId?.name?.charAt(0) || 'U'
                                             )}
                                         </div>
                                         <div>
-                                            <p className="text-sm font-bold text-gray-900 dark:text-white">{gig.ownerId?.name}</p>
+                                            <p className="text-sm font-bold text-gray-900 dark:text-white">{gig.ownerId?.name || 'Unknown'}</p>
                                             <div className="flex items-center gap-1 text-xs text-yellow-500">
                                                 <Star size={12} fill="currentColor" />
-                                                <span>{gig.ownerId?.rating?.toFixed(1) || 'N/A'}</span>
+                                                <span>{gig.ownerId?.rating?.toFixed(1) || '0.0'}</span>
                                             </div>
                                         </div>
                                     </div>

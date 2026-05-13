@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { fetchUserGigs, fetchUserBids, fetchUserProfile } from '../slices/profileSlice';
 import { deleteGig } from '../slices/gigSlice';
+import { setCredentials } from '../slices/authSlice';
 import { ProfileSkeleton } from '../components/common/Skeleton';
 import api from '../utils/api';
 import { toast } from 'react-hot-toast';
@@ -61,7 +62,8 @@ const Profile = () => {
                 ...formData,
                 skills: formData.skills.split(',').map(s => s.trim()).filter(Boolean)
             };
-            await api.put('/auth/me', updatedData);
+            const { data } = await api.put('/auth/me', updatedData);
+            dispatch(setCredentials(data));
             toast.success('Profile updated successfully');
             setIsEditing(false);
             dispatch(fetchUserProfile(userInfo._id));

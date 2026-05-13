@@ -119,6 +119,7 @@ function App() {
                 </PrivateRoute>
               }
             />
+            <Route path="/gigs" element={<GigsFeed />} />
             <Route path="/gigs/:id" element={<GigDetail />} />
           </Routes>
         </ErrorBoundary>
