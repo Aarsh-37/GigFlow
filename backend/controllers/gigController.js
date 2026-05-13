@@ -1,5 +1,6 @@
 import asyncHandler from 'express-async-handler';
 import * as gigService from '../services/gigService.js';
+import Gig from '../models/Gig.js';
 import Bid from '../models/Bid.js';
 import User from '../models/User.js';
 import createNotification from '../utils/notificationUtils.js';
@@ -52,6 +53,11 @@ const createGig = asyncHandler(async (req, res) => {
         ownerId: req.user._id,
         status: 'open'
     };
+
+    // Remove empty deadline to avoid Mongoose casting errors
+    if (gigData.deadline === '') {
+        delete gigData.deadline;
+    }
 
     const createdGig = await gigService.createGig(gigData);
     logger.info(`Gig created: ${createdGig._id} by ${req.user._id}`);

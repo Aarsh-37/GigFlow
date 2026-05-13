@@ -31,7 +31,10 @@ const Login = () => {
             dispatch(setCredentials(data));
             navigate('/');
         } catch (err) {
-            setError(err.response?.data?.message || err.message);
+            const errorMsg = err.response?.data?.errors 
+                ? err.response.data.errors.map(e => `${e.path}: ${e.message}`).join(', ')
+                : err.response?.data?.message || err.message;
+            setError(errorMsg);
         }
         setLoading(false);
     };

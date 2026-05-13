@@ -21,7 +21,10 @@ const CreateGig = () => {
             await api.post('/gigs', { title, description, budget: Number(budget), category, deadline: bidDeadline });
             navigate('/dashboard');
         } catch (err) {
-            setError(err.response?.data?.message || err.message);
+            const errorMsg = err.response?.data?.errors 
+                ? err.response.data.errors.map(e => `${e.path}: ${e.message}`).join(', ')
+                : err.response?.data?.message || err.message;
+            setError(errorMsg);
         }
         setLoading(false);
     };

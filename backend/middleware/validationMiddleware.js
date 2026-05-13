@@ -6,11 +6,17 @@ import mongoose from 'mongoose';
  */
 const validate = (schema) => (req, res, next) => {
     try {
-        schema.parse({
+        const parsed = schema.parse({
             body: req.body,
             query: req.query,
             params: req.params,
         });
+        
+        // Update request with parsed/transformed data
+        req.body = parsed.body;
+        req.query = parsed.query;
+        req.params = parsed.params;
+
         next();
     } catch (error) {
         return res.status(400).json({
