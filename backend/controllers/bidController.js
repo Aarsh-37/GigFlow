@@ -4,7 +4,7 @@ import Gig from '../models/Gig.js';
 import User from '../models/User.js';
 import createNotification from '../utils/notificationUtils.js';
 import logger from '../config/logger.js'; // Import Winston logger
-import { validationResult } from 'express-validator'; // Import validationResult
+import sendResponse from '../utils/sendResponse.js'; // Import the sendResponse utility
 
 // @desc    Place a bid
 // @route   POST /api/bids
@@ -28,7 +28,7 @@ const placeBid = asyncHandler(async (req, res) => {
         throw new Error('This gig is no longer open');
     }
 
-    if (gig.bidDeadline && new Date(gig.bidDeadline) < new Date()) {
+    if (gig.deadline && new Date(gig.deadline) < new Date()) {
         res.status(400);
         throw new Error('The bid deadline for this gig has passed');
     }
@@ -58,7 +58,7 @@ const placeBid = asyncHandler(async (req, res) => {
         req.io.to(gig.ownerId.toString()).emit('dashboard_update'); // Emit to gig owner's room
     }
 
-    res.status(201).json(bid);
+    sendResponse(res, 201, true, 'Bid placed successfully', bid);
 });
 
 // @desc    Get bids for a gig
@@ -81,7 +81,7 @@ const getBidsByGig = asyncHandler(async (req, res) => {
         .populate('freelancerId', 'name email profilePic rating skills') // Populate more freelancer details
         .sort({ createdAt: -1 });
 
-    res.json(bids);
+    sendResponse(res, 200, true, 'Bids fetched successfully', bids);
 });
 
 // @desc    Hire a freelancer
@@ -93,10 +93,16 @@ const hireFreelancer = asyncHandler(async (req, res) => {
     try {
         // Find bid and gig
         const bid = await Bid.findById(bidId);
-        if (!bid) throw new Error('Bid not found');
+        if (!bid) {
+             res.status(404);
+             throw new Error('Bid not found');
+        }
 
         const gig = await Gig.findById(bid.gigId);
-        if (!gig) throw new Error('Gig not found');
+        if (!gig) {
+            res.status(404);
+            throw new Error('Gig not found');
+        }
 
         // Authentication and Authorization checks
         if (gig.ownerId.toString() !== req.user._id.toString()) {
@@ -118,7 +124,10 @@ const hireFreelancer = asyncHandler(async (req, res) => {
 
         // 1. Payment Simulation: Check balance and move funds to escrow
         const owner = await User.findById(req.user._id);
-        if (!owner) throw new Error('Hiring user not found');
+        if (!owner) {
+             res.status(404);
+             throw new Error('Hiring user not found');
+        }
         if (owner.balance < bid.price) {
             res.status(400);
             throw new Error('Insufficient balance to hire for this gig');
@@ -157,10 +166,10 @@ const hireFreelancer = asyncHandler(async (req, res) => {
             req.io.to(req.user._id.toString()).emit('dashboard_update');
         }
 
-        res.json({ message: 'Freelancer hired successfully', gig, bid });
+        sendResponse(res, 200, true, 'Freelancer hired successfully', { gig, bid });
 
     } catch (error) {
-        logger.error('Hiring error:', error); // Use logger.error
+        logger.error('Hiring error:', error);
         // Avoid overriding existing status codes if set by earlier checks
         if (res.statusCode === 200) res.status(500);
         throw error; // Re-throw to be caught by global errorHandler
@@ -205,10 +214,10 @@ const updateBid = asyncHandler(async (req, res) => {
 
     const updatedBid = await bid.save();
     logger.info(`Bid updated: ${updatedBid._id} by ${req.user._id}`);
-    res.json(updatedBid);
+    sendResponse(res, 200, true, 'Bid updated successfully', updatedBid);
 });
 
-// @desc    Withdraw a bid
+// @desc    Delete a bid
 // @route   DELETE /api/bids/:id
 // @access  Private (Bidder only)
 const withdrawBid = asyncHandler(async (req, res) => {
@@ -247,7 +256,7 @@ const withdrawBid = asyncHandler(async (req, res) => {
 
     await bid.deleteOne();
     logger.info(`Bid withdrawn: ${bid._id} by ${req.user._id}`);
-    res.json({ message: 'Bid withdrawn successfully' });
+    sendResponse(res, 200, true, 'Bid withdrawn successfully');
 });
 
 export { placeBid, getBidsByGig, hireFreelancer, updateBid, withdrawBid };
