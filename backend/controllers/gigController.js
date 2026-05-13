@@ -5,7 +5,7 @@ import User from '../models/User.js';
 import createNotification from '../utils/notificationUtils.js';
 import logger from '../config/logger.js'; // Import Winston logger
 import sendResponse from '../utils/sendResponse.js'; // Import the sendResponse utility
-// @desc    Get all gigs with pagination and search
+// @desc    Get all gigs with pagination, filtering, and sorting
 // @route   GET /api/gigs
 // @access  Public
 const getGigs = asyncHandler(async (req, res) => {
@@ -13,27 +13,43 @@ const getGigs = asyncHandler(async (req, res) => {
     const page = Number(req.query.page) || 1; // Default page to 1
     const skip = (page - 1) * pageSize;
 
-    const query = { status: 'open' };
+    let query = { status: 'open' };
+    let sort = { createdAt: -1 }; // Default sort by newest first
 
+    // Filtering
     if (req.query.search) {
         query.title = { $regex: req.query.search, $options: 'i' };
     }
-
     if (req.query.category) {
         query.category = req.query.category;
     }
-
     if (req.query.tags) {
-        // Handle tags as an array or comma-separated string
         const tags = Array.isArray(req.query.tags) ? req.query.tags : req.query.tags.split(',');
         query.tags = { $in: tags };
+    }
+    if (req.query.owner) {
+        query.ownerId = req.query.owner;
+    }
+    // Filter by status (allow clients to see more than just 'open' for their own gigs, or for admin)
+    if (req.query.status && req.query.status !== 'open') {
+        // This is a simple example; a more robust solution might require authorization
+        // to view non-'open' gigs by status
+        query.status = req.query.status;
+    }
+
+    // Sorting
+    if (req.query.sortBy) {
+        const parts = req.query.sortBy.split(':'); // e.g., 'budget:asc', 'createdAt:desc'
+        const field = parts[0];
+        const order = parts[1] === 'desc' ? -1 : 1;
+        sort = { [field]: order };
     }
 
     try {
         const [gigs, total] = await Promise.all([
             Gig.find(query)
                 .populate('ownerId', 'name email')
-                .sort({ createdAt: -1 })
+                .sort(sort)
                 .skip(skip)
                 .limit(pageSize),
             Gig.countDocuments(query)
@@ -48,7 +64,7 @@ const getGigs = asyncHandler(async (req, res) => {
             totalPages,
             totalGigs: total
         });
-        logger.info(`Fetched ${gigs.length} gigs for page ${page}`);
+        logger.info(`Fetched ${gigs.length} gigs for page ${page} with query ${JSON.stringify(query)} and sort ${JSON.stringify(sort)}`);
     } catch (error) {
         logger.error('Error fetching gigs:', error);
         res.status(500); // Set status before throwing error
