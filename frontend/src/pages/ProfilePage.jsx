@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import api from '../utils/api'; // Assuming api utility is set up
-import { IndianRupee, Calendar, User, Briefcase, Star, Linkedin, Github, Twitter, Trash2 } from 'lucide-react'; // Added Trash2 for withdraw icon
+import { IndianRupee, Calendar, User, Briefcase, Star, Linkedin, Github, Twitter, X } from 'lucide-react'; // Import X for close icon
 import clsx from 'clsx';
 import { toast } from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom'; // For navigation
+import { useNavigate, useParams } from 'react-router-dom'; // For navigation and getting route params
 import { logout } from '../slices/authSlice'; // Assuming logout action is available
 import EditProfileForm from '../components/EditProfileForm'; // Import the new EditProfileForm component
+import LoadingSkeleton from '../components/LoadingSkeleton'; // Import the reusable LoadingSkeleton
 
 const ProfilePage = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const { userId } = useParams(); // Get userId from URL params
     const { userInfo } = useSelector((state) => state.auth);
 
     const [profile, setProfile] = useState(null);
@@ -22,27 +24,27 @@ const ProfilePage = () => {
 
     // Fetch profile, gigs, and bids
     const fetchProfileData = async () => {
-        if (!userInfo) {
-            setError('Please log in to view your profile.');
-            setLoading(false);
-            return;
-        }
-
         try {
             setLoading(true);
             setError(null);
 
-            // Fetch user details
-            const userResponse = await api.get('/auth/me'); // Assuming /auth/me provides full user data
+            // Fetch user details by ID from URL
+            const userResponse = await api.get(`/users/${userId}`); // Assuming /users/:userId endpoint exists
             setProfile(userResponse.data);
 
-            // Fetch user's posted gigs
-            const gigsResponse = await api.get(`/users/${userInfo._id}/gigs`); // Assuming this endpoint exists
-            setUserGigs(gigsResponse.data);
+            // Fetch user's posted gigs (only if the viewed profile is the logged-in user's profile)
+            if (userInfo?._id === userId) {
+                const gigsResponse = await api.get(`/users/${userId}/gigs`); // Assuming this endpoint exists
+                setUserGigs(gigsResponse.data);
 
-            // Fetch user's submitted bids
-            const bidsResponse = await api.get(`/users/${userInfo._id}/bids`); // Assuming this endpoint exists
-            setUserBids(bidsResponse.data);
+                // Fetch user's submitted bids (only if the viewed profile is the logged-in user's profile)
+                const bidsResponse = await api.get(`/users/${userId}/bids`); // Assuming this endpoint exists
+                setUserBids(bidsResponse.data);
+            } else {
+                // For other users' profiles, these might be empty or restricted
+                setUserGigs([]);
+                setUserBids([]);
+            }
 
         } catch (err) {
             console.error("Error fetching profile data:", err);
@@ -61,20 +63,21 @@ const ProfilePage = () => {
 
     useEffect(() => {
         fetchProfileData();
-    }, [userInfo, dispatch, navigate]); // Re-fetch if user info changes or on mount
+    }, [dispatch, navigate, userId, userInfo?._id]); // Re-fetch if user info or viewed userId changes
 
-    // Handle saving profile changes
+    // Handle saving profile changes from the modal
     const handleSaveProfile = (updatedProfile) => {
         setProfile(updatedProfile); // Update local state with new profile data
+        setIsEditing(false); // Close the modal after saving
         toast.success('Profile updated successfully!');
     };
 
     // --- Skeleton Loader ---
     const ProfileSkeleton = () => (
-        <div className="animate-pulse max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden mt-8">
+        <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden mt-8">
             <div className="h-48 bg-gray-300"></div> {/* Banner skeleton */}
             <div className="px-8 py-6">
-                <div className="flex items-center -mt-16 mb-4">
+                <div className="flex items-center -mt-16 mb-4 relative">
                     <div className="w-32 h-32 rounded-full bg-gray-300 border-4 border-white"></div>
                     <div className="ml-4">
                         <div className="h-8 w-48 bg-gray-300 rounded"></div>
@@ -147,7 +150,7 @@ const ProfilePage = () => {
                         </div>
                     </div>
                     {/* Edit Profile Button */}
-                    {userInfo?._id === profile._id && ( // Only show edit button to the profile owner
+                    {userInfo?._id === userId && ( // Only show edit button if viewing own profile
                         <button
                             onClick={() => setIsEditing(true)}
                             className="absolute top-4 right-4 bg-primary-500 hover:bg-primary-600 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors duration-200 shadow-md"
@@ -203,7 +206,7 @@ const ProfilePage = () => {
                     <div className="card p-6 bg-white shadow-lg">
                         <h3 className="font-bold text-slate-900 mb-4">Contact</h3>
                         <div className="flex items-center gap-3 mb-3 text-slate-700 font-medium">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-primary-500"><path d="M1.5 8.67v8.18c0 .69.56 1.25 1.25 1.25h16.5c.69 0 1.25-.56 1.25-1.25V8.67l-8.72 5.18a1.25 1.25 0 0 1-1.06 0L1.5 8.67Z" /><path d="M1.5 6.25a1.25 1.25 0 0 1 1.25-1.25h16.5c.69 0 1.25.56 1.25 1.25v.38a1.25 1.25 0 0 1-1.25 1.25H2.75a1.25 1.25 0 0 1-1.25-1.25V6.25Z" /></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-primary-500"><path d="M1.5 8.67v8.18c0 .69.56 1.25 1.25 1.25h16.5c.69 0 1.25-.56 1.25-1.25V8.67l-8.72 5.18a1.25 1.25 0 0 1-1.06 0L1.5 8.67Z" /><path d="M1.5 6.25a1.25 1.25 0 0 1 1.25-1.25h16.5c.69 0 1.25.56 1.25 1.25V6.25Z" /></svg>
                             <span>{profile.email}</span>
                         </div>
                         {/* Add more contact details if available (phone, social links) */}
@@ -261,7 +264,7 @@ const ProfilePage = () => {
                                 {userBids.slice(0, 5).map((bid) => ( // Display first 5 bids
                                     <li key={bid._id} className="p-4 bg-slate-50 rounded-xl border border-slate-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                                         <div className="flex-1">
-                                            <Link to={`/gigs/${bid.gigId._id}`} className="font-medium text-primary-600 hover:underline">{bid.gigId.title}</Link>
+                                            <Link to={`/gigs/${bid.gigId?._id}`} className="font-medium text-primary-600 hover:underline">{bid.gigId?.title}</Link>
                                             <div className="flex flex-wrap items-center gap-2 mt-1 text-sm text-slate-500">
                                                 <span className="flex items-center gap-1 font-medium text-primary-600">
                                                     My Bid: <IndianRupee size={14} /> {bid.price.toLocaleString()}
@@ -301,6 +304,15 @@ const ProfilePage = () => {
                     )}
                 </div>
             </div>
+
+            {/* Edit Profile Modal */}
+            {isEditing && profile && (
+                <EditProfileForm
+                    profile={profile}
+                    onClose={() => setIsEditing(false)}
+                    onSave={handleSaveProfile}
+                />
+            )}
         </div>
     );
 };
