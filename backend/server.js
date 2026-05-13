@@ -21,10 +21,18 @@ import logger from './config/logger.js'; // Import Winston logger
 import jwt from 'jsonwebtoken'; // Import JWT for verification
 import { parse } from 'cookie'; // Import parse for cookie handling
 
+// Import Gig and Bid models for authorization check
+import Gig from './models/Gig.js';
+import Bid from './models/Bid.js';
+
+
+// Import Swagger dependencies
+import swaggerJsdoc from 'swagger-jsdoc';
+import swaggerUi from 'swagger-ui-express';
+import specs from './swaggerDef.js'; // Import Swagger definitions
+
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-
-dotenv.config();
 
 dotenv.config();
 
@@ -43,6 +51,9 @@ if (!process.env.JWT_SECRET) {
   process.exit(1); // Exit the process if JWT_SECRET is missing
 }
 
+// Connect to database
+connectDB();
+
 configurePassport();
 
 const app = express();
@@ -55,7 +66,7 @@ app.use(helmet());
 // Global Rate Limiting
 const globalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per windowMs
+    max: process.env.NODE_ENV === 'development' ? 10000 : 100, // Limit each IP to 100 requests per windowMs
     message: 'Too many requests from this IP, please try again after 15 minutes'
 });
 app.use('/api', globalLimiter);
@@ -63,7 +74,7 @@ app.use('/api', globalLimiter);
 // Strict Rate Limiting for Auth
 const authLimiter = rateLimit({
     windowMs: 60 * 60 * 1000, // 1 hour
-    max: 10, // Limit each IP to 10 login/register attempts per hour
+    max: process.env.NODE_ENV === 'development' ? 1000 : 10, // Limit each IP to 10 login/register attempts per hour
     message: 'Too many authentication attempts, please try again after an hour'
 });
 app.use('/api/auth', authLimiter);
@@ -74,11 +85,17 @@ const io = new Server(httpServer, {
         origin: [
             'http://localhost:5173',
             'http://localhost:5174',
+            'http://localhost:5175',
+            'http://localhost:5176',
             process.env.FRONTEND_URL
         ].filter(Boolean),
         credentials: true
     }
 });
+
+// Swagger UI Setup
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+
 
 // Socket.IO Authentication Middleware
 io.use((socket, next) => {
@@ -110,9 +127,32 @@ io.on('connection', (socket) => {
     socket.join(socket.userId);
     logger.info(`Socket ${socket.id} joined room for user ${socket.userId}`);
 
-    socket.on('join_gig', (gigId) => {
-        socket.join(`gig_${gigId}`);
-        logger.debug(`Socket ${socket.id} joined gig room: gig_${gigId}`);
+    // Join gig room with authorization check
+    socket.on('join_gig', async (gigId) => {
+        logger.debug(`Received join_gig event for gigId: ${gigId} from user ${socket.userId}`);
+        try {
+            const gig = await Gig.findById(gigId);
+            if (!gig) {
+                logger.warn(`Join gig failed: Gig not found for ID ${gigId}.`);
+                return; // Gig not found, do nothing
+            }
+
+            // Check if the user is the owner or has bid on the gig
+            const isOwner = gig.ownerId.toString() === socket.userId;
+            const hasBid = await Bid.exists({ gigId: gigId, freelancerId: socket.userId });
+
+            if (isOwner || hasBid) {
+                socket.join(`gig_${gigId}`);
+                logger.info(`Socket ${socket.id} (User: ${socket.userId}) joined gig room: gig_${gigId}`);
+            } else {
+                logger.warn(`Socket ${socket.id} (User: ${socket.userId}) unauthorized to join gig room: gig_${gigId}`);
+                // Optionally, emit an error back to the client
+                socket.emit('join_error', { message: 'Unauthorized to join this gig room.' });
+            }
+        } catch (error) {
+            logger.error(`Error processing join_gig for gig ${gigId}:`, error);
+            socket.emit('join_error', { message: 'An error occurred while trying to join the gig room.' });
+        }
     });
 
     socket.on('disconnect', () => {
@@ -131,6 +171,8 @@ const corsOptions = {
     origin: [
         'http://localhost:5173',
         'http://localhost:5174',
+        'http://localhost:5175',
+        'http://localhost:5176',
         process.env.FRONTEND_URL,
     ].filter(Boolean),
     credentials: true,
