@@ -26,7 +26,7 @@ const gigSchema = new mongoose.Schema({
         enum: ['open', 'assigned', 'in-progress', 'completed', 'closed'],
         default: 'open'
     },
-    bidDeadline: {
+    deadline: { // Renamed from bidDeadline to match audit
         type: Date
     },
     escrowAmount: {
@@ -59,6 +59,12 @@ const gigSchema = new mongoose.Schema({
 }, {
     timestamps: true
 });
+
+gigSchema.index({ ownerId: 1 });
+gigSchema.index({ status: 1 });
+gigSchema.index({ category: 1 });
+gigSchema.index({ tags: 1 });
+gigSchema.index({ deadline: 1 });
 
 const Gig = mongoose.model('Gig', gigSchema);
 
