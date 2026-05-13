@@ -1,6 +1,7 @@
 import axios from 'axios';
 import store from '../store'; // Assuming store is in ../store
 import { logout } from '../slices/authSlice'; // Assuming logout action is in ../slices/authSlice
+import { toast } from 'react-hot-toast'; // Import toast for error notifications
 
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api', // Use local URL by default
@@ -22,7 +23,9 @@ api.interceptors.response.use(
             // to clear any lingering state and ensure a clean navigation to login.
             window.location.href = '/login';
         } else {
-            // For other errors, reject the promise so the calling code can handle it
+            // For other errors, display a generic message and then reject the promise
+            const errorMessage = error.response?.data?.message || error.message || 'An unexpected error occurred.';
+            toast.error(errorMessage);
             return Promise.reject(error);
         }
     }
