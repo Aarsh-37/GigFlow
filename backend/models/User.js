@@ -70,5 +70,8 @@ userSchema.methods.matchPassword = async function (enteredPassword) {
 };
 
 const User = mongoose.model('User', userSchema);
+userSchema.index({ email: 1 });
+userSchema.index({ role: 1 });
+
 
 export default User;
