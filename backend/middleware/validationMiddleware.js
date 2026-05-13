@@ -93,21 +93,23 @@ const updateGigSchema = z.object({
 const placeBidSchema = z.object({
     body: z.object({
         gigId: z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid Gig ID format'),
-        message: z.string().min(10, 'Message must be at least 10 characters').transform(sanitizeString), // Sanitize message
+        message: z.string().min(10, 'Message must be at least R10 characters').transform(sanitizeString), // Sanitize message
         price: z.number().positive('Price must be positive'),
     })
 });
 
-const updateBidSchema = z.object({
-    params: z.object({
-        id: z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid Bid ID format'),
-    }),
+const updateUserProfileSchema = z.object({
     body: z.object({
-        price: z.number().positive('Price must be positive').optional(),
-        message: z.string().min(10, 'Message must be at least 10 characters').optional().transform(sanitizeString), // Sanitize message
-        status: z.enum(['pending', 'accepted', 'rejected', 'hired', 'withdrawn'], 'Invalid bid status').optional(),
-    }).strict()
+        name: z.string().min(2, 'Name must be at least 2 characters').optional().transform(sanitizeString), // Sanitize name
+        bio: z.string().min(10, 'Bio must be at least 10 characters').optional().transform(sanitizeString), // Sanitize bio
+        skills: z.array(z.string().transform(sanitizeString)).optional(), // Sanitize each skill
+        avatar: z.string().url('Invalid URL format for avatar').optional(), // Sanitize URL
+        linkedin: z.string().url('Invalid URL format for LinkedIn').optional(),
+        github: z.string().url('Invalid URL format for GitHub').optional(),
+        twitter: z.string().url('Invalid URL format for Twitter').optional(),
+    }).strict().partial(), // Use partial() to allow optional fields
 });
+
 
 export {
     validateObjectId,
@@ -117,5 +119,6 @@ export {
     createGigSchema,
     updateGigSchema,
     placeBidSchema,
-    updateBidSchema
+    updateBidSchema,
+    updateUserProfileSchema // Export the new schema
 };
