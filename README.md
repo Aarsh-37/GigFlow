@@ -21,10 +21,18 @@ GigFlow is a high-performance, full-stack freelancer marketplace built to demons
 - **Security Hardening**: Integration of **Helmet** for secure headers, **CORS** strict origin control, and **Express Rate Limiting** to prevent brute-force attacks and spam.
 - **Fault-Tolerant Configuration**: Backend designed to start gracefully even without optional credentials (like Google OAuth), providing clear developer feedback.
 - **Testing Suite**: A stable foundation built with **Jest** and **Supertest** for unit and integration testing.
+- **API Documentation**: Integrated **Swagger/OpenAPI** documentation for clear API understanding.
+- **Docker Support**: Dockerized services for MongoDB, backend, and frontend using `docker-compose`.
 
-### 🛠️ Strategic Moderation (Admin Panel)
-- **Role-Based Access Control (RBAC)**: A dedicated administrative layer to monitor the entire ecosystem.
-- **Global Oversight**: Admins can view all users, monitor every gig's status, and moderate content by deleting inappropriate postings.
+---
+
+## 🖼️ Visuals
+
+### Screenshots
+*(Placeholder for screenshots of key features like the dashboard, gig listings, chat interface, etc. These will be added after development.)*
+
+### Live Demo
+*(Placeholder for a link to the live deployed application. This will be added upon successful deployment.)*
 
 ---
 
@@ -36,6 +44,7 @@ GigFlow is a high-performance, full-stack freelancer marketplace built to demons
 - **Redux Toolkit** (Global state management)
 - **Framer Motion** (Subtle micro-animations)
 - **Socket.IO-Client** (Real-time sync)
+- **Vitest & React Testing Library** (Frontend testing)
 
 ### Backend
 - **Node.js & Express.js**
@@ -43,6 +52,8 @@ GigFlow is a high-performance, full-stack freelancer marketplace built to demons
 - **Passport.js** (Standard & Google OAuth)
 - **Socket.IO** (Event-driven architecture)
 - **Zod** (Type-safe validation)
+- **Jest & Supertest** (Backend testing)
+- **Swagger/OpenAPI** (API documentation)
 
 ---
 
@@ -51,13 +62,17 @@ GigFlow is a high-performance, full-stack freelancer marketplace built to demons
 ### 1. Prerequisites
 - **Node.js** (v16+)
 - **MongoDB** (Local or Atlas)
+- **Docker** (for docker-compose setup)
 
 ### 2. Installation
-Clone the repository and install dependencies for **both** backend and frontend:
+
+#### Option A: Local Development (Manual Setup)
+Clone the repository and install dependencies separately for backend and frontend:
 
 ```bash
 # Clone the repository
 git clone https://github.com/Aarsh-37/GigFlow.git
+cd GigFlow
 
 # Install Backend Dependencies
 cd backend
@@ -68,18 +83,42 @@ cd ../frontend
 npm install
 ```
 
-### 3. Environment Setup
-Create a `.env` file in the `backend` directory:
-```env
-PORT=5000
-MONGO_URI=your_mongodb_uri
-JWT_SECRET=your_secret_key
-FRONTEND_URL=http://localhost:5173
-# Optional: Google OAuth
-GOOGLE_CLIENT_ID=your_id
+#### Option B: Docker Compose (Recommended)
+For a streamlined setup with containerized services:
 
-### 4. Running the Project
-You need to run both the backend and frontend servers.
+```bash
+# Clone the repository
+git clone https://github.com/Aarsh-37/GigFlow.git
+cd GigFlow
+
+# Ensure Docker is running
+# Build and run services (MongoDB, Backend, Frontend)
+docker-compose up --build
+```
+
+### 3. Environment Setup
+
+#### Backend `.env`
+Create a `.env` file in the `backend` directory and configure the following variables:
+
+*   **`PORT`**: The port the backend server will run on (e.g., `5000`).
+*   **`MONGO_URI`**: Your MongoDB connection string. For local development, `mongodb://localhost:27017/gigflow` is common. For production, use a MongoDB Atlas connection string. **Ensure this is strong and unique for production.**
+*   **`JWT_SECRET`**: **Crucial for security.** This MUST be a long, random, and securely stored string. **NEVER commit this to version control directly.** Use environment variables or a secret management system in production.
+*   **`FRONTEND_URL`**: The URL where your frontend application is running (e.g., `http://localhost:5173`). This is used for CORS configuration and redirects after login.
+*   **`NODE_ENV`**: Set to `development` for local development, and `production` in production environments.
+*   **`GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`**: (Optional) Your Google OAuth application credentials if you enable Google login.
+
+#### Frontend `.env`
+Create a `.env` file in the `frontend` directory and configure the following variable:
+
+*   **`VITE_API_URL`**: The base URL of your backend API (e.g., `http://localhost:5000/api`). Ensure this points to the correct backend service when running in different environments (e.g., Docker, production).
+
+---
+
+## ▶️ Running the Project
+
+### Option A: Local Development
+Run both the backend and frontend development servers simultaneously.
 
 **Backend:**
 ```bash
@@ -93,14 +132,41 @@ cd frontend
 npm run dev
 ```
 
+### Option B: Docker Compose
+If you have Docker installed and running:
+
+```bash
+# From the project root directory
+docker-compose up --build
+```
+This command will build the Docker images (if needed) and start all services (MongoDB, backend, frontend).
+
 ---
 
 ## 🧪 Testing
-Run the testing suite to verify system integrity:
+
+### Backend Tests
+Run the backend test suite (Jest):
 ```bash
 cd backend
 npm test
 ```
 
+### Frontend Tests
+*(Placeholder for frontend testing instructions. Will be updated once Vitest setup is confirmed.)*
+```bash
+cd frontend
+npm test # (or specific command if different)
+```
 
+---
 
+## 🤝 Contributing
+
+Contributions are welcome! Please refer to the `CONTRIBUTING.md` file for guidelines on how to contribute to this project.
+
+---
+
+## 📜 License
+
+This project is licensed under the MIT License - see the `LICENSE.md` file for details.
