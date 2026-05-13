@@ -1,49 +1,39 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-// import api from '../utils/api'; // Not directly using api here, using Redux thunks
-import { Search, MapPin, IndianRupee, Clock, ArrowRight, Filter } from 'lucide-react'; // Added Filter icon
-import clsx from 'clsx'; // For conditional styling
-import { useDispatch, useSelector } from 'react-redux'; // For Redux
-import { fetchGigs, setSearchQuery, setSelectedCategory, setSelectedTags, setCurrentPage, resetFilters } from '../slices/gigSlice'; // Import Redux actions and thunk
+import { Search, IndianRupee, ArrowRight, Filter, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchGigs, setSearchQuery, setSelectedCategory, setSelectedTags, setCurrentPage, resetFilters } from '../slices/gigSlice';
+import { GigSkeleton } from '../components/common/Skeleton';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const GigsFeed = () => {
     const dispatch = useDispatch();
-    // Get state from Redux
     const { gigs, loading, error, currentPage, limit, totalPages, searchQuery, selectedCategory, selectedTags } = useSelector((state) => state.gigs);
 
     const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [localSearch, setLocalSearch] = useState(searchQuery);
 
-    // Debounce search input to avoid excessive API calls
-    const debouncedSearch = useCallback((func, delay) => {
-        let timeoutId;
-        return (...args) => {
-            clearTimeout(timeoutId);
-            timeoutId = setTimeout(() => func(...args), delay);
-        };
-    }, []);
+    const categories = ['Design', 'Development', 'Writing', 'Marketing', 'Other'];
+    const popularTags = ['React', 'Node.js', 'JavaScript', 'UI/UX', 'Backend', 'Frontend', 'Fullstack', 'Mobile', 'Logo Design', 'SEO'];
 
-    // Fetch gigs when component mounts or filters/pagination change
+    // Debounce search input
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            dispatch(setSearchQuery(localSearch));
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [localSearch, dispatch]);
+
     useEffect(() => {
         dispatch(fetchGigs({
             page: currentPage,
-            limit: limit,
+            limit,
             search: searchQuery,
             category: selectedCategory,
             tags: selectedTags
         }));
     }, [dispatch, currentPage, limit, searchQuery, selectedCategory, selectedTags]);
 
-    // Handle search input changes
-    const handleSearchChange = (e) => {
-        dispatch(setSearchQuery(e.target.value));
-    };
-
-    // Handle category selection
-    const handleCategoryChange = (e) => {
-        dispatch(setSelectedCategory(e.target.value));
-    };
-
-    // Handle tag selection/deselection
     const handleTagToggle = (tag) => {
         const newTags = selectedTags.includes(tag)
             ? selectedTags.filter(t => t !== tag)
@@ -51,209 +41,234 @@ const GigsFeed = () => {
         dispatch(setSelectedTags(newTags));
     };
 
-    // Handle page changes
     const handlePageChange = (page) => {
         dispatch(setCurrentPage(page));
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
-
-    // Apply filters when search/category/tags change (debounced)
-    // We can either trigger fetch on every change (debounced) or use a separate apply button
-    // For simplicity, let's use debounced search and direct updates for category/tags which might reset page
-    useEffect(() => {
-        // Debounced fetch on search query change
-        const debouncedFetch = debouncedSearch(() => {
-             dispatch(fetchGigs({ page: 1, limit, search: searchQuery, category: selectedCategory, tags: selectedTags }));
-        }, 500); // 500ms debounce delay
-        if (searchQuery) {
-            debouncedFetch();
-        } else {
-             // If search is cleared, fetch immediately or reset filters if needed
-             // For now, let filter changes trigger fetch directly with reset page
-             // dispatch(fetchGigs({ page: 1, limit, search: '', category: selectedCategory, tags: selectedTags }));
-        }
-        return () => clearTimeout(debouncedFetch); // Cleanup debounce
-    }, [searchQuery, dispatch, limit, selectedCategory, selectedTags, debouncedSearch]);
-
-    // Reset filters and fetch when reset button is clicked
-    const handleResetFilters = () => {
-        dispatch(resetFilters());
-        // fetchGigs is dispatched by the useEffect hook due to resetFilters updating state
-    };
-
 
     return (
-        <div className="space-y-8">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-display font-bold text-slate-900">Explore Gigs</h1>
-                    <p className="text-slate-500 mt-1">Find the perfect project or talent</p>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+            {/* Header & Search */}
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+                <div className="space-y-1">
+                    <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white">Discover Gigs</h1>
+                    <p className="text-gray-500 dark:text-gray-400">Explore the best opportunities from top-tier clients.</p>
                 </div>
-                <div className="flex flex-col md:flex-row gap-4">
-                    <form onSubmit={(e) => e.preventDefault()} className="md:w-96 relative flex items-center">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                            <Search size={18} />
-                        </div>
+                <div className="flex w-full lg:w-auto gap-4">
+                    <div className="relative flex-grow lg:w-80">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
                         <input
                             type="text"
-                            className="input-field pl-10 rounded-full bg-white shadow-sm"
-                            placeholder="Search for gigs..."
-                            value={searchQuery}
-                            onChange={handleSearchChange}
+                            placeholder="Search projects..."
+                            className="w-full pl-12 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all dark:text-white"
+                            value={localSearch}
+                            onChange={(e) => setLocalSearch(e.target.value)}
                         />
-                    </form>
-                    <button
+                    </div>
+                    <button 
                         onClick={() => setIsFilterOpen(!isFilterOpen)}
-                        className="btn-secondary flex items-center gap-2"
+                        className={`p-3 rounded-2xl border transition-all flex items-center gap-2 font-bold ${
+                            isFilterOpen || selectedCategory || selectedTags.length > 0
+                            ? 'bg-indigo-600 border-indigo-600 text-white'
+                            : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300'
+                        }`}
                     >
-                        <Filter size={18} /> Filter
+                        <Filter size={20} />
+                        <span className="hidden sm:inline">Filters</span>
                     </button>
                 </div>
             </div>
 
-            {/* Filter Sidebar/Dropdown */}
-            {isFilterOpen && (
-                <div className="bg-white card p-6 rounded-2xl shadow-lg border border-slate-200">
-                    <div className="flex justify-between items-center mb-4">
-                        <h3 className="font-bold text-xl text-slate-900">Filters</h3>
-                        <button onClick={() => setIsFilterOpen(false)} className="text-slate-400 hover:text-slate-600">&times;</button>
-                    </div>
-                    <div className="space-y-4">
-                        {/* Category Filter */}
-                        <div>
-                            <label htmlFor="category" className="block text-sm font-bold text-slate-700 mb-2">Category</label>
-                            <select
-                                id="category"
-                                value={selectedCategory}
-                                onChange={handleCategoryChange}
-                                className="input-field"
-                            >
-                                <option value="">All Categories</option>
-                                <option value="Design">Design</option>
-                                <option value="Development">Development</option>
-                                <option value="Writing">Writing</option>
-                                <option value="Marketing">Marketing</option>
-                                <option value="Other">Other</option>
-                            </select>
-                        </div>
-
-                        {/* Tags Filter (Simple multi-select example) */}
-                        <div>
-                            <label className="block text-sm font-bold text-slate-700 mb-2">Tags</label>
-                            <div className="flex flex-wrap gap-2">
-                                {['React', 'Node.js', 'JavaScript', 'UI/UX', 'Backend', 'Frontend', 'Fullstack'].map(tag => (
-                                    <button
-                                        key={tag}
-                                        onClick={() => handleTagToggle(tag)}
-                                        className={clsx(
-                                            "px-3 py-1 rounded-full text-xs font-medium border transition-colors",
-                                            selectedTags.includes(tag)
-                                                ? 'bg-primary-100 border-primary-500 text-primary-700 font-bold'
-                                                : 'bg-white border-slate-300 text-slate-600 hover:bg-slate-50'
-                                        )}
-                                    >
-                                        {tag}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                    <div className="mt-6 pt-4 border-t border-slate-100 flex justify-between">
-                        <button onClick={handleResetFilters} className="btn-secondary">Reset</button>
-                        <button onClick={() => setIsFilterOpen(false)} className="btn-primary">Apply Filters</button>
-                    </div>
-                </div>
-            )}
-
-            {loading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
-                    {[1, 2, 3, 4, 5, 6].map((n) => (
-                        <div key={n} className="h-48 bg-slate-200 rounded-xl"></div>
-                    ))}
-                </div>
-            ) : error ? (
-                 <div className="text-center text-lg text-red-500 font-bold py-12">Error: {error}</div>
-            ) : gigs.length === 0 ? (
-                <div className="col-span-full text-center py-12 text-slate-500">
-                    No gigs found matching your criteria.
-                </div>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {gigs.map((gig) => (
-                        <div key={gig._id} className="card hover:shadow-lg transition-shadow duration-300 flex flex-col h-full group">
-                            <div className="p-6 flex flex-col flex-grow">
-                                <div className="flex justify-between items-start mb-4">
-                                    <div className="bg-primary-50 text-primary-700 text-xs font-semibold px-2 py-1 rounded inline-block uppercase tracking-wide">
-                                        {gig.category || 'General'} {/* Display category */}
-                                    </div>
-                                    <span className="text-slate-400 text-xs">
-                                        {new Date(gig.createdAt).toLocaleDateString()}
-                                    </span>
-                                </div>
-                                <h3 className="text-xl font-bold text-slate-900 mb-2 line-clamp-1 group-hover:text-primary-600 transition-colors">
-                                    {gig.title}
-                                </h3>
-                                <p className="text-sm text-slate-600 mb-4 line-clamp-3">
-                                    {gig.description}
-                                </p>
-                                {/* Display tags if available */}
-                                {gig.tags && gig.tags.length > 0 && (
-                                    <div className="flex flex-wrap gap-1 mb-4">
-                                        {gig.tags.slice(0, 3).map(tag => ( // Show max 3 tags
-                                            <span key={tag} className="bg-slate-100 text-slate-600 text-xs font-medium px-2 py-0.5 rounded-full">{tag}</span>
+            {/* Filter Section */}
+            <AnimatePresence>
+                {isFilterOpen && (
+                    <motion.div 
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden"
+                    >
+                        <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-xl space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                {/* Categories */}
+                                <div>
+                                    <h4 className="text-sm font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-4">Categories</h4>
+                                    <div className="flex flex-wrap gap-2">
+                                        {categories.map(cat => (
+                                            <button
+                                                key={cat}
+                                                onClick={() => dispatch(setSelectedCategory(selectedCategory === cat ? '' : cat))}
+                                                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                                                    selectedCategory === cat
+                                                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30'
+                                                    : 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
+                                                }`}
+                                            >
+                                                {cat}
+                                            </button>
                                         ))}
                                     </div>
-                                )}
-                                <div className="mt-auto pt-4 border-t border-slate-50 flex items-center justify-between text-sm">
-                                    <div className="flex items-center text-slate-700 font-medium">
-                                        <IndianRupee size={16} className="text-primary-500 mr-1" />
-                                        {gig.budget.toLocaleString()}
-                                    </div>
-                                    <div className="flex items-center text-slate-500">
-                                        <span className="truncate max-w-[100px] text-right">
-                                            by {gig.ownerId?.name || 'Unknown'}
-                                        </span>
+                                </div>
+
+                                {/* Tags */}
+                                <div className="lg:col-span-2">
+                                    <h4 className="text-sm font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-4">Popular Tags</h4>
+                                    <div className="flex flex-wrap gap-2">
+                                        {popularTags.map(tag => (
+                                            <button
+                                                key={tag}
+                                                onClick={() => handleTagToggle(tag)}
+                                                className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                                                    selectedTags.includes(tag)
+                                                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30'
+                                                    : 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'
+                                                }`}
+                                            >
+                                                {tag}
+                                            </button>
+                                        ))}
                                     </div>
                                 </div>
                             </div>
-                            <div className="px-6 py-4 bg-slate-50 border-t border-slate-100">
-                                <Link
-                                    to={`/gigs/${gig._id}`}
-                                    className="text-primary-600 font-medium text-sm flex items-center hover:gap-2 transition-all"
+                            <div className="pt-6 border-t border-gray-50 dark:border-gray-700 flex justify-between items-center">
+                                <button 
+                                    onClick={() => dispatch(resetFilters())}
+                                    className="text-gray-500 hover:text-red-500 font-bold transition-colors"
                                 >
-                                    View Details <ArrowRight size={16} className="ml-1" />
-                                </Link>
+                                    Reset All Filters
+                                </button>
+                                <button 
+                                    onClick={() => setIsFilterOpen(false)}
+                                    className="px-6 py-2 bg-gray-900 dark:bg-white dark:text-gray-900 text-white rounded-xl font-bold"
+                                >
+                                    Done
+                                </button>
                             </div>
                         </div>
-                    ))
-                }
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Gigs Grid */}
+            {loading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {[1, 2, 3, 4, 5, 6].map(i => <GigSkeleton key={i} />)}
+                </div>
+            ) : error ? (
+                <div className="text-center py-20 bg-red-50 dark:bg-red-900/10 rounded-3xl border border-red-100 dark:border-red-900/30">
+                    <p className="text-red-600 dark:text-red-400 font-bold">Error loading gigs: {error}</p>
+                    <button onClick={() => window.location.reload()} className="mt-4 text-red-600 underline">Try again</button>
+                </div>
+            ) : gigs.length === 0 ? (
+                <div className="text-center py-32 bg-gray-50 dark:bg-gray-800/50 rounded-3xl border-2 border-dashed border-gray-200 dark:border-gray-700">
+                    <div className="max-w-xs mx-auto">
+                        <Search className="mx-auto text-gray-300 dark:text-gray-600 mb-4" size={48} />
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">No Gigs Found</h3>
+                        <p className="text-gray-500 dark:text-gray-400">We couldn't find any projects matching your current filters.</p>
+                        <button 
+                            onClick={() => dispatch(resetFilters())}
+                            className="mt-6 px-6 py-2 bg-indigo-600 text-white rounded-xl font-bold shadow-lg"
+                        >
+                            Clear Filters
+                        </button>
+                    </div>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {gigs.map((gig, idx) => (
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.4, delay: idx * 0.05 }}
+                            key={gig._id}
+                        >
+                            <Link 
+                                to={`/gigs/${gig._id}`}
+                                className="group block bg-white dark:bg-gray-800 rounded-3xl shadow-sm hover:shadow-2xl transition-all duration-300 border border-gray-100 dark:border-gray-700 p-6 h-full relative"
+                            >
+                                <div className="flex justify-between items-start mb-4">
+                                    <span className="px-3 py-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-[10px] font-black uppercase tracking-widest rounded-lg">
+                                        {gig.category}
+                                    </span>
+                                    <div className="flex items-center gap-1 text-indigo-600 font-black text-lg">
+                                        <IndianRupee size={16} /> {gig.budget.toLocaleString()}
+                                    </div>
+                                </div>
+                                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 group-hover:text-indigo-600 transition-colors line-clamp-1">
+                                    {gig.title}
+                                </h3>
+                                <p className="text-gray-500 dark:text-gray-400 text-sm line-clamp-3 mb-6">
+                                    {gig.description}
+                                </p>
+                                
+                                <div className="flex flex-wrap gap-2 mb-8">
+                                    {gig.tags?.slice(0, 3).map(tag => (
+                                        <span key={tag} className="px-2 py-1 bg-gray-50 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-[10px] font-bold rounded-md">
+                                            #{tag}
+                                        </span>
+                                    ))}
+                                </div>
+
+                                <div className="mt-auto pt-6 border-t border-gray-50 dark:border-gray-700 flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center font-bold text-gray-500">
+                                            {gig.ownerId?.avatar ? (
+                                                <img src={gig.ownerId.avatar} alt="" className="w-full h-full rounded-full object-cover" />
+                                            ) : (
+                                                gig.ownerId?.name?.charAt(0)
+                                            )}
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-bold text-gray-900 dark:text-white">{gig.ownerId?.name}</p>
+                                            <div className="flex items-center gap-1 text-xs text-yellow-500">
+                                                <Star size={12} fill="currentColor" />
+                                                <span>{gig.ownerId?.rating?.toFixed(1) || 'N/A'}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                                        <ArrowRight size={20} />
+                                    </div>
+                                </div>
+                            </Link>
+                        </motion.div>
+                    ))}
                 </div>
             )}
 
             {/* Pagination */}
             {totalPages > 1 && (
-                <div className="flex justify-center mt-8">
-                    <button
+                <div className="flex justify-center items-center gap-2 pt-12">
+                    <button 
                         onClick={() => handlePageChange(currentPage - 1)}
                         disabled={currentPage === 1}
-                        className="px-4 py-2 rounded-l-lg border border-slate-300 bg-white disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="p-2 rounded-xl border border-gray-200 dark:border-gray-700 disabled:opacity-30 dark:text-white"
                     >
-                        Prev
+                        <ChevronLeft size={24} />
                     </button>
-                    {[...Array(totalPages).keys()].map(num => (
-                        <button
-                            key={num + 1}
-                            onClick={() => handlePageChange(num + 1)}
-                            className={`px-4 py-2 border-y border-r border-slate-300 ${currentPage === num + 1 ? 'bg-primary-500 text-white font-bold' : 'bg-white text-slate-700'}`}
-                        >
-                            {num + 1}
-                        </button>
-                    ))}
-                    <button
+                    
+                    <div className="flex items-center gap-2">
+                        {[...Array(totalPages).keys()].map(i => (
+                            <button
+                                key={i + 1}
+                                onClick={() => handlePageChange(i + 1)}
+                                className={`w-10 h-10 rounded-xl font-bold transition-all ${
+                                    currentPage === i + 1
+                                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30'
+                                    : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                }`}
+                            >
+                                {i + 1}
+                            </button>
+                        ))}
+                    </div>
+
+                    <button 
                         onClick={() => handlePageChange(currentPage + 1)}
                         disabled={currentPage === totalPages}
-                        className="px-4 py-2 rounded-r-lg border border-slate-300 bg-white disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="p-2 rounded-xl border border-gray-200 dark:border-gray-700 disabled:opacity-30 dark:text-white"
                     >
-                        Next
+                        <ChevronRight size={24} />
                     </button>
                 </div>
             )}

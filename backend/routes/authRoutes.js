@@ -9,7 +9,9 @@ import {
 import { protect } from '../middleware/authMiddleware.js';
 import passport from 'passport';
 import generateToken from '../utils/generateToken.js';
-import { validate, registerSchema, loginSchema, updateUserProfileSchema } from '../middleware/validationMiddleware.js'; // Import the new schema
+import { validate } from '../middleware/validationMiddleware.js';
+import { registerSchema, loginSchema } from '../validations/authSchema.js';
+import { updateUserProfileSchema } from '../validations/userSchema.js';
 
 const router = express.Router();
 

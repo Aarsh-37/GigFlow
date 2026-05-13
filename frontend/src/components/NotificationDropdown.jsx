@@ -8,7 +8,7 @@ import { formatDistanceToNow } from 'date-fns'; // For human-readable timestamps
 const NotificationDropdown = () => {
     const dispatch = useDispatch();
     // Access notifications and unreadCount from the Redux store
-    const { items: notifications, loading, error, unreadCount } = useSelector((state) => state.notifications);
+    const { notifications, loading, error, unreadCount } = useSelector((state) => state.notifications);
     const { userInfo } = useSelector((state) => state.auth); // To check if user is logged in
 
     const [isOpen, setIsOpen] = useState(false);

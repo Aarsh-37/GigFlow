@@ -1,49 +1,40 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../utils/api';
 
-// Async thunk for fetching gigs with filters (search, category, tags)
 export const fetchGigs = createAsyncThunk(
     'gigs/fetchGigs',
-    async ({ page = 1, limit = 12, search = '', category = '', tags = [] }, { rejectWithValue }) => {
+    async (params, { rejectWithValue }) => {
         try {
-            const response = await api.get('/gigs', {
-                params: {
-                    page,
-                    limit,
-                    search,
-                    category,
-                    tags: tags.join(',') // Pass tags as a comma-separated string
-                }
-            });
-            return response.data; // Expected response: { gigs, page, limit, totalPages, totalGigs }
+            const { data } = await api.get('/gigs', { params });
+            return data;
         } catch (error) {
-            return rejectWithValue(error.response?.data?.message || error.message || 'Failed to fetch gigs');
+            return rejectWithValue(error.response?.data?.message || error.message);
         }
     }
 );
 
-// Async thunk for fetching a single gig detail
-export const fetchGigById = createAsyncThunk(
-    'gigs/fetchGigById',
-    async (gigId, { rejectWithValue }) => {
+export const deleteGig = createAsyncThunk(
+    'gigs/deleteGig',
+    async (id, { rejectWithValue }) => {
         try {
-            const response = await api.get(`/gigs/${gigId}`);
-            return response.data;
+            await api.delete(`/gigs/${id}`);
+            return id;
         } catch (error) {
-            return rejectWithValue(error.response?.data?.message || error.message || 'Failed to fetch gig details');
+            return rejectWithValue(error.response?.data?.message || error.message);
         }
     }
 );
 
 const initialState = {
     gigs: [],
-    currentGig: null,
-    status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
+    loading: false,
     error: null,
+    // Pagination state
     currentPage: 1,
-    limit: 12,
+    limit: 10,
     totalPages: 0,
     totalGigs: 0,
+    // Search/filter state
     searchQuery: '',
     selectedCategory: '',
     selectedTags: [],
@@ -53,64 +44,51 @@ const gigSlice = createSlice({
     name: 'gigs',
     initialState,
     reducers: {
-        setSearchQuery: (state, action) => {
+        setSearchQuery(state, action) {
             state.searchQuery = action.payload;
-            state.currentPage = 1; // Reset to first page on new search
+            state.currentPage = 1;
         },
-        setSelectedCategory: (state, action) => {
+        setSelectedCategory(state, action) {
             state.selectedCategory = action.payload;
-            state.currentPage = 1; // Reset to first page on category change
+            state.currentPage = 1;
         },
-        setSelectedTags: (state, action) => {
+        setSelectedTags(state, action) {
             state.selectedTags = action.payload;
-            state.currentPage = 1; // Reset to first page on tag change
+            state.currentPage = 1;
         },
-        setCurrentPage: (state, action) => {
+        setCurrentPage(state, action) {
             state.currentPage = action.payload;
         },
-        // Reducer to reset filters when needed, e.g., when navigating away from filter page
-        resetFilters: (state) => {
+        resetFilters(state) {
             state.searchQuery = '';
             state.selectedCategory = '';
             state.selectedTags = [];
             state.currentPage = 1;
-        },
+        }
     },
     extraReducers: (builder) => {
         builder
-            // Fetch Gigs
             .addCase(fetchGigs.pending, (state) => {
-                state.status = 'loading';
-                state.error = null; // Clear previous errors on new fetch
+                state.loading = true;
+                state.error = null;
             })
             .addCase(fetchGigs.fulfilled, (state, action) => {
-                state.status = 'succeeded';
-                state.gigs = action.payload.gigs;
-                state.currentPage = action.payload.page;
-                state.limit = action.payload.limit;
-                state.totalPages = action.payload.totalPages;
-                state.totalGigs = action.payload.totalGigs;
+                state.loading = false;
+                state.gigs = action.payload.gigs || action.payload || [];
+                state.totalPages = action.payload.totalPages || 1;
+                state.totalGigs = action.payload.totalGigs || state.gigs.length;
             })
             .addCase(fetchGigs.rejected, (state, action) => {
-                state.status = 'failed';
+                state.loading = false;
                 state.error = action.payload;
             })
-            // Fetch Gig by ID
-            .addCase(fetchGigById.pending, (state) => {
-                state.status = 'loading';
-                state.error = null;
-                state.currentGig = null; // Clear previous gig details
-            })
-            .addCase(fetchGigById.fulfilled, (state, action) => {
-                state.status = 'succeeded';
-                state.currentGig = action.payload;
-            })
-            .addCase(fetchGigById.rejected, (state, action) => {
-                state.status = 'failed';
-                state.error = action.payload;
+            .addCase(deleteGig.fulfilled, (state, action) => {
+                state.gigs = state.gigs.filter((gig) => gig._id !== action.payload);
+                state.totalGigs -= 1;
             });
     }
 });
 
 export const { setSearchQuery, setSelectedCategory, setSelectedTags, setCurrentPage, resetFilters } = gigSlice.actions;
+
 export default gigSlice.reducer;

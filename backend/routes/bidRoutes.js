@@ -1,66 +1,36 @@
 import express from 'express';
+import {
+    createBid,
+    getBidById,
+    getBidsForGig,
+    updateBid,
+    deleteBid,
+    acceptBid,
+    rejectBid,
+    withdrawBid
+} from '../controllers/bidController.js';
 import { protect } from '../middleware/authMiddleware.js';
-import { placeBid, getBidsByGig, hireFreelancer, updateBid, withdrawBid } from '../controllers/bidController.js'; // Import withdrawBid
-import { body, param } from 'express-validator'; // Import for validation
-import { validateObjectId } from '../middleware/validationMiddleware.js'; // Assuming validationMiddleware exists for ObjectId validation
+import { isBidOwner, isGigOwner } from '../middleware/checkOwnership.js';
+import { validateObjectId, validate } from '../middleware/validationMiddleware.js';
+import { placeBidSchema, updateBidSchema } from '../validations/bidSchema.js';
 
 const router = express.Router();
 
-// Validate gigId for routes requiring it
-const validateGigId = [
-    param('gigId').isMongoId().withMessage('Invalid Gig ID'),
-    (req, res, next) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
-        next();
-    }
-];
-
-// Validate bidId for routes requiring it
-const validateBidId = [
-    param('bidId').isMongoId().withMessage('Invalid Bid ID'),
-    (req, res, next) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
-        next();
-    }
-];
-
-// Routes for /api/bids
+// Routes for creating and fetching bids
 router.route('/')
-    .post(protect, validateObjectId('gigId', 'body'), body('message').trim().notEmpty(), body('price').isFloat({ min: 1 }), (req, res, next) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
-        next();
-    }, placeBid);
+    .post(protect, validate(placeBidSchema), createBid);
 
-// Route to get bids for a specific gig (Owner only)
-router.route('/:gigId')
-    .get(protect, validateGigId, getBidsByGig);
+// Routes for specific bid operations by ID
+router.route('/:id')
+    .get(validateObjectId('id'), getBidById)
+    .put(protect, isBidOwner, validateObjectId('id'), validate(updateBidSchema), updateBid)
+    .delete(protect, isBidOwner, validateObjectId('id'), deleteBid);
 
-// Route to hire a freelancer for a specific bid
-router.route('/:bidId/hire')
-    .patch(protect, validateBidId, hireFreelancer);
+// Routes for gig owner actions on bids
+router.patch('/:id/accept', protect, isGigOwner, validateObjectId('id'), acceptBid);
+router.patch('/:id/reject', protect, isGigOwner, validateObjectId('id'), rejectBid);
+router.patch('/:id/withdraw', protect, isBidOwner, validateObjectId('id'), withdrawBid);
 
-// Route to update a bid (Freelancer only)
-router.route('/:id') // Assuming :id here refers to bidId for update
-    .patch(protect, validateBidId, body('message').optional().trim(), body('price').optional().isFloat({ min: 1 }), (req, res, next) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
-        next();
-    }, updateBid);
-
-// Route to withdraw a bid (Freelancer only)
-router.route('/:id') // Assuming :id here refers to bidId for withdrawal
-    .delete(protect, validateBidId, withdrawBid);
-
+router.get('/gig/:gigId', protect, validateObjectId('gigId', 'params'), getBidsForGig);
 
 export default router;

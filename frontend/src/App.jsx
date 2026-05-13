@@ -16,6 +16,7 @@ import api from './utils/api';
 import Profile from './pages/Profile';
 import AdminPanel from './pages/AdminPanel';
 import LandingPage from './pages/LandingPage'; // Import the LandingPage component
+import ErrorBoundary from './components/common/ErrorBoundary';
 
 const PrivateRoute = ({ children }) => {
   const { userInfo } = useSelector((state) => state.auth);
@@ -43,6 +44,17 @@ function App() {
     checkAuth();
   }, []); // Empty dependency array = run only on mount
 
+  const { mode } = useSelector((state) => state.theme);
+
+  // Apply dark mode theme
+  useEffect(() => {
+    if (mode === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [mode]);
+
   // Socket and Notifications logic - runs when userInfo changes
   useEffect(() => {
     if (userInfo) {
@@ -66,52 +78,56 @@ function App() {
   }, [userInfo, dispatch]);
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+    <div className="min-h-screen bg-slate-50 dark:bg-gray-900 flex flex-col font-sans transition-colors duration-300">
       <Toaster />
       <Navbar />
       <main className="flex-grow py-8 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8">
-        <Routes>
-          <Route path="/" element={<LandingPage />} /> {/* Route for Landing Page */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route
-            path="/dashboard"
-            element={
-              <PrivateRoute>
-                <Dashboard />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/admin"
-            element={
-              <PrivateRoute>
-                <AdminPanel />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <PrivateRoute>
-                <Profile />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/gigs/create"
-            element={
-              <PrivateRoute>
-                <CreateGig />
-              </PrivateRoute>
-            }
-          />
-          <Route path="/gigs/:id" element={<GigDetail />} />
-        </Routes>
+        <ErrorBoundary>
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route
+              path="/dashboard"
+              element={
+                <PrivateRoute>
+                  <Dashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <PrivateRoute>
+                  <AdminPanel />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <PrivateRoute>
+                  <Profile />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/gigs/create"
+              element={
+                <PrivateRoute>
+                  <CreateGig />
+                </PrivateRoute>
+              }
+            />
+            <Route path="/gigs/:id" element={<GigDetail />} />
+          </Routes>
+        </ErrorBoundary>
       </main>
-      <footer className="bg-white border-t border-slate-100 py-6 mt-12">
-        <div className="max-w-7xl mx-auto px-4 text-center text-slate-400 text-sm">
-          &copy; {new Date().getFullYear()} GigFlow. All rights reserved.
+      <footer className="bg-white dark:bg-gray-900 border-t border-slate-100 dark:border-gray-800 py-10 mt-12">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <p className="text-slate-400 dark:text-gray-500 text-sm font-bold tracking-widest uppercase">
+            &copy; {new Date().getFullYear()} GigFlow • The Future of Freelancing
+          </p>
         </div>
       </footer>
     </div>

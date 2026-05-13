@@ -35,7 +35,8 @@ const getDashboardStats = asyncHandler(async (req, res) => {
         },
         user: {
             completedGigsCount: req.user.completedGigsCount,
-            averageRating: req.user.averageRating
+            averageRating: req.user.averageRating,
+            balance: req.user.balance
         }
     });
 });

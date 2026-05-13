@@ -65,6 +65,7 @@ gigSchema.index({ status: 1 });
 gigSchema.index({ category: 1 });
 gigSchema.index({ tags: 1 });
 gigSchema.index({ deadline: 1 });
+gigSchema.index({ title: 'text', description: 'text' });
 
 const Gig = mongoose.model('Gig', gigSchema);
 

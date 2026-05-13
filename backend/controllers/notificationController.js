@@ -9,7 +9,9 @@ const getNotifications = asyncHandler(async (req, res) => {
         .sort({ createdAt: -1 })
         .limit(20);
 
-    res.json(notifications);
+    const unreadCount = notifications.filter(n => !n.read).length;
+
+    res.json({ notifications, unreadCount });
 });
 
 // @desc    Mark notification as read

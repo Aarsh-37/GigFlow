@@ -4,6 +4,7 @@ import notificationReducer from './slices/notificationSlice';
 import gigReducer from './slices/gigSlice'; // Import gigReducer
 import bidReducer from './slices/bidSlice'; // Import bidReducer
 import profileReducer from './slices/profileSlice'; // Import profileReducer
+import themeReducer from './slices/themeSlice'; // Import themeReducer
 
 const store = configureStore({
     reducer: {
@@ -12,6 +13,7 @@ const store = configureStore({
         gigs: gigReducer, // Add gigReducer
         bids: bidReducer, // Add bidReducer
         profile: profileReducer, // Add profileReducer
+        theme: themeReducer, // Add themeReducer
     },
 });
 

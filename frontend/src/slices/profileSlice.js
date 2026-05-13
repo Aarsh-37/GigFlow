@@ -41,6 +41,19 @@ export const fetchUserBids = createAsyncThunk(
     }
 );
 
+// Async thunk to withdraw a bid
+export const withdrawBid = createAsyncThunk(
+    'profile/withdrawBid',
+    async (bidId, { rejectWithValue }) => {
+        try {
+            await api.delete(`/bids/${bidId}`);
+            return bidId;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || error.message || 'Failed to withdraw bid');
+        }
+    }
+);
+
 const initialState = {
     userProfile: null,
     userGigs: [],
@@ -103,6 +116,10 @@ const profileSlice = createSlice({
             .addCase(fetchUserBids.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload;
+            })
+            // Withdraw Bid
+            .addCase(withdrawBid.fulfilled, (state, action) => {
+                state.userBids = state.userBids.filter(bid => bid._id !== action.payload);
             });
     }
 });

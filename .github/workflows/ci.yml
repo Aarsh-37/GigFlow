@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: './backend/node_modules' # Cache backend dependencies
+        cache-dependency-path: './frontend/node_modules' # Cache frontend dependencies
+
+    - name: Install Backend Dependencies
+      run: npm install --prefix backend
+
+    - name: Install Frontend Dependencies
+      run: npm install --prefix frontend
+
+    - name: Run Backend Linting
+      run: npm run lint --prefix backend # Assumes 'lint' script exists in backend package.json
+
+    - name: Run Frontend Linting
+      run: npm run lint --prefix frontend # Assumes 'lint' script exists in frontend package.json
+
+    - name: Run Backend Tests
+      run: npm test --prefix backend # Assumes 'test' script exists in backend package.json
+
+    - name: Run Frontend Tests
+      run: npm test --prefix frontend # Assumes 'test' script exists in frontend package.json
+

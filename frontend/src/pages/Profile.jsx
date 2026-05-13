@@ -1,319 +1,329 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
+import { 
+    ArrowLeft, IndianRupee, Briefcase, Star, Edit, Trash2, 
+    Linkedin, Github, Twitter, MapPin, Mail, ExternalLink,
+    CheckCircle2, Clock, ShieldCheck
+} from 'lucide-react';
+import { fetchUserGigs, fetchUserBids, fetchUserProfile } from '../slices/profileSlice';
+import { deleteGig } from '../slices/gigSlice';
+import { ProfileSkeleton } from '../components/common/Skeleton';
 import api from '../utils/api';
-import { ArrowLeft, IndianRupee, Calendar, User, CheckCircle, XCircle, Clock, Briefcase, DollarSign, Award, Edit, Trash2 } from 'lucide-react'; // Added Trash2 icon
-import clsx from 'clsx';
 import { toast } from 'react-hot-toast';
-import { fetchUserGigs, fetchUserBids, withdrawBid } from '../slices/profileSlice'; // Import withdrawBid thunk
-import { fetchUserProfile } from '../slices/profileSlice'; // Assuming a slice for user profile details
-import { deleteGig } from '../slices/gigSlice'; // Import deleteGig thunk
+import { motion } from 'framer-motion';
 
 const Profile = () => {
-    const { id } = useParams(); // Could use this if profile route was /users/:id/profile
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const { userInfo } = useSelector((state) => state.auth);
-    // Assuming profileSlice manages userProfile, userGigs, userBids, status, error
     const { userProfile, userGigs, userBids, status, error } = useSelector((state) => state.profile);
 
-    // State for local management if needed, e.g., for editing
     const [isEditing, setIsEditing] = useState(false);
-    const [name, setName] = useState('');
-    const [bio, setBio] = useState('');
-    const [skills, setSkills] = useState(''); // Input as string, split later
-    const [profilePic, setProfilePic] = useState('');
-
-    // State for managing gig editing/deletion and bid withdrawal
-    const [editingGigId, setEditingGigId] = useState(null);
-    const [confirmDeleteId, setConfirmDeleteId] = useState(null);
-    const [confirmWithdrawId, setConfirmWithdrawId] = useState(null); // State for bid withdrawal confirmation
-
-    // Determine which user profile to fetch: logged-in user's or another user's
-    // For now, assume we are always viewing the logged-in user's profile via /profile route
-    const userIdToFetch = userInfo?._id; // Use logged-in user's ID
+    const [formData, setFormData] = useState({
+        name: '',
+        bio: '',
+        skills: '',
+        avatar: '',
+        linkedin: '',
+        github: '',
+        twitter: ''
+    });
 
     useEffect(() => {
-        if (userIdToFetch) {
-            // Dispatch thunks to fetch data
-            dispatch(fetchUserProfile(userIdToFetch));
-            dispatch(fetchUserGigs(userIdToFetch));
-            dispatch(fetchUserBids(userIdToFetch));
+        if (userInfo?._id) {
+            dispatch(fetchUserProfile(userInfo._id));
+            dispatch(fetchUserGigs(userInfo._id));
+            dispatch(fetchUserBids(userInfo._id));
         } else {
-            // If no userInfo, redirect to login
             navigate('/login');
         }
-    }, [dispatch, userIdToFetch, navigate]);
+    }, [dispatch, userInfo?._id, navigate]);
 
-    // Handle loading and error states
-    if (status === 'loading') {
-        return <div className="text-center text-lg text-gray-500">Loading profile...</div>;
-    }
-    if (status === 'failed') {
-        return <div className="text-center text-lg text-red-500 font-bold">Error: {error || 'Could not load profile'}</div>;
-    }
-    if (!userProfile) { // Should ideally be caught by 'failed' or 'loading' state
-        return <div className="text-center text-lg text-gray-500">Profile not found.</div>;
-    }
-
-    // Prepare skills for display/editing
-    const skillsArray = Array.isArray(userProfile.skills) ? userProfile.skills : (userProfile.skills || '').split(',').map(s => s.trim()).filter(Boolean);
-    const skillsString = skillsArray.join(', ');
-
-    // Initialize editing state if editing is initiated
     useEffect(() => {
-        if (isEditing) {
-            setName(userProfile.name);
-            setBio(userProfile.bio);
-            setSkills(skillsString);
-            setProfilePic(userProfile.profilePic);
+        if (userProfile) {
+            setFormData({
+                name: userProfile.name || '',
+                bio: userProfile.bio || '',
+                skills: (userProfile.skills || []).join(', '),
+                avatar: userProfile.avatar || '',
+                linkedin: userProfile.linkedin || '',
+                github: userProfile.github || '',
+                twitter: userProfile.twitter || ''
+            });
         }
-    }, [isEditing, userProfile, skillsString]);
+    }, [userProfile]);
 
-    // Placeholder for save changes functionality
-    const handleSaveChanges = async (e) => {
+    const handleUpdateProfile = async (e) => {
         e.preventDefault();
-        // TODO: Implement API call to update profile
-        toast.info('Save changes functionality not yet implemented.');
-        setIsEditing(false); // Exit editing mode
-    };
-
-    const handleDeleteGig = async (gigId) => {
-        if (window.confirm('Are you sure you want to delete this gig? This action cannot be undone.')) {
-            try {
-                await api.delete(`/gigs/${gigId}`);
-                toast.success('Gig deleted successfully!');
-                // Refresh the user's gigs list after deletion
-                dispatch(fetchUserGigs(userIdToFetch));
-                setConfirmDeleteId(null); // Close confirmation
-            } catch (err) {
-                toast.error(err.response?.data?.message || 'Error deleting gig');
-            }
+        try {
+            const updatedData = {
+                ...formData,
+                skills: formData.skills.split(',').map(s => s.trim()).filter(Boolean)
+            };
+            await api.put('/auth/me', updatedData);
+            toast.success('Profile updated successfully');
+            setIsEditing(false);
+            dispatch(fetchUserProfile(userInfo._id));
+        } catch (err) {
+            toast.error(err.response?.data?.message || 'Failed to update profile');
         }
     };
 
-    // Function to handle withdrawing a bid
-    const handleWithdrawBid = async (bidId) => {
-        if (window.confirm('Are you sure you want to withdraw this bid?')) {
-            try {
-                await api.delete(`/bids/${bidId}`);
-                toast.success('Bid withdrawn successfully!');
-                // Refresh the user's bids list after withdrawal
-                dispatch(fetchUserBids(userIdToFetch));
-                setConfirmWithdrawId(null); // Close confirmation
-            } catch (err) {
-                toast.error(err.response?.data?.message || 'Error withdrawing bid');
-            }
-        }
-    };
+    if (status === 'loading') return <ProfileSkeleton />;
+    if (status === 'failed') return <div className="text-center py-20 text-red-500">{error}</div>;
+    if (!userProfile) return null;
+
+    const skills = userProfile.skills || [];
 
     return (
-        <div className="max-w-4xl mx-auto space-y-8 pb-12">
+        <div className="max-w-6xl mx-auto px-4 py-8">
             <button
                 onClick={() => navigate(-1)}
-                className="flex items-center text-slate-500 hover:text-slate-900 transition-colors font-medium"
+                className="flex items-center text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white mb-8 transition-colors"
             >
-                <ArrowLeft size={18} className="mr-1" /> Back
+                <ArrowLeft size={20} className="mr-2" /> Back
             </button>
 
-            {/* Profile Header Card */}
-            <div className="card p-8 bg-white shadow-xl shadow-slate-200/50 rounded-2xl border-0 overflow-hidden relative">
-                <div className="flex flex-col md:flex-row items-center gap-6">
-                    {userProfile.profilePic ? (
-                        <img src={userProfile.profilePic} alt="Profile Picture" className="w-32 h-32 rounded-full object-cover shadow-md" />
-                    ) : (
-                        <div className="w-32 h-32 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold text-5xl shadow-md">
-                            {userProfile.name.charAt(0).toUpperCase()}
-                        </div>
-                    )}
-                    <div className="text-center md:text-left">
-                        <h1 className="text-3xl font-display font-bold text-slate-900 mb-1">{userProfile.name}</h1>
-                        <p className="text-sm font-medium text-slate-500 mb-2">@{userProfile.email.split('@')[0]}</p>
-                        <div className="flex flex-wrap gap-2 justify-center md:justify-start">
-                             <div className="flex items-center gap-1 text-sm text-slate-600 font-medium">
-                                <Award size={16} className="text-yellow-500"/> {userProfile.averageRating?.toFixed(1) || 'N/A'} Rating
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Left Column: Info Card */}
+                <div className="lg:col-span-1 space-y-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl overflow-hidden border border-gray-100 dark:border-gray-700">
+                        <div className="h-24 bg-indigo-600"></div>
+                        <div className="px-6 pb-8">
+                            <div className="relative -mt-12 mb-4 flex justify-center lg:justify-start">
+                                {userProfile.avatar ? (
+                                    <img 
+                                        src={userProfile.avatar} 
+                                        alt={userProfile.name} 
+                                        className="w-32 h-32 rounded-2xl border-4 border-white dark:border-gray-800 shadow-lg object-cover"
+                                    />
+                                ) : (
+                                    <div className="w-32 h-32 rounded-2xl border-4 border-white dark:border-gray-800 shadow-lg bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-4xl">
+                                        {userProfile.name?.charAt(0)}
+                                    </div>
+                                )}
                             </div>
-                             <div className="flex items-center gap-1 text-sm text-slate-600 font-medium">
-                                <Briefcase size={16} className="text-primary-500"/> {userProfile.completedGigsCount || 0} Gigs Completed
+                            <div className="text-center lg:text-left">
+                                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{userProfile.name}</h1>
+                                <p className="text-gray-500 dark:text-gray-400 mb-4">{userProfile.email}</p>
+                                
+                                <div className="flex justify-center lg:justify-start gap-4 mb-6">
+                                    <div className="text-center px-4 py-2 bg-gray-50 dark:bg-gray-700 rounded-xl">
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">Rating</p>
+                                        <div className="flex items-center gap-1 font-bold text-gray-900 dark:text-white">
+                                            <Star size={14} className="text-yellow-400 fill-current" />
+                                            {userProfile.rating?.toFixed(1) || '0.0'}
+                                        </div>
+                                    </div>
+                                    <div className="text-center px-4 py-2 bg-gray-50 dark:bg-gray-700 rounded-xl">
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">Gigs</p>
+                                        <p className="font-bold text-gray-900 dark:text-white">{userProfile.totalGigs || 0}</p>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-3 text-gray-600 dark:text-gray-400">
+                                        <ShieldCheck size={18} className="text-green-500" />
+                                        <span className="text-sm">Verified Professional</span>
+                                    </div>
+                                    <div className="flex items-center gap-3 text-gray-600 dark:text-gray-400">
+                                        <Mail size={18} />
+                                        <span className="text-sm truncate">{userProfile.email}</span>
+                                    </div>
+                                </div>
+
+                                <div className="mt-8 pt-8 border-t border-gray-100 dark:border-gray-700 flex justify-center lg:justify-start gap-4">
+                                    {userProfile.linkedin && (
+                                        <a href={userProfile.linkedin} target="_blank" rel="noopener noreferrer" className="p-2 bg-gray-50 dark:bg-gray-700 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors">
+                                            <Linkedin size={20} />
+                                        </a>
+                                    )}
+                                    {userProfile.github && (
+                                        <a href={userProfile.github} target="_blank" rel="noopener noreferrer" className="p-2 bg-gray-50 dark:bg-gray-700 rounded-lg text-gray-900 dark:text-white hover:bg-gray-100 transition-colors">
+                                            <Github size={20} />
+                                        </a>
+                                    )}
+                                    {userProfile.twitter && (
+                                        <a href={userProfile.twitter} target="_blank" rel="noopener noreferrer" className="p-2 bg-gray-50 dark:bg-gray-700 rounded-lg text-blue-400 hover:bg-blue-50 transition-colors">
+                                            <Twitter size={20} />
+                                        </a>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Editable Section */}
-                {isEditing ? (
-                    <div className="mt-6 pt-6 border-t border-slate-100">
-                        <h2 className="text-xl font-bold text-slate-900 mb-4">Edit Profile</h2>
-                        <form onSubmit={handleSaveChanges} className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-bold text-slate-700 mb-1">Name</label>
-                                <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="input-field" />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-bold text-slate-700 mb-1">Bio</label>
-                                <textarea value={bio} onChange={(e) => setBio(e.target.value)} className="input-field h-32" />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-bold text-slate-700 mb-1">Skills (comma-separated)</label>
-                                <input type="text" value={skills} onChange={(e) => setSkills(e.target.value)} className="input-field" />
-                            </div>
-                             <div>
-                                <label className="block text-sm font-bold text-slate-700 mb-1">Profile Picture URL</label>
-                                <input type="text" value={profilePic} onChange={(e) => setProfilePic(e.target.value)} className="input-field" />
-                            </div>
-                            <div className="flex gap-4">
-                                <button type="submit" className="btn-primary">Save Changes</button>
-                                <button type="button" onClick={() => setIsEditing(false)} className="btn-secondary">Cancel</button>
-                            </div>
-                        </form>
-                    </div>
-                ) : (
-                    <div className="mt-6 pt-6 border-t border-slate-100">
-                        <div className="flex justify-between items-center">
-                            <h2 className="text-xl font-bold text-slate-900">About</h2>
-                            <button className="text-slate-400 hover:text-slate-600 transition-colors" onClick={() => setIsEditing(true)}>
+                {/* Right Column: Bio & Activities */}
+                <div className="lg:col-span-2 space-y-8">
+                    <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-8 border border-gray-100 dark:border-gray-700">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Professional Bio</h2>
+                            <button 
+                                onClick={() => setIsEditing(!isEditing)}
+                                className="p-2 text-gray-400 hover:text-indigo-600 transition-colors"
+                            >
                                 <Edit size={20} />
                             </button>
                         </div>
-                        <p className="text-slate-600 whitespace-pre-line">{userProfile.bio || 'No bio provided.'}</p>
-                        <div className="mt-4">
-                            <h3 className="text-lg font-bold text-slate-900 mb-2">Skills</h3>
-                            {skillsArray.length > 0 ? (
-                                <div className="flex flex-wrap gap-2">
-                                    {skillsArray.map(skill => (
-                                        <span key={skill} className="bg-primary-100 text-primary-700 text-xs font-bold px-3 py-1 rounded-full">{skill}</span>
-                                    ))}
-                                </div>
-                            ) : (
-                                <p className="text-slate-400 italic">No skills listed.</p>
-                            )}
-                        </div>
-                    </div>
-                )}
-            </div>
 
-            {/* User's Gigs Section */}
-            {userGigs && userGigs.length > 0 && (
-                <div className="space-y-4">
-                    <h2 className="text-2xl font-display font-bold text-slate-900">Gigs Posted</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {userGigs.map((gig) => (
-                            <div key={gig._id} className="card group hover:shadow-lg transition-shadow duration-300 flex flex-col"> {/* Changed Link to div */}
-                                <Link to={`/gigs/${gig._id}`} className="flex-grow"> {/* Link wraps content */}
-                                    <h3 className="font-bold text-lg text-slate-900 mb-2 truncate">{gig.title}</h3>
-                                    <p className="text-sm text-slate-500 mb-3 h-16 overflow-hidden line-clamp-3">{gig.description}</p>
-                                </Link>
-                                <div className="flex justify-between items-center mt-auto pt-3 border-t border-slate-100">
-                                    <div className="text-sm font-medium text-slate-700 flex items-center">
-                                        <IndianRupee size={16} className="mr-0.5 text-primary-500" /> ₹{gig.budget.toLocaleString()}
+                        {isEditing ? (
+                            <form onSubmit={handleUpdateProfile} className="space-y-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Display Name</label>
+                                        <input 
+                                            type="text" 
+                                            value={formData.name} 
+                                            onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                            className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                                        />
                                     </div>
-                                    <span className={clsx(
-                                        "text-xs font-bold px-2 py-0.5 rounded-full",
-                                        gig.status === 'open' ? "bg-green-100 text-green-700" :
-                                            gig.status === 'assigned' ? "bg-primary-100 text-primary-700" :
-                                                "bg-slate-100 text-slate-600"
-                                    )}>
-                                        {gig.status.toUpperCase()}
-                                    </span>
-                                    {/* Edit and Delete Buttons */}
-                                    <div className="flex items-center gap-2">
-                                        <button onClick={() => setEditingGigId(gig._id)} className="text-blue-500 hover:text-blue-700">
-                                            <Edit size={18} />
-                                        </button>
-                                        <button onClick={() => setConfirmDeleteId(gig._id)} className="text-red-500 hover:text-red-700">
-                                            <Trash2 size={18} />
-                                        </button>
+                                    <div>
+                                        <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Avatar URL</label>
+                                        <input 
+                                            type="text" 
+                                            value={formData.avatar} 
+                                            onChange={(e) => setFormData({...formData, avatar: e.target.value})}
+                                            className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                                        />
                                     </div>
                                 </div>
-                                {/* Delete Confirmation Modal/Overlay */}
-                                {confirmDeleteId === gig._id && (
-                                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                                        <div className="bg-white p-6 rounded-lg shadow-lg">
-                                            <h3 className="text-lg font-bold text-red-600 mb-4">Confirm Deletion</h3>
-                                            <p>Are you sure you want to delete this gig? This action cannot be undone.</p>
-                                            <div className="flex justify-end gap-4 mt-4">
-                                                <button onClick={() => setConfirmDeleteId(null)} className="btn-secondary">Cancel</button>
-                                                <button onClick={() => {
-                                                    dispatch(deleteGig(gig._id));
-                                                    // Optionally refresh gigs list or handle UI update after deletion
-                                                    // For now, just close confirmation and show toast via deleteGig thunk
-                                                    setConfirmDeleteId(null);
-                                                }} className="btn-danger">Delete Gig</button>
-                                            </div>
+                                <div>
+                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Bio</label>
+                                    <textarea 
+                                        rows="4"
+                                        value={formData.bio} 
+                                        onChange={(e) => setFormData({...formData, bio: e.target.value})}
+                                        className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                                    ></textarea>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Skills (Comma separated)</label>
+                                    <input 
+                                        type="text" 
+                                        value={formData.skills} 
+                                        onChange={(e) => setFormData({...formData, skills: e.target.value})}
+                                        className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none"
+                                    />
+                                </div>
+                                <div className="flex gap-4">
+                                    <button type="submit" className="px-6 py-2 bg-indigo-600 text-white rounded-lg font-bold hover:bg-indigo-700">Save Changes</button>
+                                    <button type="button" onClick={() => setIsEditing(false)} className="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-white rounded-lg font-bold">Cancel</button>
+                                </div>
+                            </form>
+                        ) : (
+                            <>
+                                <p className="text-gray-600 dark:text-gray-400 leading-relaxed mb-8">
+                                    {userProfile.bio || "No professional bio available yet. Click edit to add your story."}
+                                </p>
+                                <div>
+                                    <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-4">Core Skills</h3>
+                                    <div className="flex flex-wrap gap-2">
+                                        {skills.length > 0 ? skills.map(skill => (
+                                            <span key={skill} className="px-4 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl text-sm font-bold">
+                                                {skill}
+                                            </span>
+                                        )) : (
+                                            <p className="text-gray-500 text-sm italic">No skills listed yet.</p>
+                                        )}
+                                    </div>
+                                </div>
+                            </>
+                        )}
+                    </div>
+
+                    {/* Tabs for Gigs and Bids */}
+                    <div className="space-y-6">
+                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Active Management</h2>
+                        
+                        <div className="space-y-4">
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                <Briefcase size={20} className="text-indigo-600" /> My Posted Gigs
+                            </h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {userGigs?.length > 0 ? userGigs.map(gig => (
+                                    <div key={gig._id} className="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all">
+                                        <h4 className="font-bold text-gray-900 dark:text-white mb-2 truncate">{gig.title}</h4>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-indigo-600 font-bold flex items-center">
+                                                <IndianRupee size={14} /> {gig.budget}
+                                            </span>
+                                            <span className={`text-[10px] uppercase font-black px-2 py-1 rounded-md ${
+                                                gig.status === 'open' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+                                            }`}>
+                                                {gig.status}
+                                            </span>
+                                        </div>
+                                        <div className="mt-4 flex gap-2">
+                                            <button 
+                                                onClick={() => navigate(`/gigs/${gig._id}`)}
+                                                className="text-xs text-gray-500 hover:text-indigo-600 font-bold"
+                                            >
+                                                View Details
+                                            </button>
                                         </div>
                                     </div>
-                                )}
-                                {/* Edit Gig Modal/Overlay - Placeholder */}
-                                {editingGigId === gig._id && (
-                                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                                        <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
-                                            <h3 className="text-lg font-bold text-primary-600 mb-4">Edit Gig</h3>
-                                            {/* TODO: Add form for editing gig details */}
-                                            <p>Editing form for gig {gig._id} will go here.</p>
-                                            <div className="flex justify-end gap-4 mt-4">
-                                                <button onClick={() => setEditingGigId(null)} className="btn-secondary">Cancel</button>
-                                                {/* <button onClick={() => handleSaveGigEdit(gig._id)} className="btn-primary">Save Changes</button> */}
-                                            </div>
-                                        </div>
+                                )) : (
+                                    <div className="col-span-full py-10 text-center bg-gray-50 dark:bg-gray-800/50 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700">
+                                        <p className="text-gray-500">You haven't posted any gigs yet.</p>
                                     </div>
                                 )}
                             </div>
-                        ))}
-                    </div>
-                </div>
-            )}
+                        </div>
 
-            {/* User's Bids Section */}
-            {userBids && userBids.length > 0 && (
-                <div className="space-y-4">
-                    <h2 className="text-2xl font-display font-bold text-slate-900">Bids Submitted</h2>
-                    <div className="card p-6 bg-white border-0 shadow-lg">
-                        <ul className="space-y-4">
-                            {userBids.map((bid) => (
-                                <li key={bid._id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <span className="font-bold text-lg text-slate-900">₹{bid.price}</span>
-                                            <span className={clsx(
-                                                "text-xs font-bold px-2 py-0.5 rounded-full",
-                                                bid.status === 'hired' ? "bg-green-100 text-green-800" :
-                                                    bid.status === 'rejected' ? "bg-red-100 text-red-800" : "bg-slate-200 text-slate-700"
-                                            )}>
-                                                {bid.status.toUpperCase()}
-                                            </span>
+                        <div className="space-y-4">
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                                <Star size={20} className="text-yellow-500" /> My Active Bids
+                            </h3>
+                            <div className="space-y-4">
+                                {userBids?.length > 0 ? userBids.map(bid => (
+                                    <div key={bid._id} className="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col md:flex-row justify-between gap-4">
+                                        <div>
+                                            <h4 className="font-bold text-gray-900 dark:text-white mb-1">{bid.gigId?.title}</h4>
+                                            <p className="text-sm text-gray-500 mb-2 truncate max-w-md">{bid.message}</p>
+                                            <div className="flex items-center gap-4">
+                                                <span className="text-indigo-600 font-bold flex items-center text-sm">
+                                                    <IndianRupee size={14} /> {bid.price}
+                                                </span>
+                                                <span className={`text-[10px] uppercase font-black px-2 py-1 rounded-md ${
+                                                    bid.status === 'hired' ? 'bg-green-100 text-green-700' : 
+                                                    bid.status === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'
+                                                }`}>
+                                                    {bid.status}
+                                                </span>
+                                            </div>
                                         </div>
-                                        <div className="text-sm font-medium text-slate-700 mb-2">on Gig: {bid.gigId?.title || 'N/A'}</div>
-                                        <p className="text-slate-600 text-sm bg-white p-3 rounded-lg border border-slate-100 italic">"{bid.message}"</p>
-                                    </div>
-                                    {bid.status === 'pending' && (
-                                        <div className="flex items-center gap-2"> {/* Added div for button alignment */}
-                                            <button
-                                                onClick={() => setConfirmWithdrawId(bid._id)}
-                                                className="btn-secondary whitespace-nowrap"
+                                        {bid.status === 'pending' && (
+                                            <button 
+                                                onClick={async () => {
+                                                    if(window.confirm('Withdraw this bid?')) {
+                                                        try {
+                                                            await api.patch(`/bids/${bid._id}/withdraw`);
+                                                            toast.success('Bid withdrawn');
+                                                            dispatch(fetchUserBids(userInfo._id));
+                                                        } catch (err) {
+                                                            toast.error('Failed to withdraw');
+                                                        }
+                                                    }
+                                                }}
+                                                className="self-center px-4 py-2 text-sm text-red-500 font-bold hover:bg-red-50 rounded-lg transition-colors"
                                             >
-                                                Withdraw Bid
+                                                Withdraw
                                             </button>
-                                        </div>
-                                    )}
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                </div>
-            )}
-            {/* Bid Withdrawal Confirmation */}
-            {confirmWithdrawId && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white p-6 rounded-lg shadow-lg">
-                        <h3 className="text-lg font-bold text-red-600 mb-4">Confirm Withdrawal</h3>
-                        <p>Are you sure you want to withdraw this bid? This action cannot be undone.</p>
-                        <div className="flex justify-end gap-4 mt-4">
-                            <button onClick={() => setConfirmWithdrawId(null)} className="btn-secondary">Cancel</button>
-                            <button onClick={() => handleWithdrawBid(confirmWithdrawId)} className="btn-danger">Withdraw Bid</button>
+                                        )}
+                                    </div>
+                                )) : (
+                                    <div className="py-10 text-center bg-gray-50 dark:bg-gray-800/50 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700">
+                                        <p className="text-gray-500">No active bids.</p>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
-            )}
+            </div>
         </div>
     );
 };

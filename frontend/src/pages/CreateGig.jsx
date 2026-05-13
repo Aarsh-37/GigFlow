@@ -7,6 +7,7 @@ const CreateGig = () => {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [budget, setBudget] = useState('');
+    const [category, setCategory] = useState('');
     const [bidDeadline, setBidDeadline] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -17,7 +18,7 @@ const CreateGig = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            await api.post('/gigs', { title, description, budget, bidDeadline });
+            await api.post('/gigs', { title, description, budget: Number(budget), category, deadline: bidDeadline });
             navigate('/dashboard');
         } catch (err) {
             setError(err.response?.data?.message || err.message);
@@ -84,6 +85,22 @@ const CreateGig = () => {
                         </div>
                     </div>
 
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Category</label>
+                        <select
+                            required
+                            className="input-field"
+                            value={category}
+                            onChange={(e) => setCategory(e.target.value)}
+                        >
+                            <option value="">Select a category...</option>
+                            <option value="Design">Design</option>
+                            <option value="Development">Development</option>
+                            <option value="Writing">Writing</option>
+                            <option value="Marketing">Marketing</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
                     <div>
                         <label className="block text-sm font-medium text-slate-700 mb-1">Bid Deadline (Optional)</label>
                         <input

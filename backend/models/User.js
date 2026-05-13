@@ -30,15 +30,15 @@ const userSchema = new mongoose.Schema({
         type: [String],
         default: []
     },
-    profilePic: { // Added from remote
+    avatar: { 
         type: String,
         default: ''
     },
-    completedGigsCount: { // Added from remote
+    totalGigs: { 
         type: Number,
         default: 0
     },
-    averageRating: { // Added from remote
+    rating: { 
         type: Number,
         default: 0
     },

@@ -20,6 +20,7 @@ import configurePassport from './config/passportConfig.js';
 import logger from './config/logger.js'; // Import Winston logger
 import jwt from 'jsonwebtoken'; // Import JWT for verification
 import { parse } from 'cookie'; // Import parse for cookie handling
+import validateEnv from './config/envValidator.js';
 
 // Import Gig and Bid models for authorization check
 import Gig from './models/Gig.js';
@@ -36,23 +37,13 @@ import { Server } from 'socket.io';
 
 dotenv.config();
 
-// Check for required environment variables
-const requiredEnvVars = ['PORT', 'MONGO_URI', 'JWT_SECRET', 'NODE_ENV', 'FRONTEND_URL'];
-requiredEnvVars.forEach((key) => {
-  if (!process.env[key]) {
-    logger.error(`FATAL ERROR: Missing required environment variable: ${key}`);
-    process.exit(1);
-  }
-});
-
-// Check for JWT_SECRET (already added, but this ensures it's checked if PORT, MONGO_URI etc. are missing)
-if (!process.env.JWT_SECRET) {
-  logger.error('FATAL ERROR: JWT_SECRET environment variable is not set.');
-  process.exit(1); // Exit the process if JWT_SECRET is missing
-}
+// Validate environment variables
+validateEnv();
 
 // Connect to database
-connectDB();
+if (process.env.NODE_ENV !== 'test') {
+    connectDB();
+}
 
 configurePassport();
 
@@ -203,4 +194,9 @@ app.use(errorHandler);
 
 const port = process.env.PORT || 5000;
 
-httpServer.listen(port, () => logger.info(`Server started on port ${port}`)); // Use logger.info
+if (process.env.NODE_ENV !== 'test') {
+    httpServer.listen(port, () => logger.info(`Server started on port ${port}`));
+}
+
+export default app;
+export { io, httpServer };
