@@ -44,3 +44,8 @@ Thumbs.db
 # Optional: Ignore backend/frontend specific node_modules if you have a monorepo-like structure
 backend/node_modules/
 frontend/node_modules/
+
+ARCHITECTURE.md
+CONTRIBUTING.md
+FOLDER_STRUCTURE.md
+GEMINI.md
