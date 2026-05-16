@@ -23,7 +23,7 @@ const gigSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['open', 'assigned', 'in-progress', 'completed', 'closed'],
+        enum: ['open', 'assigned', 'in-progress', 'completed', 'closed', 'disputed'],
         default: 'open'
     },
     deadline: { // Renamed from bidDeadline to match audit
