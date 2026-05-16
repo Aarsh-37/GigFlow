@@ -47,7 +47,8 @@ const Navbar = () => {
     };
 
     const navLinks = [
-        { name: 'Explore', path: '/gigs', icon: <Search size={18} /> },
+        { name: 'Explore Gigs', path: '/gigs', icon: <Search size={18} /> },
+        { name: 'Post a Gig', path: '/gigs/create', icon: <PlusCircle size={18} /> },
         { name: 'Dashboard', path: '/dashboard', icon: <Briefcase size={18} /> },
     ];
 
