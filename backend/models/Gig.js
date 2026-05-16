@@ -55,6 +55,13 @@ const gigSchema = new mongoose.Schema({
     views: {
         type: Number,
         default: 0
+    },
+    isDeleted: {
+        type: Boolean,
+        default: false
+    },
+    deletedAt: {
+        type: Date
     }
 }, {
     timestamps: true
@@ -65,6 +72,7 @@ gigSchema.index({ status: 1 });
 gigSchema.index({ category: 1 });
 gigSchema.index({ tags: 1 });
 gigSchema.index({ deadline: 1 });
+gigSchema.index({ isDeleted: 1 });
 gigSchema.index({ title: 'text', description: 'text' });
 
 const Gig = mongoose.model('Gig', gigSchema);
