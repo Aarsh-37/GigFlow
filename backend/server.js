@@ -15,6 +15,7 @@ import dashboardRoutes from './routes/dashboardRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import chatRoutes from './routes/chatRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import disputeRoutes from './routes/disputeRoutes.js';
 import passport from 'passport';
 import configurePassport from './config/passportConfig.js';
 import logger from './config/logger.js'; // Import Winston logger
@@ -184,6 +185,7 @@ app.use('/api/v1/dashboard', dashboardRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
 app.use('/api/v1/chat', chatRoutes);
 app.use('/api/v1/admin', adminRoutes);
+app.use('/api/v1/disputes', disputeRoutes);
 
 app.get('/', (req, res) => {
     res.send('API is running...');
