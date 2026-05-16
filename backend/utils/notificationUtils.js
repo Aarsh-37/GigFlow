@@ -1,4 +1,5 @@
 import Notification from '../models/Notification.js';
+import logger from '../config/logger.js';
 
 const createNotification = async (io, { userId, message, type, link }) => {
     try {
@@ -19,7 +20,7 @@ const createNotification = async (io, { userId, message, type, link }) => {
 
         return notification;
     } catch (error) {
-        console.error('Error creating notification:', error);
+        logger.error(`Error creating notification: ${error.message}`);
     }
 };
 

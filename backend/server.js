@@ -22,6 +22,8 @@ import logger from './config/logger.js'; // Import Winston logger
 import jwt from 'jsonwebtoken'; // Import JWT for verification
 import { parse } from 'cookie'; // Import parse for cookie handling
 import validateEnv from './config/envValidator.js';
+import './config/bullmq.js'; 
+import './config/cloudinary.js';
 
 // Import Gig and Bid models for authorization check
 import Gig from './models/Gig.js';
@@ -61,15 +63,15 @@ const globalLimiter = rateLimit({
     max: process.env.NODE_ENV === 'development' ? 10000 : 100, // Limit each IP to 100 requests per windowMs
     message: 'Too many requests from this IP, please try again after 15 minutes'
 });
-app.use('/api', globalLimiter);
+app.use('/api/v1', globalLimiter);
 
 // Strict Rate Limiting for Auth
 const authLimiter = rateLimit({
     windowMs: 60 * 60 * 1000, // 1 hour
-    max: process.env.NODE_ENV === 'development' ? 1000 : 10, // Limit each IP to 10 login/register attempts per hour
+    max: process.env.NODE_ENV === 'development' ? 1000 : 10, // Limit each IP to 1 login/register attempts per hour
     message: 'Too many authentication attempts, please try again after an hour'
 });
-app.use('/api/auth', authLimiter);
+app.use('/api/v1/auth', authLimiter);
 
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
