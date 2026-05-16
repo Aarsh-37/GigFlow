@@ -64,20 +64,31 @@ const Dashboard = () => {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
                 <div>
                     <h1 className="text-4xl font-black text-gray-900 dark:text-white tracking-tight">
-                        Welcome back, <span className="text-indigo-600">{userInfo.name.split(' ')[0]}!</span>
+                        Welcome back, <span className="text-brand-600">{userInfo.name.split(' ')[0]}!</span>
                     </h1>
                     <p className="text-gray-500 dark:text-gray-400 mt-2 text-lg">Here's what's happening with your projects today.</p>
                 </div>
-                <div className="flex bg-gray-100 dark:bg-gray-800 p-1.5 rounded-2xl border border-gray-200 dark:border-gray-700">
+                <div className="flex bg-gray-100/50 dark:bg-gray-800/50 backdrop-blur-sm p-1.5 rounded-2xl border border-gray-200 dark:border-gray-800 relative">
+                    <motion.div
+                        className="absolute bg-white dark:bg-gray-700 rounded-xl shadow-lg"
+                        initial={false}
+                        animate={{
+                            x: activeTab === 'client' ? 0 : '100%',
+                            width: '50%',
+                            height: 'calc(100% - 12px)',
+                            top: '6px'
+                        }}
+                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    />
                     <button
                         onClick={() => setActiveTab('client')}
-                        className={`px-6 py-2.5 rounded-xl text-sm font-black transition-all ${activeTab === 'client' ? 'bg-white dark:bg-gray-700 text-indigo-600 shadow-xl' : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'}`}
+                        className={`px-8 py-2.5 rounded-xl text-sm font-black transition-colors relative z-10 w-32 ${activeTab === 'client' ? 'text-brand-600' : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'}`}
                     >
                         Hiring
                     </button>
                     <button
                         onClick={() => setActiveTab('freelancer')}
-                        className={`px-6 py-2.5 rounded-xl text-sm font-black transition-all ${activeTab === 'freelancer' ? 'bg-white dark:bg-gray-700 text-indigo-600 shadow-xl' : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'}`}
+                        className={`px-8 py-2.5 rounded-xl text-sm font-black transition-colors relative z-10 w-32 ${activeTab === 'freelancer' ? 'text-brand-600' : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'}`}
                     >
                         Working
                     </button>
@@ -88,7 +99,7 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {activeTab === 'client' ? (
                     <>
-                        <StatCard title="Posted Gigs" value={clientGigs.length} icon={FileText} color="bg-indigo-600" />
+                        <StatCard title="Posted Gigs" value={clientGigs.length} icon={FileText} color="bg-brand-600" />
                         <StatCard title="Active Hires" value={stats?.client?.activeHires?.length || 0} icon={CheckCircle} color="bg-blue-500" />
                         <StatCard title="Total Spent" value={`₹${(stats?.client?.totalSpent || 0).toLocaleString()}`} icon={Wallet} color="bg-purple-600" />
                         <StatCard title="Wallet Balance" value={`₹${(stats?.user?.balance || 0).toLocaleString()}`} icon={IndianRupee} color="bg-emerald-500" />
@@ -108,11 +119,11 @@ const Dashboard = () => {
                 {/* Left: Main Activity List */}
                 <div className="lg:col-span-2 space-y-6">
                     <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-                        <div className="p-8 border-b border-gray-50 dark:border-gray-700 flex justify-between items-center">
+                        <div className="p-8 border-b border-gray-50 dark:border-gray-800/50 flex justify-between items-center">
                             <h2 className="text-2xl font-black text-gray-900 dark:text-white">
                                 {activeTab === 'client' ? 'Recent Gigs' : 'Recent Applications'}
                             </h2>
-                            <Link to={activeTab === 'client' ? "/gigs/create" : "/gigs"} className="text-indigo-600 font-bold text-sm hover:underline">
+                            <Link to={activeTab === 'client' ? "/gigs/create" : "/gigs"} className="text-brand-600 font-bold text-sm hover:underline">
                                 {activeTab === 'client' ? '+ Post New' : 'Browse More'}
                             </Link>
                         </div>
