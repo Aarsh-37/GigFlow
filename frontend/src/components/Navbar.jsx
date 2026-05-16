@@ -53,20 +53,20 @@ const Navbar = () => {
 
     return (
         <>
-            <nav className={`sticky top-0 z-[90] transition-all duration-300 ${
+            <nav className={`sticky top-4 z-[90] transition-all duration-500 mx-4 sm:mx-6 lg:mx-8 rounded-2xl ${
                 scrolled 
-                ? 'bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-lg py-2' 
-                : 'bg-white dark:bg-gray-900 py-4'
-            } border-b border-gray-100 dark:border-gray-800`}>
+                ? 'glass py-2 shadow-2xl translate-y-2' 
+                : 'bg-white/50 dark:bg-dark-bg/50 py-4 border border-transparent'
+            }`}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center">
                         {/* Logo */}
                         <Link to="/" className="flex items-center gap-2 group">
-                            <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30 group-hover:rotate-12 transition-transform">
+                            <div className="w-10 h-10 bg-brand-600 rounded-xl flex items-center justify-center shadow-lg shadow-brand-500/30 group-hover:rotate-12 transition-transform duration-500">
                                 <Zap className="text-white fill-current" size={24} />
                             </div>
                             <span className="text-2xl font-black text-gray-900 dark:text-white tracking-tighter">
-                                Gig<span className="text-indigo-600">Flow</span>
+                                Gig<span className="text-brand-600">Flow</span>
                             </span>
                         </Link>
 
@@ -77,13 +77,14 @@ const Navbar = () => {
                                     <Link 
                                         key={link.name} 
                                         to={link.path}
-                                        className={`text-sm font-bold transition-colors flex items-center gap-2 ${
+                                        className={`text-sm font-bold transition-all relative py-1 group ${
                                             location.pathname === link.path 
-                                            ? 'text-indigo-600' 
+                                            ? 'text-brand-600' 
                                             : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                                         }`}
                                     >
                                         {link.name}
+                                        <span className={`absolute bottom-0 left-0 w-full h-0.5 bg-brand-600 transition-transform duration-300 origin-left ${location.pathname === link.path ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`}></span>
                                     </Link>
                                 ))}
                             </div>
@@ -94,9 +95,9 @@ const Navbar = () => {
                                 {/* Theme Toggle */}
                                 <button 
                                     onClick={() => dispatch(toggleTheme())}
-                                    className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                    className="p-2.5 rounded-xl glass hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                                 >
-                                    {mode === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+                                    {mode === 'light' ? <Moon size={20} className="text-gray-600" /> : <Sun size={20} className="text-yellow-400" />}
                                 </button>
 
                                 {userInfo ? (
@@ -104,9 +105,9 @@ const Navbar = () => {
                                         {/* Notifications */}
                                         <button 
                                             onClick={() => setIsNotificationOpen(true)}
-                                            className="p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors relative"
+                                            className="p-2.5 rounded-xl glass hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors relative"
                                         >
-                                            <Bell size={20} />
+                                            <Bell size={20} className="text-gray-600 dark:text-gray-400" />
                                             {unreadCount > 0 && (
                                                 <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 border-2 border-white dark:border-gray-800 rounded-full"></span>
                                             )}
@@ -116,9 +117,9 @@ const Navbar = () => {
                                         <div className="relative">
                                             <button 
                                                 onClick={() => setIsProfileOpen(!isProfileOpen)}
-                                                className="flex items-center gap-3 p-1 pr-3 rounded-full bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+                                                className="flex items-center gap-3 p-1 pr-3 rounded-full glass border border-gray-100 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all shadow-sm"
                                             >
-                                                <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold overflow-hidden">
+                                                <div className="w-8 h-8 rounded-full bg-brand-600 flex items-center justify-center text-white font-bold overflow-hidden shadow-inner">
                                                     {userInfo.avatar ? (
                                                         <img src={userInfo.avatar} alt="" className="w-full h-full object-cover" />
                                                     ) : (
@@ -126,7 +127,7 @@ const Navbar = () => {
                                                     )}
                                                 </div>
                                                 <span className="text-sm font-bold text-gray-700 dark:text-gray-300">{userInfo.name?.split(' ')[0] || 'User'}</span>
-                                                <ChevronDown size={14} className={`text-gray-400 transition-transform ${isProfileOpen ? 'rotate-180' : ''}`} />
+                                                <ChevronDown size={14} className={`text-gray-400 transition-transform duration-300 ${isProfileOpen ? 'rotate-180' : ''}`} />
                                             </button>
 
                                             <AnimatePresence>
