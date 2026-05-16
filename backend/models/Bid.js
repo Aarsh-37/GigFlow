@@ -28,6 +28,10 @@ const bidSchema = new mongoose.Schema({
     timestamps: true
 });
 
+bidSchema.index({ gigId: 1 });
+bidSchema.index({ freelancerId: 1 });
+bidSchema.index({ status: 1 });
+
 const Bid = mongoose.model('Bid', bidSchema);
 
 export default Bid;
