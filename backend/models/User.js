@@ -50,6 +50,13 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: ['client', 'freelancer', 'both', 'admin'], // Expanded roles
         default: 'both' // Default to 'both' for new users
+    },
+    mfaSecret: {
+        type: String
+    },
+    isMfaEnabled: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true
