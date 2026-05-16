@@ -2,6 +2,7 @@ import asyncHandler from 'express-async-handler';
 import Gig from '../models/Gig.js';
 import Bid from '../models/Bid.js';
 import User from '../models/User.js';
+import sendResponse from '../utils/sendResponse.js';
 
 // @desc    Get dashboard stats
 // @route   GET /api/dashboard
@@ -41,4 +42,35 @@ const getDashboardStats = asyncHandler(async (req, res) => {
     });
 });
 
-export { getDashboardStats };
+// @desc    Get advanced analytics for the dashboard
+// @route   GET /api/v1/dashboard/analytics
+// @access  Private
+const getAnalytics = async (req, res) => {
+    try {
+        const userId = req.user._id;
+
+        // Example: Aggregating earnings over time for a freelancer
+        const earnings = await Bid.aggregate([
+            { $match: { freelancerId: userId, status: 'hired' } },
+            { $group: {
+                _id: { $dateToString: { format: "%Y-%m", date: "$updatedAt" } },
+                total: { $sum: "$price" }
+            }},
+            { $sort: { "_id": 1 } }
+        ]);
+
+        // Example: Bid success rate
+        const totalBids = await Bid.countDocuments({ freelancerId: userId });
+        const hiredBids = await Bid.countDocuments({ freelancerId: userId, status: 'hired' });
+        const successRate = totalBids > 0 ? (hiredBids / totalBids) * 100 : 0;
+
+        sendResponse(res, 200, true, 'Analytics fetched successfully', {
+            earnings,
+            successRate
+        });
+    } catch (error) {
+        sendResponse(res, 500, false, error.message);
+    }
+};
+
+export { getDashboardStats, getAnalytics };
