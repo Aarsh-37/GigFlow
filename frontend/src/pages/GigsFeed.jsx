@@ -257,7 +257,7 @@ const GigsFeed = () => {
                                 onClick={() => handlePageChange(i + 1)}
                                 className={`w-10 h-10 rounded-xl font-bold transition-all ${
                                     currentPage === i + 1
-                                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30'
+                                    ? 'bg-brand-600 text-white shadow-lg shadow-brand-500/30'
                                     : 'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700'
                                 }`}
                             >
