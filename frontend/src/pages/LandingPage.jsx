@@ -15,80 +15,105 @@ const LandingPage = () => {
     ];
 
     return (
-        <div className="bg-white dark:bg-gray-900 transition-colors duration-300">
+        <div className="bg-white dark:bg-dark-bg transition-colors duration-300 relative overflow-hidden">
+            {/* 3D-like Decorative Blobs */}
+            <div className="fixed inset-0 pointer-events-none z-0">
+                <div className="absolute top-[10%] right-[-5%] w-[500px] h-[500px] bg-brand-500/10 blur-[120px] rounded-full animate-blob"></div>
+                <div className="absolute bottom-[10%] left-[-5%] w-[400px] h-[400px] bg-indigo-500/10 blur-[120px] rounded-full animate-blob animation-delay-2000"></div>
+            </div>
+
             {/* Hero Section */}
-            <section className="relative pt-20 pb-32 overflow-hidden">
-                <div className="container mx-auto px-6 relative z-10">
-                    <div className="flex flex-col lg:flex-row items-center">
+            <section className="relative pt-24 pb-32 overflow-hidden z-10">
+                <div className="container mx-auto px-6 relative">
+                    <div className="flex flex-col lg:flex-row items-center gap-16">
                         <div className="lg:w-1/2 text-center lg:text-left">
                             <motion.div
-                                initial={{ opacity: 0, y: 20 }}
+                                initial={{ opacity: 0, y: 30 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.5 }}
+                                transition={{ duration: 0.6, ease: "easeOut" }}
                             >
-                                <span className="inline-block py-1 px-3 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-sm font-bold tracking-widest uppercase mb-4">
+                                <span className="inline-block py-1.5 px-4 rounded-full glass text-brand-600 dark:text-brand-400 text-sm font-black tracking-[0.2em] uppercase mb-6 border border-brand-100/50">
                                     The Future of Freelancing
                                 </span>
-                                <h1 className="text-5xl lg:text-7xl font-extrabold text-gray-900 dark:text-white leading-tight mb-6">
-                                    Connect with <span className="text-indigo-600">Expert</span> Talent Instantly.
+                                <h1 className="text-6xl lg:text-8xl font-black text-gray-900 dark:text-white leading-[1.1] mb-8 tracking-tighter">
+                                    Connect with <span className="text-brand-600 relative inline-block">
+                                        Expert
+                                        <svg className="absolute -bottom-2 left-0 w-full h-3 text-brand-200 dark:text-brand-900/50 -z-10" viewBox="0 0 100 10" preserveAspectRatio="none">
+                                            <path d="M0 5 Q 25 0 50 5 T 100 5" stroke="currentColor" strokeWidth="8" fill="transparent" />
+                                        </svg>
+                                    </span> Talent.
                                 </h1>
-                                <p className="text-xl text-gray-600 dark:text-gray-300 mb-10 lg:pr-20">
+                                <p className="text-xl text-gray-600 dark:text-gray-400 mb-12 lg:pr-20 font-medium leading-relaxed">
                                     GigFlow is the premium marketplace where innovation meets expertise. Find top-tier freelancers or discover your next big project today.
                                 </p>
-                                <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                                <div className="flex flex-col sm:flex-row gap-6 justify-center lg:justify-start">
                                     <Link
                                         to={userInfo ? "/dashboard" : "/register"}
-                                        className="px-8 py-4 bg-indigo-600 text-white rounded-xl font-bold text-lg hover:bg-indigo-700 transition-all shadow-lg hover:shadow-indigo-500/25 flex items-center justify-center gap-2"
+                                        className="px-10 py-5 bg-brand-600 text-white rounded-2xl font-black text-lg hover:bg-brand-700 transition-all shadow-2xl shadow-brand-500/30 flex items-center justify-center gap-3 group"
                                     >
-                                        Get Started <ArrowRight size={20} />
+                                        Get Started <ArrowRight size={22} className="group-hover:translate-x-1 transition-transform" />
                                     </Link>
                                     <Link
                                         to="/gigs"
-                                        className="px-8 py-4 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-xl font-bold text-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-sm flex items-center justify-center gap-2"
+                                        className="px-10 py-5 glass text-gray-900 dark:text-white rounded-2xl font-black text-lg hover:bg-gray-50/50 dark:hover:bg-gray-800/50 transition-all shadow-sm flex items-center justify-center gap-3"
                                     >
-                                        Browse Gigs <Search size={20} />
+                                        Browse Gigs <Search size={22} />
                                     </Link>
                                 </div>
                             </motion.div>
                         </div>
-                        <div className="lg:w-1/2 mt-16 lg:mt-0 relative">
+                        
+                        <div className="lg:w-1/2 relative">
                             <motion.div
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ duration: 0.8, delay: 0.2 }}
+                                initial={{ opacity: 0, scale: 0.9, rotate: -2 }}
+                                animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                                transition={{ duration: 1, ease: "easeOut" }}
                                 className="relative"
                             >
-                                <div className="absolute top-0 -left-4 w-72 h-72 bg-purple-300 dark:bg-purple-900/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
-                                <div className="absolute top-0 -right-4 w-72 h-72 bg-yellow-300 dark:bg-yellow-900/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
-                                <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-300 dark:bg-pink-900/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
-                                <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-4 border border-gray-100 dark:border-gray-700">
-                                    <img
-                                        src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                                        alt="Team working"
-                                        className="rounded-xl shadow-inner w-full h-auto"
-                                    />
-                                    <div className="absolute -bottom-6 -left-6 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 flex items-center gap-4">
-                                        <div className="bg-green-100 dark:bg-green-900/30 p-2 rounded-lg">
-                                            <CheckCircle2 className="text-green-600 dark:text-green-400" />
+                                {/* 3D Decorative Cards */}
+                                <motion.div 
+                                    animate={{ y: [0, -15, 0] }}
+                                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                                    className="absolute -top-12 -right-12 glass p-6 rounded-3xl shadow-2xl z-20 border border-white/40 hidden md:block"
+                                >
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-2xl flex items-center justify-center text-green-600">
+                                            <CheckCircle2 size={24} />
                                         </div>
                                         <div>
-                                            <p className="text-sm font-bold text-gray-900 dark:text-white">Secure Payments</p>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400">Escrow protected</p>
+                                            <p className="text-sm font-black text-gray-900 dark:text-white">Secure Payments</p>
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Escrow protected</p>
                                         </div>
                                     </div>
-                                    <div className="absolute -top-6 -right-6 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 flex items-center gap-4">
-                                        <div className="flex -space-x-2">
+                                </motion.div>
+
+                                <motion.div 
+                                    animate={{ y: [0, 15, 0] }}
+                                    transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                                    className="absolute -bottom-12 -left-12 glass p-6 rounded-3xl shadow-2xl z-20 border border-white/40 hidden md:block"
+                                >
+                                    <div className="flex items-center gap-4">
+                                        <div className="flex -space-x-3">
                                             {[1, 2, 3].map((i) => (
-                                                <div key={i} className="w-8 h-8 rounded-full border-2 border-white dark:border-gray-800 bg-gray-200 overflow-hidden">
-                                                    <img src={`https://i.pravatar.cc/100?img=${i + 10}`} alt="User" />
+                                                <div key={i} className="w-10 h-10 rounded-full border-2 border-white dark:border-gray-800 bg-gray-200 overflow-hidden shadow-sm">
+                                                    <img src={`https://i.pravatar.cc/100?img=${i + 20}`} alt="User" />
                                                 </div>
                                             ))}
                                         </div>
                                         <div>
-                                            <p className="text-sm font-bold text-gray-900 dark:text-white">10k+ Talent</p>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400">Vetted professionals</p>
+                                            <p className="text-sm font-black text-gray-900 dark:text-white">10k+ Talent</p>
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Vetted professionals</p>
                                         </div>
                                     </div>
+                                </motion.div>
+
+                                <div className="relative bg-white dark:bg-dark-card rounded-[40px] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.25)] p-4 border border-white/20 overflow-hidden group">
+                                    <img
+                                        src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80"
+                                        alt="Team working"
+                                        className="rounded-[32px] w-full h-auto grayscale-[20%] group-hover:grayscale-0 transition-all duration-700"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                                 </div>
                             </motion.div>
                         </div>
@@ -97,11 +122,11 @@ const LandingPage = () => {
             </section>
 
             {/* Popular Categories */}
-            <section className="py-24 bg-gray-50 dark:bg-gray-800/50">
+            <section className="py-32 relative z-10">
                 <div className="container mx-auto px-6">
-                    <div className="text-center mb-16">
-                        <h2 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Browse Top Categories</h2>
-                        <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                    <div className="text-center mb-20">
+                        <h2 className="text-4xl lg:text-5xl font-black text-gray-900 dark:text-white mb-6 tracking-tight">Browse Top Categories</h2>
+                        <p className="text-xl text-gray-500 dark:text-gray-400 max-w-2xl mx-auto font-medium">
                             Explore specialized talent across various industries and find the perfect match for your project.
                         </p>
                     </div>
@@ -109,14 +134,18 @@ const LandingPage = () => {
                         {categories.map((cat, index) => (
                             <motion.div
                                 key={cat.name}
-                                whileHover={{ y: -10 }}
-                                className="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-sm hover:shadow-xl transition-all border border-gray-100 dark:border-gray-700 group"
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                transition={{ delay: index * 0.1 }}
+                                viewport={{ once: true }}
+                                whileHover={{ y: -12, scale: 1.02 }}
+                                className="glass p-10 rounded-[32px] shadow-sm hover:shadow-2xl hover:shadow-brand-500/10 transition-all duration-500 group border border-white/20"
                             >
-                                <div className="w-14 h-14 bg-gray-50 dark:bg-gray-700 rounded-xl flex items-center justify-center mb-6 group-hover:bg-indigo-600 transition-colors">
-                                    {React.cloneElement(cat.icon, { size: 28, className: "group-hover:text-white transition-colors" })}
+                                <div className="w-16 h-16 bg-brand-50 dark:bg-brand-900/30 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-brand-600 transition-all duration-500 group-hover:rotate-6">
+                                    {React.cloneElement(cat.icon, { size: 32, className: "group-hover:text-white transition-colors" })}
                                 </div>
-                                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{cat.name}</h3>
-                                <p className="text-gray-500 dark:text-gray-400">{cat.count}</p>
+                                <h3 className="text-2xl font-black text-gray-900 dark:text-white mb-3 tracking-tight">{cat.name}</h3>
+                                <p className="text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest text-xs">{cat.count}</p>
                             </motion.div>
                         ))}
                     </div>
