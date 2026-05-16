@@ -6,25 +6,26 @@ import { generateInvoice } from '../services/invoiceService.js';
 
 dotenv.config();
 
-const connection = new IORedis(process.env.REDIS_URL || 'redis://127.0.0.1:6379', {
-  maxRetriesPerRequest: null,
-});
+const connection = process.env.NODE_ENV !== 'test' 
+  ? new IORedis(process.env.REDIS_URL || 'redis://127.0.0.1:6379', { maxRetriesPerRequest: null })
+  : null;
 
-const notificationQueue = new Queue('notifications', { connection });
+const notificationQueue = process.env.NODE_ENV !== 'test' ? new Queue('notifications', { connection }) : null;
 
-const worker = new Worker('notifications', async (job) => {
+const worker = process.env.NODE_ENV !== 'test' ? new Worker('notifications', async (job) => {
   logger.info(`Processing background job ${job.id}: ${job.name}`);
   
   if (job.name === 'generate_invoice') {
     await generateInvoice(job.data);
   }
 
-  // In a real scenario, this would send an email or push notification
   logger.info(`Completed background job ${job.id}`);
-}, { connection });
+}, { connection }) : null;
 
-worker.on('failed', (job, err) => {
-  logger.error(`Job ${job.id} failed: ${err.message}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+    worker.on('failed', (job, err) => {
+      logger.error(`Job ${job.id} failed: ${err.message}`);
+    });
+}
 
 export { notificationQueue };
