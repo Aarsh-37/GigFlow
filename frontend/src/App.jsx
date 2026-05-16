@@ -82,7 +82,7 @@ function App() {
       {/* Mesh Gradient Background */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-brand-500/10 blur-[120px] animate-blob"></div>
-        <div className="absolute top-[10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-500/10 blur-[120px] animate-blob animation-delay-2000"></div>
+        <div className="absolute top-[10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-brand-500/10 blur-[120px] animate-blob animation-delay-2000"></div>
         <div className="absolute bottom-[-10%] left-[20%] w-[40%] h-[40%] rounded-full bg-teal-500/10 blur-[120px] animate-blob animation-delay-4000"></div>
       </div>
 
