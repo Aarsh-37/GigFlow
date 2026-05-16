@@ -62,7 +62,7 @@ const Profile = () => {
                 ...formData,
                 skills: formData.skills.split(',').map(s => s.trim()).filter(Boolean)
             };
-            const { data } = await api.put('/auth/me', updatedData);
+            const { data } = await api.patch('/users/profile', updatedData);
             dispatch(setCredentials(data));
             toast.success('Profile updated successfully');
             setIsEditing(false);
