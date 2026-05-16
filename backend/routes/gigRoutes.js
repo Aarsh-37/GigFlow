@@ -7,7 +7,8 @@ import {
     deleteGig,
     startGig,
     completeGig,
-    closeGig
+    closeGig,
+    getRecommendations
 } from '../controllers/gigController.js';
 import { protect } from '../middleware/authMiddleware.js';
 import { isGigOwner } from '../middleware/checkOwnership.js';
@@ -19,6 +20,8 @@ import { createGigSchema, updateGigSchema } from '../validations/gigSchema.js';
 const router = express.Router();
 
 // Routes for /api/gigs
+router.get('/recommendations', protect, getRecommendations);
+
 router.route('/')
     .get(getGigs)
     .post(protect, validate(createGigSchema), createGig);

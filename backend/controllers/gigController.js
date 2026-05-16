@@ -170,4 +170,35 @@ const closeGig = asyncHandler(async (req, res) => {
     sendResponse(res, 200, true, 'Gig closed and payment processed successfully', updatedGig);
 });
 
-export { getGigs, getGigById, createGig, updateGig, deleteGig, startGig, completeGig, closeGig };
+// @desc    Get recommended gigs for a freelancer
+// @route   GET /api/v1/gigs/recommendations
+// @access  Private
+const getRecommendations = asyncHandler(async (req, res) => {
+    try {
+        const userSkills = req.user.skills || [];
+        
+        if (userSkills.length === 0) {
+            // If no skills, return latest open gigs
+            const gigs = await Gig.find({ status: 'open', isDeleted: false }).sort({ createdAt: -1 }).limit(10);
+            return sendResponse(res, 200, true, 'Latest gigs', gigs);
+        }
+
+        // Simple matchmaking: Find gigs where tags intersect with user skills
+        const recommendedGigs = await Gig.find({
+            status: 'open',
+            isDeleted: false,
+            $or: [
+                { tags: { $in: userSkills } },
+                { category: { $in: userSkills } }
+            ]
+        })
+        .sort({ createdAt: -1 })
+        .limit(20);
+
+        sendResponse(res, 200, true, 'Recommended gigs', recommendedGigs);
+    } catch (error) {
+        sendResponse(res, 500, false, error.message);
+    }
+});
+
+export { getGigs, getGigById, createGig, updateGig, deleteGig, startGig, completeGig, closeGig, getRecommendations };
