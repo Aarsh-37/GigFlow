@@ -2,6 +2,7 @@ import { Queue, Worker } from 'bullmq';
 import IORedis from 'ioredis';
 import dotenv from 'dotenv';
 import logger from './logger.js';
+import { generateInvoice } from '../services/invoiceService.js';
 
 dotenv.config();
 
@@ -13,8 +14,12 @@ const notificationQueue = new Queue('notifications', { connection });
 
 const worker = new Worker('notifications', async (job) => {
   logger.info(`Processing background job ${job.id}: ${job.name}`);
+  
+  if (job.name === 'generate_invoice') {
+    await generateInvoice(job.data);
+  }
+
   // In a real scenario, this would send an email or push notification
-  // Example: await sendEmail(job.data.to, job.data.subject, job.data.body);
   logger.info(`Completed background job ${job.id}`);
 }, { connection });
 
