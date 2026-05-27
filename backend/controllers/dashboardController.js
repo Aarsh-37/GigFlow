@@ -1,42 +1,66 @@
 import asyncHandler from 'express-async-handler';
 import Gig from '../models/Gig.js';
-import Bid from '../models/Bid.js';
+import Application from '../models/Application.js';
 import User from '../models/User.js';
 import sendResponse from '../utils/sendResponse.js';
+import { APPLICATION_STATUS } from '../utils/constants.js';
 
 // @desc    Get dashboard stats
-// @route   GET /api/dashboard
+// @route   GET /api/v1/dashboard
 // @access  Private
 const getDashboardStats = asyncHandler(async (req, res) => {
-    // 1. Client Stats
-    const postedGigs = await Gig.find({ ownerId: req.user._id }).sort({ createdAt: -1 });
+    const userId = req.user._id;
 
-    // 2. Freelancer Stats
-    const appliedBids = await Bid.find({ freelancerId: req.user._id })
+    // 1. Hirer Stats
+    const postedGigs = await Gig.find({ ownerId: userId }).sort({ createdAt: -1 });
+    
+    // Calculate total spent (completed gigs)
+    const completedGigs = postedGigs.filter(gig => gig.status === 'completed');
+    const totalSpent = completedGigs.reduce((sum, gig) => sum + gig.budget, 0);
+
+    // Active Hires (Gigs assigned/in-progress for Hirer)
+    // We should also find the applications that were hired
+    const activeInternsData = await Application.find({
+        gigId: { $in: postedGigs.map(g => g._id) },
+        status: APPLICATION_STATUS.HIRED
+    }).populate('internId', 'name email avatar');
+
+    // 2. Intern Stats
+    const applications = await Application.find({ internId: userId })
         .populate('gigId', 'title status ownerId budget')
         .sort({ createdAt: -1 });
 
-    // 3. Current Hires (Active work for Client)
-    const activeHires = await Gig.find({
-        ownerId: req.user._id,
-        status: { $in: ['assigned', 'in-progress', 'completed'] }
-    }).populate('ownerId', 'name email');
+    // Calculate total earned (completed gigs where intern was hired)
+    const totalEarned = applications
+        .filter(app => app.status === APPLICATION_STATUS.HIRED && app.gigId?.status === 'completed')
+        .reduce((sum, app) => sum + (app.gigId?.budget || 0), 0);
 
-    // 4. Active Work for Freelancer
-    const hiredBids = appliedBids.filter(bid => bid.status === 'hired');
+    // Successful Applications (Active work for Intern)
+    const activeInternships = applications.filter(app => 
+        app.status === APPLICATION_STATUS.HIRED && 
+        ['assigned', 'in-progress'].includes(app.gigId?.status)
+    );
 
-    res.json({
-        client: {
+    sendResponse(res, 200, true, 'Dashboard stats fetched successfully', {
+        hirer: {
             postedGigs,
-            activeHires
+            activeInterns: activeInternsData.map(app => ({
+                _id: app._id,
+                gigId: app.gigId,
+                internName: app.internId?.name,
+                internAvatar: app.internId?.avatar,
+                status: app.status
+            })),
+            totalSpent
         },
-        freelancer: {
-            appliedBids,
-            activeWork: hiredBids
+        intern: {
+            applications,
+            activeInternships,
+            totalEarned
         },
         user: {
-            completedGigsCount: req.user.completedGigsCount,
-            averageRating: req.user.averageRating,
+            totalGigs: req.user.totalGigs,
+            rating: req.user.rating,
             balance: req.user.balance
         }
     });
@@ -45,32 +69,18 @@ const getDashboardStats = asyncHandler(async (req, res) => {
 // @desc    Get advanced analytics for the dashboard
 // @route   GET /api/v1/dashboard/analytics
 // @access  Private
-const getAnalytics = async (req, res) => {
-    try {
-        const userId = req.user._id;
+const getAnalytics = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
 
-        // Example: Aggregating earnings over time for a freelancer
-        const earnings = await Bid.aggregate([
-            { $match: { freelancerId: userId, status: 'hired' } },
-            { $group: {
-                _id: { $dateToString: { format: "%Y-%m", date: "$updatedAt" } },
-                total: { $sum: "$price" }
-            }},
-            { $sort: { "_id": 1 } }
-        ]);
+    const totalApplications = await Application.countDocuments({ internId: userId });
+    const hiredApplications = await Application.countDocuments({ internId: userId, status: APPLICATION_STATUS.HIRED });
+    const successRate = totalApplications > 0 ? (hiredApplications / totalApplications) * 100 : 0;
 
-        // Example: Bid success rate
-        const totalBids = await Bid.countDocuments({ freelancerId: userId });
-        const hiredBids = await Bid.countDocuments({ freelancerId: userId, status: 'hired' });
-        const successRate = totalBids > 0 ? (hiredBids / totalBids) * 100 : 0;
-
-        sendResponse(res, 200, true, 'Analytics fetched successfully', {
-            earnings,
-            successRate
-        });
-    } catch (error) {
-        sendResponse(res, 500, false, error.message);
-    }
-};
+    sendResponse(res, 200, true, 'Analytics fetched successfully', {
+        successRate,
+        totalApplications,
+        hiredApplications
+    });
+});
 
 export { getDashboardStats, getAnalytics };

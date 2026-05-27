@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import morgan from 'morgan';
 import connectDB from './config/db.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 import helmet from 'helmet';
@@ -54,6 +55,12 @@ if (process.env.NODE_ENV !== 'test') {
 configurePassport();
 
 const app = express();
+
+// Request logging
+if (process.env.NODE_ENV === 'development') {
+    app.use(morgan('dev'));
+}
+
 // Trust proxy is required for secure cookies on Render/Heroku
 app.set('trust proxy', 1);
 
