@@ -29,8 +29,8 @@ const Login = () => {
         setError(null);
         try {
             const { data } = await api.post('/auth/login', { email, password });
-            dispatch(setCredentials(data));
-            // Redirect based on role if needed, or just home
+            dispatch(setCredentials(data.data));
+            // Redirect to landing page
             navigate('/');
         } catch (err) {
             const errorMsg = err.response?.data?.errors 

@@ -64,5 +64,6 @@ Middleware used: `protect` (JWT verification), `authorizeRoles(...roles)` (Middl
     - Resolved data extraction issues in `gigSlice`, `profileSlice`, `Login`, `Register`, and `Profile` pages to correctly handle the backend's nested response format.
     - Standardized profile and internship-related API endpoints in the frontend for better consistency.
 - **Post Gig Fix:** Fixed validation error in `CreateGig.jsx` by sending a mandatory `tags` array to satisfy the strict schema requirement.
+- **Redirection:** Updated `Login.jsx` and `Register.jsx` to redirect to the landing page ('/') instead of the dashboard by default.
 - **Feed Fix:** Resolved `TypeError: gigService.fetchGigs(...).lean is not a function` by removing the incorrect `.lean()` call in `getGigs` controller, as the service already returns plain objects.
 - **Documentation:** Corrected `VITE_API_URL` in `frontend/.env.example`.

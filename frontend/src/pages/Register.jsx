@@ -75,8 +75,8 @@ const Register = () => {
                 password,
                 role: selectedRole,
             });
-            dispatch(setCredentials(data));
-            navigate('/dashboard');
+            dispatch(setCredentials(data.data));
+            navigate('/');
         } catch (err) {
             const errorMsg = err.response?.data?.errors
                 ? err.response.data.errors.map((e) => `${e.path}: ${e.message}`).join(', ')
