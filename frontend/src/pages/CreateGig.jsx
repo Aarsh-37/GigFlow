@@ -18,7 +18,14 @@ const CreateGig = () => {
         e.preventDefault();
         setLoading(true);
         try {
-            await api.post('/gigs', { title, description, budget: Number(budget), category, deadline: bidDeadline });
+            await api.post('/gigs', { 
+                title, 
+                description, 
+                budget: Number(budget), 
+                category, 
+                deadline: bidDeadline,
+                tags: [] // Add empty tags array to satisfy strict schema
+            });
             navigate('/dashboard');
         } catch (err) {
             const errorMsg = err.response?.data?.errors 
@@ -39,40 +46,40 @@ const CreateGig = () => {
             </button>
 
             <div className="mb-8">
-                <h1 className="text-3xl font-display font-bold text-slate-900">Post a New Gig</h1>
-                <p className="text-slate-500 mt-1">Describe your project and budget to attract top talent.</p>
+                <h1 className="text-3xl font-display font-bold text-slate-900 dark:text-white">Post a New Internship</h1>
+                <p className="text-slate-500 dark:text-slate-400 mt-1">Describe the role and stipend to attract top interns.</p>
             </div>
 
-            <div className="card p-8 bg-white border-0 shadow-lg shadow-slate-200/50">
+            <div className="card p-8 bg-white dark:bg-gray-800 border-0 shadow-lg shadow-slate-200/50 dark:shadow-black/30 rounded-2xl">
                 {error && (
-                    <div className="mb-6 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
+                    <div className="mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-lg text-sm">
                         {error}
                     </div>
                 )}
                 <form onSubmit={submitHandler} className="space-y-6">
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">Job Title</label>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Internship Title</label>
                         <input
                             type="text"
                             required
                             className="input-field"
-                            placeholder="e.g. React Frontend Developer needed..."
+                            placeholder="e.g. React Frontend Intern needed..."
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">Description</label>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Description</label>
                         <textarea
                             required
                             className="input-field h-32 resize-none"
-                            placeholder="Describe the project details, requirements, and deliverables..."
+                            placeholder="Describe the internship role, responsibilities, and perks..."
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">Budget (₹)</label>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Stipend (₹)</label>
                         <div className="relative">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                                 <IndianRupee size={18} />
@@ -81,7 +88,7 @@ const CreateGig = () => {
                                 type="number"
                                 required
                                 className="input-field pl-10"
-                                placeholder="500"
+                                placeholder="5000"
                                 value={budget}
                                 onChange={(e) => setBudget(e.target.value)}
                             />
@@ -89,7 +96,7 @@ const CreateGig = () => {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">Category</label>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Category</label>
                         <select
                             required
                             className="input-field"
@@ -105,7 +112,7 @@ const CreateGig = () => {
                         </select>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">Bid Deadline (Optional)</label>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Application Deadline (Optional)</label>
                         <input
                             type="date"
                             className="input-field"
@@ -113,7 +120,7 @@ const CreateGig = () => {
                             onChange={(e) => setBidDeadline(e.target.value)}
                             min={new Date().toISOString().split('T')[0]}
                         />
-                        <p className="text-[10px] text-slate-400 mt-1">Gigs will automatically stop accepting bids after this date.</p>
+                        <p className="text-[10px] text-slate-400 dark:text-gray-500 mt-1">Internships will automatically stop accepting applications after this date.</p>
                     </div>
                     <div className="pt-4">
                         <button
@@ -121,7 +128,7 @@ const CreateGig = () => {
                             disabled={loading}
                             className="w-full btn-primary py-3 text-lg"
                         >
-                            {loading ? 'Posting...' : 'Post Job Now'}
+                            {loading ? 'Posting...' : 'Post Internship Now'}
                         </button>
                     </div>
                 </form>

@@ -59,4 +59,9 @@ Middleware used: `protect` (JWT verification), `authorizeRoles(...roles)` (Middl
     - Improved `activeInterns` data for hirers to show intern details instead of just gig titles.
     - Fixed UI bugs in `Dashboard.jsx` where application data was incorrectly referenced.
     - Added `morgan` middleware for better request logging in development.
+- **Feed & Profile Fixes:**
+    - Fixed `fetchGigs` service logic in the backend to correctly handle pagination and filters from a single query object.
+    - Resolved data extraction issues in `gigSlice`, `profileSlice`, `Login`, `Register`, and `Profile` pages to correctly handle the backend's nested response format.
+    - Standardized profile and internship-related API endpoints in the frontend for better consistency.
+- **Post Gig Fix:** Fixed validation error in `CreateGig.jsx` by sending a mandatory `tags` array to satisfy the strict schema requirement.
 - **Documentation:** Corrected `VITE_API_URL` in `frontend/.env.example`.
