@@ -53,4 +53,5 @@ Middleware used: `protect` (JWT verification), `authorizeRoles(...roles)` (Middl
 - **Environment:** Updated `.env.example` to include `REDIS_URL`.
 - **Auth Fixes:** Corrected role enum in `registerSchema` to match the new architecture (`hirer`, `intern`).
 - **Path Fixes:** Updated inconsistent API path references from `/api` to `/api/v1` in `passportConfig.js`, `swaggerDef.js`, and frontend `Login`/`Register` pages.
+- **OAuth:** Added `GOOGLE_CALLBACK_URL` to `.env` to allow flexible configuration and resolve `redirect_uri_mismatch` errors.
 - **Documentation:** Corrected `VITE_API_URL` in `frontend/.env.example`.
