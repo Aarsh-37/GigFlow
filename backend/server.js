@@ -8,7 +8,9 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import authRoutes from './routes/authRoutes.js';
 import gigRoutes from './routes/gigRoutes.js';
-import bidRoutes from './routes/bidRoutes.js';
+import applicationRoutes from './routes/applicationRoutes.js';
+import hirerRoutes from './routes/hirerRoutes.js';
+import internRoutes from './routes/internRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
@@ -25,9 +27,9 @@ import validateEnv from './config/envValidator.js';
 import './config/bullmq.js'; 
 import './config/cloudinary.js';
 
-// Import Gig and Bid models for authorization check
+// Import Gig and Application models for authorization check
 import Gig from './models/Gig.js';
-import Bid from './models/Bid.js';
+import Application from './models/Application.js';
 
 
 // Import Swagger dependencies
@@ -38,6 +40,7 @@ import specs from './swaggerDef.js'; // Import Swagger definitions
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 
+// Load environment variables
 dotenv.config();
 
 // Validate environment variables
@@ -131,11 +134,11 @@ io.on('connection', (socket) => {
                 return; // Gig not found, do nothing
             }
 
-            // Check if the user is the owner or has bid on the gig
+            // Check if the user is the owner or has applied for the gig
             const isOwner = gig.ownerId.toString() === socket.userId;
-            const hasBid = await Bid.exists({ gigId: gigId, freelancerId: socket.userId });
+            const hasApplied = await Application.exists({ gigId: gigId, internId: socket.userId });
 
-            if (isOwner || hasBid) {
+            if (isOwner || hasApplied) {
                 socket.join(`gig_${gigId}`);
                 logger.info(`Socket ${socket.id} (User: ${socket.userId}) joined gig room: gig_${gigId}`);
             } else {
@@ -180,7 +183,9 @@ app.use(passport.initialize());
 
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/gigs', gigRoutes);
-app.use('/api/v1/bids', bidRoutes);
+app.use('/api/v1/applications', applicationRoutes);
+app.use('/api/v1/hirer', hirerRoutes);
+app.use('/api/v1/intern', internRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/reviews', reviewRoutes);
 app.use('/api/v1/dashboard', dashboardRoutes);

@@ -7,8 +7,20 @@ import { generateInvoice } from '../services/invoiceService.js';
 dotenv.config();
 
 const connection = process.env.NODE_ENV !== 'test' 
-  ? new IORedis(process.env.REDIS_URL || 'redis://127.0.0.1:6379', { maxRetriesPerRequest: null })
+  ? new IORedis(process.env.REDIS_URL || 'redis://127.0.0.1:6379', { 
+      maxRetriesPerRequest: null,
+      retryStrategy: (times) => {
+        const delay = Math.min(times * 50, 2000);
+        return delay;
+      }
+    })
   : null;
+
+if (connection) {
+  connection.on('error', (err) => {
+    logger.error(`Redis connection error: ${err.message}`);
+  });
+}
 
 const notificationQueue = process.env.NODE_ENV !== 'test' ? new Queue('notifications', { connection }) : null;
 
