@@ -17,18 +17,20 @@ const Dashboard = ({ role: forcedRole, section }) => {
     const showToggle = role === 'admin'; 
 
     // Default to the user's primary role or the forced role from props
-    const defaultTab = forcedRole || (role === 'intern' ? 'intern' : 'hirer');
+    const defaultTab = forcedRole || (userInfo?.role === 'intern' ? 'intern' : 'hirer');
     const [activeTab, setActiveTab] = useState(defaultTab);
 
-    // Sync active tab if forcedRole changes
+    // Update activeTab when userInfo changes (e.g., after login)
     useEffect(() => {
-        if (forcedRole) setActiveTab(forcedRole);
-    }, [forcedRole]);
+        if (userInfo?.role) {
+            setActiveTab(forcedRole || (userInfo.role === 'intern' ? 'intern' : 'hirer'));
+        }
+    }, [userInfo?.role, forcedRole]);
 
     const fetchStats = async () => {
         try {
             const { data } = await api.get('/dashboard');
-            setStats(data);
+            setStats(data.data);
         } catch (error) {
             console.error('Error fetching dashboard stats:', error);
         }
