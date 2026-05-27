@@ -1,163 +1,121 @@
 import asyncHandler from 'express-async-handler';
 import * as gigService from '../services/gigService.js';
 import Gig from '../models/Gig.js';
-import Bid from '../models/Bid.js';
+import Application from '../models/Application.js';
 import User from '../models/User.js';
 import createNotification from '../utils/notificationUtils.js';
 import logger from '../config/logger.js';
 import sendResponse from '../utils/sendResponse.js';
+import { APPLICATION_STATUS } from '../utils/constants.js';
 
 // @desc    Get all gigs with pagination, filtering, and sorting
 // @route   GET /api/gigs
 // @access  Public
 const getGigs = asyncHandler(async (req, res) => {
-    const filters = {
-        search: req.query.search,
-        category: req.query.category,
-        tags: req.query.tags,
-        ownerId: req.query.owner,
-        status: req.query.status || 'open'
-    };
-
-    const options = {
-        page: Number(req.query.page) || 1,
-        limit: Number(req.query.limit) || 12,
-        sortBy: req.query.sortBy
-    };
-
-    const result = await gigService.fetchGigs(filters, options);
-
-    sendResponse(res, 200, true, 'Gigs fetched successfully', {
-        gigs: result.gigs,
-        page: result.page,
-        limit: options.limit,
-        totalPages: result.totalPages,
-        totalGigs: result.total
-    });
+    const gigs = await gigService.fetchGigs(req.query);
+    sendResponse(res, 200, true, 'Gigs fetched successfully', gigs);
 });
 
 // @desc    Get gig by ID
 // @route   GET /api/gigs/:id
 // @access  Public
 const getGigById = asyncHandler(async (req, res) => {
-    const gig = await gigService.fetchGigById(req.params.id);
-    sendResponse(res, 200, true, 'Gig fetched successfully', gig);
+    const gig = await Gig.findById(req.params.id).populate('ownerId', 'name email avatar rating').lean();
+    if (!gig) {
+        res.status(404);
+        throw new Error('Internship not found');
+    }
+    sendResponse(res, 200, true, 'Internship fetched successfully', gig);
 });
 
-// @desc    Create a gig
+// @desc    Create a new gig
 // @route   POST /api/gigs
-// @access  Private
+// @access  Private (Hirer)
 const createGig = asyncHandler(async (req, res) => {
-    const gigData = {
-        ...req.body,
-        ownerId: req.user._id,
-        status: 'open'
-    };
-
-    // Remove empty deadline to avoid Mongoose casting errors
-    if (gigData.deadline === '') {
-        delete gigData.deadline;
-    }
-
-    const createdGig = await gigService.createGig(gigData);
-    logger.info(`Gig created: ${createdGig._id} by ${req.user._id}`);
-    sendResponse(res, 201, true, 'Gig created successfully', createdGig);
+    const gig = await gigService.createGig({ ...req.body, ownerId: req.user._id });
+    sendResponse(res, 201, true, 'Internship created successfully', gig);
 });
 
 // @desc    Update a gig
 // @route   PUT /api/gigs/:id
-// @access  Private (Owner only)
+// @access  Private (Owner)
 const updateGig = asyncHandler(async (req, res) => {
-    const updatedGig = await gigService.updateGig(req.params.id, req.user._id, req.body);
-    logger.info(`Gig updated: ${updatedGig._id} by ${req.user._id}`);
-    sendResponse(res, 200, true, 'Gig updated successfully', updatedGig);
+    const gig = await gigService.updateGig(req.params.id, req.user._id, req.body);
+    sendResponse(res, 200, true, 'Internship updated successfully', gig);
 });
 
 // @desc    Delete a gig
 // @route   DELETE /api/gigs/:id
-// @access  Private (Owner only)
+// @access  Private (Owner)
 const deleteGig = asyncHandler(async (req, res) => {
     await gigService.deleteGig(req.params.id, req.user._id);
-    logger.info(`Gig deleted: ${req.params.id} by ${req.user._id}`);
-    sendResponse(res, 200, true, 'Gig deleted successfully');
+    sendResponse(res, 200, true, 'Internship deleted successfully');
 });
 
-// @desc    Start a gig
+// @desc    Start work on a gig
 // @route   PATCH /api/gigs/:id/start
 // @access  Private
 const startGig = asyncHandler(async (req, res) => {
     const gig = await gigService.transitionStatus(req.params.id, req.user._id, 'in-progress');
-
-    if (req.io) {
-        await createNotification(req.io, {
-            userId: gig.ownerId,
-            message: `Gig "${gig.title}" has started!`,
-            type: 'gig_started',
-            link: `/gigs/${gig._id}`
-        });
-        req.io.to(req.user._id.toString()).emit('dashboard_update');
-    }
-
-    sendResponse(res, 200, true, 'Gig started successfully', gig);
+    sendResponse(res, 200, true, 'Internship started successfully', gig);
 });
 
-// @desc    Complete a gig
+// @desc    Complete an internship
 // @route   PATCH /api/gigs/:id/complete
 // @access  Private
 const completeGig = asyncHandler(async (req, res) => {
     const gig = await gigService.transitionStatus(req.params.id, req.user._id, 'completed');
 
     if (req.io) {
-        const chosenBid = await Bid.findOne({ gigId: gig._id, status: 'hired' });
-        if (chosenBid) {
+        const hiredApp = await Application.findOne({ gigId: gig._id, status: APPLICATION_STATUS.HIRED });
+        if (hiredApp) {
             await createNotification(req.io, {
-                userId: chosenBid.freelancerId,
-                message: `The gig "${gig.title}" has been marked as completed by the client.`,
+                userId: hiredApp.internId,
+                message: `The internship "${gig.title}" has been marked as completed by the hirer.`,
                 type: 'gig_completed',
                 link: `/gigs/${gig._id}`
             });
-            req.io.to(chosenBid.freelancerId.toString()).emit('dashboard_update');
+            req.io.to(hiredApp.internId.toString()).emit('dashboard_update');
         }
         req.io.to(req.user._id.toString()).emit('dashboard_update');
     }
 
-    sendResponse(res, 200, true, 'Gig completed successfully', gig);
+    sendResponse(res, 200, true, 'Internship completed successfully', gig);
 });
 
-// @desc    Close a gig
+// @desc    Close an internship and release stipend
 // @route   PATCH /api/gigs/:id/close
 // @access  Private
 const closeGig = asyncHandler(async (req, res) => {
-    const gig = await Gig.findById(req.params.id); // Need full gig object for escrow logic
+    const gig = await Gig.findById(req.params.id);
 
     if (!gig) {
         res.status(404);
-        throw new Error('Gig not found');
+        throw new Error('Internship not found');
     }
 
-    const chosenBid = await Bid.findOne({ gigId: gig._id, status: 'hired' });
+    const hiredApp = await Application.findOne({ gigId: gig._id, status: APPLICATION_STATUS.HIRED });
     const releasedAmount = gig.escrowAmount;
 
-    // Perform transition via service
     const updatedGig = await gigService.transitionStatus(req.params.id, req.user._id, 'closed');
     updatedGig.escrowAmount = 0;
     await updatedGig.save();
 
-    if (chosenBid) {
-        const freelancer = await User.findById(chosenBid.freelancerId);
-        if (freelancer) {
-            freelancer.balance += releasedAmount;
-            freelancer.totalGigs += 1; // Updated field name
-            await freelancer.save();
+    if (hiredApp) {
+        const intern = await User.findById(hiredApp.internId);
+        if (intern) {
+            intern.balance += releasedAmount;
+            intern.totalGigs += 1;
+            await intern.save();
 
             if (req.io) {
                 await createNotification(req.io, {
-                    userId: chosenBid.freelancerId,
-                    message: `The gig "${gig.title}" has been closed. ₹${releasedAmount} has been released to your balance!`,
+                    userId: hiredApp.internId,
+                    message: `The internship "${gig.title}" has been closed. ₹${releasedAmount} stipend has been released to your balance!`,
                     type: 'gig_closed',
                     link: `/gigs/${gig._id}`
                 });
-                req.io.to(chosenBid.freelancerId.toString()).emit('dashboard_update');
+                req.io.to(hiredApp.internId.toString()).emit('dashboard_update');
             }
         }
     }
@@ -166,11 +124,11 @@ const closeGig = asyncHandler(async (req, res) => {
         req.io.to(req.user._id.toString()).emit('dashboard_update');
     }
 
-    logger.info(`Gig ${gig._id} closed and payment processed.`);
-    sendResponse(res, 200, true, 'Gig closed and payment processed successfully', updatedGig);
+    logger.info(`Internship ${gig._id} closed and stipend processed.`);
+    sendResponse(res, 200, true, 'Internship closed and stipend processed successfully', updatedGig);
 });
 
-// @desc    Get recommended gigs for a freelancer
+// @desc    Get recommended internships for an intern
 // @route   GET /api/v1/gigs/recommendations
 // @access  Private
 const getRecommendations = asyncHandler(async (req, res) => {
@@ -178,24 +136,23 @@ const getRecommendations = asyncHandler(async (req, res) => {
         const userSkills = req.user.skills || [];
         
         if (userSkills.length === 0) {
-            // If no skills, return latest open gigs
-            const gigs = await Gig.find({ status: 'open', isDeleted: false }).sort({ createdAt: -1 }).limit(10);
-            return sendResponse(res, 200, true, 'Latest gigs', gigs);
+            const gigs = await Gig.find({ status: 'open', isDeleted: false }).sort({ createdAt: -1 }).limit(10).lean();
+            return sendResponse(res, 200, true, 'Latest internships', gigs);
         }
 
-        // Simple matchmaking: Find gigs where tags intersect with user skills
         const recommendedGigs = await Gig.find({
             status: 'open',
-            isDeleted: false,
+            isDeleted: { $ne: true },
             $or: [
                 { tags: { $in: userSkills } },
                 { category: { $in: userSkills } }
             ]
         })
         .sort({ createdAt: -1 })
-        .limit(20);
+        .limit(20)
+        .lean();
 
-        sendResponse(res, 200, true, 'Recommended gigs', recommendedGigs);
+        sendResponse(res, 200, true, 'Recommended internships', recommendedGigs);
     } catch (error) {
         sendResponse(res, 500, false, error.message);
     }
