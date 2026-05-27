@@ -7,7 +7,7 @@ const configurePassport = () => {
     passport.use(new GoogleStrategy({
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:5000/api/auth/google/callback',
+        callbackURL: process.env.GOOGLE_CALLBACK_URL || 'http://localhost:5000/api/v1/auth/google/callback',
         proxy: true // Necessary if behind a proxy like Heroku/Render
     },
     async (request, accessToken, refreshToken, profile, done) => {
@@ -30,8 +30,7 @@ const configurePassport = () => {
                     name: profile.name.givenName + ' ' + profile.name.familyName,
                     email: profile.emails[0].value,
                     profilePic: profile.photos?.[0].value || '',
-                    role: 'client', // Default role, might need adjustment
-                    // Password field is not set for Google OAuth users
+                    role: 'intern', // Default role for new Google users
                 });
                 logger.info(`New user created with Google ID: ${profile.id}`);
                 done(null, newUser);

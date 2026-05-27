@@ -8,6 +8,7 @@ import { Mail, Lock, ArrowRight } from 'lucide-react';
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [role, setRole] = useState('intern'); // 'hirer' or 'intern'
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
 
@@ -29,6 +30,7 @@ const Login = () => {
         try {
             const { data } = await api.post('/auth/login', { email, password });
             dispatch(setCredentials(data));
+            // Redirect based on role if needed, or just home
             navigate('/');
         } catch (err) {
             const errorMsg = err.response?.data?.errors 
@@ -43,20 +45,45 @@ const Login = () => {
         <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-md w-full space-y-8">
                 <div className="text-center">
-                    <h2 className="mt-6 text-3xl font-display font-bold text-slate-900">Welcome Back</h2>
-                    <p className="mt-2 text-sm text-slate-600">
-                        Sign in to access your gigs
+                    <h2 className="mt-6 text-3xl font-display font-bold text-slate-900 dark:text-white">Welcome Back</h2>
+                    <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                        Sign in to access your dashboard
                     </p>
                 </div>
-                <div className="card p-8 bg-white shadow-xl shadow-slate-200/50 rounded-2xl border-0">
+
+                {/* Role Switcher */}
+                <div className="flex p-1 bg-slate-100 dark:bg-gray-800 rounded-2xl border border-slate-200 dark:border-gray-700">
+                    <button 
+                        onClick={() => setRole('intern')}
+                        className={`flex-1 py-2.5 rounded-xl text-sm font-black transition-all ${
+                            role === 'intern' 
+                            ? 'bg-white dark:bg-gray-700 text-brand-600 dark:text-white shadow-sm' 
+                            : 'text-slate-500 hover:text-slate-700'
+                        }`}
+                    >
+                        Apply for Jobs
+                    </button>
+                    <button 
+                        onClick={() => setRole('hirer')}
+                        className={`flex-1 py-2.5 rounded-xl text-sm font-black transition-all ${
+                            role === 'hirer' 
+                            ? 'bg-white dark:bg-gray-700 text-brand-600 dark:text-white shadow-sm' 
+                            : 'text-slate-500 hover:text-slate-700'
+                        }`}
+                    >
+                        Hire Interns
+                    </button>
+                </div>
+
+                <div className="card p-8 bg-white dark:bg-gray-800 shadow-xl shadow-slate-200/50 dark:shadow-black/30 rounded-2xl border border-gray-100 dark:border-gray-700">
                     {error && (
-                        <div className="mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
+                        <div className="mb-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-lg text-sm">
                             {error}
                         </div>
                     )}
                     <form className="space-y-6" onSubmit={submitHandler}>
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Email Address</label>
+                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email Address</label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                                     <Mail size={18} />
@@ -72,7 +99,7 @@ const Login = () => {
                             </div>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
+                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Password</label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
                                     <Lock size={18} />
@@ -94,24 +121,24 @@ const Login = () => {
                             className="w-full btn-primary flex justify-center items-center gap-2 py-2.5"
                         >
                             {loading ? 'Signing in...' : (
-                                <>Sign In <ArrowRight size={18} /></>
+                                <>Sign In as {role === 'hirer' ? 'Hirer' : 'Intern'} <ArrowRight size={18} /></>
                             )}
                         </button>
                     </form>
 
                     <div className="mt-6 relative">
                         <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-slate-200"></div>
+                            <div className="w-full border-t border-slate-200 dark:border-gray-700"></div>
                         </div>
                         <div className="relative flex justify-center text-sm">
-                            <span className="px-2 bg-white text-slate-500">Or continue with</span>
+                            <span className="px-2 bg-white dark:bg-gray-800 text-slate-500">Or continue with</span>
                         </div>
                     </div>
 
                     <div className="mt-6">
                         <a
-                            href={`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/google`}
-                            className="w-full flex justify-center items-center gap-2 py-2.5 px-4 border border-slate-200 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+                            href={`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1'}/auth/google`}
+                            className="w-full flex justify-center items-center gap-2 py-2.5 px-4 border border-slate-200 dark:border-gray-700 rounded-lg text-sm font-medium text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700 transition-colors"
                         >
                             <svg className="w-5 h-5" viewBox="0 0 24 24">
                                 <path
@@ -128,7 +155,7 @@ const Login = () => {
                                 />
                                 <path
                                     fill="currentColor"
-                                    d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 12-4.53z"
+                                    d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                                 />
                             </svg>
                             Google
@@ -136,8 +163,8 @@ const Login = () => {
                     </div>
                 </div>
                 <div className="text-center text-sm">
-                    <span className="text-slate-500">Don't have an account? </span>
-                    <Link to="/register" className="font-medium text-primary-600 hover:text-primary-500">
+                    <span className="text-slate-500 dark:text-slate-400">Don't have an account? </span>
+                    <Link to="/register" className="font-medium text-brand-600 hover:text-brand-500">
                         Sign up now
                     </Link>
                 </div>

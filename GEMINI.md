@@ -51,3 +51,6 @@ Middleware used: `protect` (JWT verification), `authorizeRoles(...roles)` (Middl
 - **Infrastructure:** Added Redis service to `docker-compose.yml` and linked it to the backend via `REDIS_URL`.
 - **Resilience:** Implemented Redis error handling and retry strategy in `bullmq.js` to prevent crashes and improve logging.
 - **Environment:** Updated `.env.example` to include `REDIS_URL`.
+- **Auth Fixes:** Corrected role enum in `registerSchema` to match the new architecture (`hirer`, `intern`).
+- **Path Fixes:** Updated inconsistent API path references from `/api` to `/api/v1` in `passportConfig.js`, `swaggerDef.js`, and frontend `Login`/`Register` pages.
+- **Documentation:** Corrected `VITE_API_URL` in `frontend/.env.example`.

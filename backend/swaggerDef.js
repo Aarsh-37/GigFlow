@@ -10,23 +10,23 @@ const options = {
     },
     servers: [
       {
-        url: 'http://localhost:5000/api', // Assuming backend runs on localhost:5000/api
+        url: 'http://localhost:5000/api/v1',
         description: 'Development server',
       },
     ],
     components: {
       securitySchemes: {
-        bearerAuth: {
-          type: 'http',
-          scheme: 'bearer',
-          bearerFormat: 'JWT',
-          description: "Enter JWT token in the format: Bearer <token>",
+        cookieAuth: {
+          type: 'apiKey',
+          in: 'cookie',
+          name: 'jwt',
+          description: "Cookie-based JWT authentication",
         },
       },
     },
-    security: [{ bearerAuth: [] }], // Default security scheme
+    security: [{ cookieAuth: [] }],
   },
-  apis: ['./backend/routes/*.js', './backend/controllers/*.js', './backend/models/*.js'], // Paths to your API files
+  apis: ['./routes/*.js', './controllers/*.js', './models/*.js'], // Paths to your API files
 };
 
 const specs = swaggerJsdoc(options);
