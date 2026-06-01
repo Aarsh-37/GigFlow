@@ -32,11 +32,11 @@ if (process.env.REDIS_URL && process.env.NODE_ENV !== 'test') {
 
 /**
  * Global Rate Limiter
- * Limits each IP to 100 requests per 15 minutes.
+ * Limits each IP to 5000 requests per 15 minutes.
  */
 export const globalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') ? 10000 : 100,
+    max: 5000, // Increased to prevent blocking during development/testing
     message: 'Too many requests from this IP, please try again after 15 minutes',
     standardHeaders: true,
     legacyHeaders: false,
@@ -45,11 +45,11 @@ export const globalLimiter = rateLimit({
 
 /**
  * Strict Rate Limiter for Authentication
- * Limits login/register attempts to 10 per 15 minutes.
+ * Limits login/register attempts to 500 per 15 minutes.
  */
 export const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') ? 1000 : 10,
+    max: 500, // Increased
     message: { success: false, message: 'Too many authentication attempts, please try again after 15 minutes' },
     standardHeaders: true,
     legacyHeaders: false,
@@ -58,11 +58,11 @@ export const authLimiter = rateLimit({
 
 /**
  * Rate Limiter for critical operations (e.g., payment, status changes)
- * Limits to 20 requests per 15 minutes.
+ * Limits to 500 requests per 15 minutes.
  */
 export const strictLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test') ? 1000 : 20,
+    max: 500, // Increased
     message: 'Too many attempts for this action, please try again later',
     standardHeaders: true,
     legacyHeaders: false,

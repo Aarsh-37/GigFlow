@@ -20,6 +20,11 @@ const registerUser = asyncHandler(async (req, res) => {
             balance: user.balance,
             avatar: user.avatar,
             banner: user.banner,
+            bio: user.bio,
+            skills: user.skills,
+            linkedin: user.linkedin,
+            github: user.github,
+            twitter: user.twitter,
             totalGigs: user.totalGigs,
             rating: user.rating
         });
@@ -45,6 +50,11 @@ const authUser = asyncHandler(async (req, res) => {
         balance: user.balance,
         avatar: user.avatar,
         banner: user.banner,
+        bio: user.bio,
+        skills: user.skills,
+        linkedin: user.linkedin,
+        github: user.github,
+        twitter: user.twitter,
         totalGigs: user.totalGigs,
         rating: user.rating
     });

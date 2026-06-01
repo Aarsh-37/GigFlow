@@ -302,3 +302,154 @@
 {"message":"Socket authenticated successfully. User ID: 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T13:58:26.948Z","requestId":"system"}
 {"message":"A user connected: 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T13:58:26.948Z","requestId":"system"}
 {"message":"Socket LE5HnUdL-SUyIyLlAAAQ joined room for user 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T13:58:26.949Z","requestId":"system"}
+{"message":"User 6a1c6077020a8672571097a8 disconnected from socket LE5HnUdL-SUyIyLlAAAQ","level":"info","timestamp":"2026-06-01T14:00:56.838Z","requestId":"system"}
+{"message":"Socket.IO authentication middleware started.","level":"debug","timestamp":"2026-06-01T14:00:57.005Z","requestId":"system"}
+{"message":"Socket authenticated successfully. User ID: 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T14:00:57.006Z","requestId":"system"}
+{"message":"A user connected: 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T14:00:57.006Z","requestId":"system"}
+{"message":"Socket lB8nwrf6mLMsQ8vzAAAT joined room for user 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T14:00:57.007Z","requestId":"system"}
+{"message":"User 6a1c6077020a8672571097a8 disconnected from socket lB8nwrf6mLMsQ8vzAAAT","level":"info","timestamp":"2026-06-01T14:00:58.619Z","requestId":"system"}
+{"message":"Socket.IO authentication middleware started.","level":"debug","timestamp":"2026-06-01T14:00:58.686Z","requestId":"system"}
+{"message":"Socket authenticated successfully. User ID: 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T14:00:58.687Z","requestId":"system"}
+{"message":"A user connected: 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T14:00:58.688Z","requestId":"system"}
+{"message":"Socket qpCWjYA3jYAgfBZ3AAAW joined room for user 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T14:00:58.688Z","requestId":"system"}
+{"message":"User 6a1c6077020a8672571097a8 disconnected from socket qpCWjYA3jYAgfBZ3AAAW","level":"info","timestamp":"2026-06-01T14:01:52.986Z","requestId":"system"}
+{"message":"Fetched gigs for user: 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T14:04:37.972Z","requestId":"8975ada1-9060-4568-a897-086070fdab35"}
+{"message":"User profile updated: 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T14:05:09.621Z","requestId":"20d76e71-e3e1-4c0a-8321-acb49bd7582d"}
+{"message":"User 6a19183abab82352f5f46a43 disconnected from socket 2xL8hd-BsefLiHRgAAAD","level":"info","timestamp":"2026-06-01T14:05:09.631Z","requestId":"system"}
+{"message":"Socket.IO authentication middleware started.","level":"debug","timestamp":"2026-06-01T14:05:09.644Z","requestId":"system"}
+{"message":"Socket authenticated successfully. User ID: 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T14:05:09.644Z","requestId":"system"}
+{"message":"A user connected: 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T14:05:09.645Z","requestId":"system"}
+{"message":"Socket Aum4walXhuyOtCD4AAAY joined room for user 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T14:05:09.645Z","requestId":"system"}
+{"message":"User profile updated: 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T14:05:34.270Z","requestId":"c4b11d68-3d4b-4080-b895-f8ffa9a9bd93"}
+{"message":"User 6a19183abab82352f5f46a43 disconnected from socket Aum4walXhuyOtCD4AAAY","level":"info","timestamp":"2026-06-01T14:05:34.281Z","requestId":"system"}
+{"message":"Socket.IO authentication middleware started.","level":"debug","timestamp":"2026-06-01T14:05:34.295Z","requestId":"system"}
+{"message":"Socket authenticated successfully. User ID: 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T14:05:34.296Z","requestId":"system"}
+{"message":"A user connected: 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T14:05:34.296Z","requestId":"system"}
+{"message":"Socket iSxfh56Oq2OGV4heAAAa joined room for user 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T14:05:34.296Z","requestId":"system"}
+{"message":"Wallet top-up: ₹10000 added for user 6a19183abab82352f5f46a43. New balance: ₹24000","level":"info","timestamp":"2026-06-01T14:06:03.294Z","requestId":"b79a8904-64ec-4842-bcc8-4e9f50a222c0"}
+{"message":"User 6a19183abab82352f5f46a43 disconnected from socket iSxfh56Oq2OGV4heAAAa","level":"info","timestamp":"2026-06-01T14:06:03.324Z","requestId":"system"}
+{"message":"Socket.IO authentication middleware started.","level":"debug","timestamp":"2026-06-01T14:06:03.333Z","requestId":"system"}
+{"message":"Socket authenticated successfully. User ID: 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T14:06:03.333Z","requestId":"system"}
+{"message":"A user connected: 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T14:06:03.334Z","requestId":"system"}
+{"message":"Socket 9RqCNUcl_lCDkBaCAAAc joined room for user 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T14:06:03.334Z","requestId":"system"}
+{"message":"Google OAuth Strategy invoked.","level":"debug","timestamp":"2026-06-01T14:06:24.343Z","requestId":"bace5d49-7995-420d-8bc2-426f12e822dd"}
+{"message":"User found with Google ID: 116164854308355629728","level":"info","timestamp":"2026-06-01T14:06:24.359Z","requestId":"bace5d49-7995-420d-8bc2-426f12e822dd"}
+{"message":"Socket.IO authentication middleware started.","level":"debug","timestamp":"2026-06-01T14:06:24.630Z","requestId":"system"}
+{"message":"Socket authenticated successfully. User ID: 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T14:06:24.630Z","requestId":"system"}
+{"message":"A user connected: 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T14:06:24.631Z","requestId":"system"}
+{"message":"Socket HXvJKFi8xz48nAr4AAAf joined room for user 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T14:06:24.631Z","requestId":"system"}
+{"message":"Socket.IO authentication middleware started.","level":"debug","timestamp":"2026-06-01T14:06:41.147Z","requestId":"system"}
+{"message":"Socket authenticated successfully. User ID: 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T14:06:41.148Z","requestId":"system"}
+{"message":"A user connected: 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T14:06:41.148Z","requestId":"system"}
+{"message":"Socket K2iv40dDkHfxDkteAAAi joined room for user 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T14:06:41.148Z","requestId":"system"}
+{"message":"User 6a1c6077020a8672571097a8 disconnected from socket K2iv40dDkHfxDkteAAAi","level":"info","timestamp":"2026-06-01T14:06:48.281Z","requestId":"system"}
+{"message":"Google OAuth Strategy invoked.","level":"debug","timestamp":"2026-06-01T14:06:56.444Z","requestId":"bd5bfa51-5723-4397-add9-d2b661e13e36"}
+{"message":"User found with Google ID: 116164854308355629728","level":"info","timestamp":"2026-06-01T14:06:56.447Z","requestId":"bd5bfa51-5723-4397-add9-d2b661e13e36"}
+{"message":"Socket.IO authentication middleware started.","level":"debug","timestamp":"2026-06-01T14:06:56.654Z","requestId":"system"}
+{"message":"Socket authenticated successfully. User ID: 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T14:06:56.655Z","requestId":"system"}
+{"message":"A user connected: 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T14:06:56.655Z","requestId":"system"}
+{"message":"Socket -_w3CHizDhIa_xHPAAAl joined room for user 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T14:06:56.655Z","requestId":"system"}
+{"message":"User profile updated: 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T14:07:13.271Z","requestId":"98f07b62-0fc4-4139-be3a-fc4dd8a46171"}
+{"message":"User 6a1c6077020a8672571097a8 disconnected from socket -_w3CHizDhIa_xHPAAAl","level":"info","timestamp":"2026-06-01T14:07:13.279Z","requestId":"system"}
+{"message":"Socket.IO authentication middleware started.","level":"debug","timestamp":"2026-06-01T14:07:13.295Z","requestId":"system"}
+{"message":"Socket authenticated successfully. User ID: 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T14:07:13.295Z","requestId":"system"}
+{"message":"A user connected: 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T14:07:13.295Z","requestId":"system"}
+{"message":"Socket uMVUVhLWF7L5nabNAAAn joined room for user 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T14:07:13.296Z","requestId":"system"}
+{"message":"Avatar updated for user: 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T14:07:23.781Z","requestId":"system"}
+{"message":"User 6a1c6077020a8672571097a8 disconnected from socket uMVUVhLWF7L5nabNAAAn","level":"info","timestamp":"2026-06-01T14:07:23.786Z","requestId":"system"}
+{"message":"Socket.IO authentication middleware started.","level":"debug","timestamp":"2026-06-01T14:07:23.796Z","requestId":"system"}
+{"message":"Socket authenticated successfully. User ID: 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T14:07:23.797Z","requestId":"system"}
+{"message":"A user connected: 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T14:07:23.797Z","requestId":"system"}
+{"message":"Socket mB1ktImdeT5JyVuRAAAp joined room for user 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T14:07:23.797Z","requestId":"system"}
+{"message":"User profile updated: 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T14:07:23.801Z","requestId":"7f2a62f3-3169-4adc-8187-58792e72aa78"}
+{"message":"User 6a1c6077020a8672571097a8 disconnected from socket mB1ktImdeT5JyVuRAAAp","level":"info","timestamp":"2026-06-01T14:07:23.809Z","requestId":"system"}
+{"message":"Socket.IO authentication middleware started.","level":"debug","timestamp":"2026-06-01T14:07:23.821Z","requestId":"system"}
+{"message":"Socket authenticated successfully. User ID: 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T14:07:23.822Z","requestId":"system"}
+{"message":"A user connected: 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T14:07:23.822Z","requestId":"system"}
+{"message":"Socket BEEC8hxIfUlD07GcAAAr joined room for user 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T14:07:23.822Z","requestId":"system"}
+{"message":"User 6a1c6077020a8672571097a8 disconnected from socket BEEC8hxIfUlD07GcAAAr","level":"info","timestamp":"2026-06-01T14:07:26.041Z","requestId":"system"}
+{"message":"Socket.IO authentication middleware started.","level":"debug","timestamp":"2026-06-01T14:07:26.185Z","requestId":"system"}
+{"message":"Socket authenticated successfully. User ID: 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T14:07:26.185Z","requestId":"system"}
+{"message":"A user connected: 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T14:07:26.186Z","requestId":"system"}
+{"message":"Socket nGDPBOpzgjv5aXG0AAAu joined room for user 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T14:07:26.186Z","requestId":"system"}
+{"message":"User 6a1c6077020a8672571097a8 disconnected from socket nGDPBOpzgjv5aXG0AAAu","level":"info","timestamp":"2026-06-01T14:07:26.834Z","requestId":"system"}
+{"message":"Socket.IO authentication middleware started.","level":"debug","timestamp":"2026-06-01T14:07:26.940Z","requestId":"system"}
+{"message":"Socket authenticated successfully. User ID: 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T14:07:26.941Z","requestId":"system"}
+{"message":"A user connected: 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T14:07:26.941Z","requestId":"system"}
+{"message":"Socket 2yKGin9rZyGYrSNYAAAx joined room for user 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T14:07:26.941Z","requestId":"system"}
+{"message":"User 6a1c6077020a8672571097a8 disconnected from socket 2yKGin9rZyGYrSNYAAAx","level":"info","timestamp":"2026-06-01T14:07:27.343Z","requestId":"system"}
+{"message":"Socket.IO authentication middleware started.","level":"debug","timestamp":"2026-06-01T14:07:27.452Z","requestId":"system"}
+{"message":"Socket authenticated successfully. User ID: 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T14:07:27.453Z","requestId":"system"}
+{"message":"A user connected: 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T14:07:27.453Z","requestId":"system"}
+{"message":"Socket CD44ExS-LWES99DgAAA0 joined room for user 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T14:07:27.453Z","requestId":"system"}
+{"message":"User 6a1c6077020a8672571097a8 disconnected from socket CD44ExS-LWES99DgAAA0","level":"info","timestamp":"2026-06-01T14:07:27.852Z","requestId":"system"}
+{"message":"Socket.IO authentication middleware started.","level":"debug","timestamp":"2026-06-01T14:07:27.963Z","requestId":"system"}
+{"message":"Socket authenticated successfully. User ID: 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T14:07:27.964Z","requestId":"system"}
+{"message":"A user connected: 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T14:07:27.964Z","requestId":"system"}
+{"message":"Socket zFGAxVFTcsHFeFVZAAA3 joined room for user 6a1c6077020a8672571097a8","level":"info","timestamp":"2026-06-01T14:07:27.964Z","requestId":"system"}
+{"message":"User 6a1c6077020a8672571097a8 disconnected from socket zFGAxVFTcsHFeFVZAAA3","level":"info","timestamp":"2026-06-01T14:07:28.328Z","requestId":"system"}
+{"message":"User 6a1c6077020a8672571097a8 disconnected from socket HXvJKFi8xz48nAr4AAAf","level":"info","timestamp":"2026-06-01T14:07:55.227Z","requestId":"system"}
+{"message":"REDIS_URL not found in environment variables. Redis-dependent features will be disabled.","level":"warn","timestamp":"2026-06-01T14:09:11.560Z","requestId":"system"}
+{"message":"OpenAPI document generated successfully.","level":"info","timestamp":"2026-06-01T14:09:11.969Z","requestId":"system"}
+{"message":"Environment variables validated successfully.","level":"info","timestamp":"2026-06-01T14:09:12.025Z","requestId":"system"}
+{"message":"Google Client ID loaded: 6673985772...","level":"info","timestamp":"2026-06-01T14:09:12.037Z","requestId":"system"}
+{"message":"Google OAuth Strategy initialized successfully.","level":"info","timestamp":"2026-06-01T14:09:12.038Z","requestId":"system"}
+{"message":"Server started on port 5000","level":"info","timestamp":"2026-06-01T14:09:12.044Z","requestId":"system"}
+{"message":"Mongoose connected to MongoDB.","level":"info","timestamp":"2026-06-01T14:09:12.055Z","requestId":"system"}
+{"message":"MongoDB Connected: localhost","level":"info","timestamp":"2026-06-01T14:09:12.058Z","requestId":"system"}
+{"message":"Socket.IO authentication middleware started.","level":"debug","timestamp":"2026-06-01T14:09:12.230Z","requestId":"system"}
+{"message":"Socket authenticated successfully. User ID: 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T14:09:12.232Z","requestId":"system"}
+{"message":"A user connected: 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T14:09:12.233Z","requestId":"system"}
+{"message":"Socket xQT7UALK7DUPWcsKAAAB joined room for user 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T14:09:12.233Z","requestId":"system"}
+{"message":"Fetched gigs for user: 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T14:09:13.648Z","requestId":"ed344a64-89c8-4710-8b42-7cd053d6167c"}
+{"message":"Fetched gigs for user: 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T14:12:52.297Z","requestId":"11b23900-f121-4337-a1c0-51358c5daa78"}
+{"message":"User profile updated: 6a18845f6c8c156af6a3bc00","level":"info","timestamp":"2026-06-01T14:24:20.461Z","requestId":"31ca0144-1d36-4eb9-af6d-31f7f0a3ee9b"}
+{"message":"User 6a19183abab82352f5f46a43 disconnected from socket xQT7UALK7DUPWcsKAAAB","level":"info","timestamp":"2026-06-01T16:30:01.867Z","requestId":"system"}
+{"message":"Socket.IO authentication middleware started.","level":"debug","timestamp":"2026-06-01T16:45:47.462Z","requestId":"system"}
+{"message":"Socket authenticated successfully. User ID: 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T16:45:47.466Z","requestId":"system"}
+{"message":"A user connected: 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T16:45:47.467Z","requestId":"system"}
+{"message":"Socket HJITzU2HezjHj19FAAAD joined room for user 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T16:45:47.469Z","requestId":"system"}
+{"message":"User 6a19183abab82352f5f46a43 disconnected from socket HJITzU2HezjHj19FAAAD","level":"info","timestamp":"2026-06-01T16:45:51.052Z","requestId":"system"}
+{"message":"Fetched gigs for user: 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T17:03:13.657Z","requestId":"07ca957f-73ad-451e-b75f-7d6c0bebbf30"}
+{"message":"Socket.IO authentication middleware started.","level":"debug","timestamp":"2026-06-01T17:03:13.660Z","requestId":"system"}
+{"message":"Socket authenticated successfully. User ID: 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T17:03:13.661Z","requestId":"system"}
+{"message":"A user connected: 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T17:03:13.663Z","requestId":"system"}
+{"message":"Socket ENQEsUVZjM2pRLa2AAAF joined room for user 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T17:03:13.663Z","requestId":"system"}
+{"message":"Fetched gigs for user: 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T17:04:47.185Z","requestId":"124d4e90-c4ed-4072-99aa-edfe9a845dec"}
+{"message":"User 6a19183abab82352f5f46a43 disconnected from socket ENQEsUVZjM2pRLa2AAAF","level":"info","timestamp":"2026-06-01T17:04:47.207Z","requestId":"system"}
+{"message":"Fetched gigs for user: 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T17:04:47.388Z","requestId":"181c4702-593f-46b1-b4f2-1bccca141cc4"}
+{"message":"Socket.IO authentication middleware started.","level":"debug","timestamp":"2026-06-01T17:04:47.440Z","requestId":"system"}
+{"message":"Socket authenticated successfully. User ID: 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T17:04:47.441Z","requestId":"system"}
+{"message":"A user connected: 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T17:04:47.441Z","requestId":"system"}
+{"message":"Socket mGO5pFYx9AJr3yRCAAAI joined room for user 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T17:04:47.442Z","requestId":"system"}
+{"message":"REDIS_URL not found in environment variables. Redis-dependent features will be disabled.","level":"warn","timestamp":"2026-06-01T17:05:48.828Z","requestId":"system"}
+{"message":"OpenAPI document generated successfully.","level":"info","timestamp":"2026-06-01T17:05:49.259Z","requestId":"system"}
+{"message":"Environment variables validated successfully.","level":"info","timestamp":"2026-06-01T17:05:49.316Z","requestId":"system"}
+{"message":"Google Client ID loaded: 6673985772...","level":"info","timestamp":"2026-06-01T17:05:49.328Z","requestId":"system"}
+{"message":"Google OAuth Strategy initialized successfully.","level":"info","timestamp":"2026-06-01T17:05:49.329Z","requestId":"system"}
+{"message":"Server started on port 5000","level":"info","timestamp":"2026-06-01T17:05:49.336Z","requestId":"system"}
+{"message":"Mongoose connected to MongoDB.","level":"info","timestamp":"2026-06-01T17:05:49.344Z","requestId":"system"}
+{"message":"MongoDB Connected: localhost","level":"info","timestamp":"2026-06-01T17:05:49.348Z","requestId":"system"}
+{"message":"Socket.IO authentication middleware started.","level":"debug","timestamp":"2026-06-01T17:05:49.517Z","requestId":"system"}
+{"message":"Socket authenticated successfully. User ID: 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T17:05:49.519Z","requestId":"system"}
+{"message":"A user connected: 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T17:05:49.520Z","requestId":"system"}
+{"message":"Socket rLs27AIFGPk4G9sHAAAB joined room for user 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T17:05:49.520Z","requestId":"system"}
+{"message":"Fetched gigs for user: 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T17:17:12.440Z","requestId":"823068b2-5e3e-497a-adfa-fb8cfaec737a"}
+{"message":"User 6a19183abab82352f5f46a43 disconnected from socket rLs27AIFGPk4G9sHAAAB","level":"info","timestamp":"2026-06-01T17:17:16.749Z","requestId":"system"}
+{"message":"Fetched gigs for user: 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T17:17:16.901Z","requestId":"7bbdfd5b-ae6a-4ee6-81bc-17079c874093"}
+{"message":"Socket.IO authentication middleware started.","level":"debug","timestamp":"2026-06-01T17:17:16.927Z","requestId":"system"}
+{"message":"Socket authenticated successfully. User ID: 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T17:17:16.928Z","requestId":"system"}
+{"message":"A user connected: 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T17:17:16.928Z","requestId":"system"}
+{"message":"Socket HrD_zlFXLFOFgTe9AAAE joined room for user 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T17:17:16.928Z","requestId":"system"}
+{"message":"User 6a19183abab82352f5f46a43 disconnected from socket HrD_zlFXLFOFgTe9AAAE","level":"info","timestamp":"2026-06-01T17:17:23.806Z","requestId":"system"}
+{"message":"Fetched gigs for user: 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T17:17:23.913Z","requestId":"89c18ec4-9e81-4047-b85f-b896f226082d"}
+{"message":"Socket.IO authentication middleware started.","level":"debug","timestamp":"2026-06-01T17:17:23.943Z","requestId":"system"}
+{"message":"Socket authenticated successfully. User ID: 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T17:17:23.944Z","requestId":"system"}
+{"message":"A user connected: 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T17:17:23.944Z","requestId":"system"}
+{"message":"Socket mSaZv6UN2G7ZuMI3AAAH joined room for user 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T17:17:23.945Z","requestId":"system"}
+{"message":"User 6a19183abab82352f5f46a43 disconnected from socket mSaZv6UN2G7ZuMI3AAAH","level":"info","timestamp":"2026-06-01T17:17:24.357Z","requestId":"system"}
+{"message":"Fetched gigs for user: 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T17:17:24.451Z","requestId":"7d4d9f74-ba05-48f2-957e-eadc07d97764"}
+{"message":"Socket.IO authentication middleware started.","level":"debug","timestamp":"2026-06-01T17:17:24.466Z","requestId":"system"}
+{"message":"Socket authenticated successfully. User ID: 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T17:17:24.467Z","requestId":"system"}
+{"message":"A user connected: 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T17:17:24.467Z","requestId":"system"}
+{"message":"Socket 03kevXwInmWey7wlAAAK joined room for user 6a19183abab82352f5f46a43","level":"info","timestamp":"2026-06-01T17:17:24.467Z","requestId":"system"}

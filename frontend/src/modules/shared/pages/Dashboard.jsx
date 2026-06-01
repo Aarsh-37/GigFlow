@@ -70,9 +70,6 @@ const Dashboard = ({ role: forcedRole, section }) => {
                 <div className={`p-3 rounded-2xl ${color} bg-opacity-10`}>
                     <Icon className={color.replace('bg-', 'text-')} size={24} />
                 </div>
-                <div className="flex items-center gap-1 text-green-500 text-xs font-bold">
-                    <TrendingUp size={14} /> +12%
-                </div>
             </div>
             <p className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-1">{title}</p>
             <p className="text-3xl font-black text-gray-900 dark:text-white">{value}</p>

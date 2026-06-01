@@ -19,5 +19,5 @@ export const updateUserProfileSchema = z.object({
         linkedin: z.string().url('Invalid URL format for LinkedIn').or(z.literal('')).optional(),
         github: z.string().url('Invalid URL format for GitHub').or(z.literal('')).optional(),
         twitter: z.string().url('Invalid URL format for Twitter').or(z.literal('')).optional(),
-    }).strict().partial(),
+    }).partial(),
 });
