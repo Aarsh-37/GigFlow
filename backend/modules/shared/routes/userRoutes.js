@@ -1,12 +1,9 @@
 import express from 'express';
-import { getUserById, updateUserProfile, getUserGigs, getUserApplications, uploadAvatar, uploadBanner } from '../controllers/userController.js';
+import { getUserById, getUserGigs, uploadAvatar, uploadBanner } from '../controllers/userController.js';
 import { protect } from '../middleware/authMiddleware.js';
 import { upload, validateFileType } from '../middleware/uploadMiddleware.js';
 
 const router = express.Router();
-
-router.route('/profile')
-    .patch(protect, updateUserProfile);
 
 // Avatar upload route — must come before /:id to avoid conflict
 router.post(
@@ -32,8 +29,5 @@ router.route('/:id')
 // Routes for user's gigs and applications
 router.route('/:id/gigs')
     .get(getUserGigs);
-
-router.route('/:id/applications')
-    .get(getUserApplications);
 
 export default router;

@@ -21,49 +21,7 @@ const getUserById = asyncHandler(async (req, res) => {
     }
 });
 
-// @desc    Update user profile
-// @route   PATCH /api/users/profile
-// @access  Private
-const updateUserProfile = asyncHandler(async (req, res) => {
-    const user = await User.findById(req.user._id);
 
-    if (user) {
-        user.name = req.body.name || user.name;
-        user.bio = req.body.bio || user.bio;
-        user.skills = req.body.skills || user.skills;
-        user.avatar = req.body.avatar || user.avatar;
-        user.banner = req.body.banner || user.banner;
-        user.linkedin = req.body.linkedin || user.linkedin;
-        user.github = req.body.github || user.github;
-        user.twitter = req.body.twitter || user.twitter;
-
-        if (req.body.password) {
-            user.password = req.body.password;
-        }
-
-        const updatedUser = await user.save();
-
-        sendResponse(res, 200, true, 'Profile updated successfully', {
-            _id: updatedUser._id,
-            name: updatedUser.name,
-            email: updatedUser.email,
-            bio: updatedUser.bio,
-            skills: updatedUser.skills,
-            avatar: updatedUser.avatar,
-            banner: updatedUser.banner,
-            linkedin: updatedUser.linkedin,
-            github: updatedUser.github,
-            twitter: updatedUser.twitter,
-            role: updatedUser.role,
-            rating: updatedUser.rating,
-            totalGigs: updatedUser.totalGigs
-        });
-        logger.info(`User profile updated: ${updatedUser._id}`);
-    } else {
-        res.status(404);
-        throw new Error('User not found');
-    }
-});
 
 // @desc    Get gigs posted by a user
 // @route   GET /api/users/:id/gigs
@@ -75,17 +33,7 @@ const getUserGigs = asyncHandler(async (req, res) => {
     logger.info(`Fetched gigs for user: ${userId}`);
 });
 
-// @desc    Get applications submitted by a user
-// @route   GET /api/users/:id/applications
-// @access  Public
-const getUserApplications = asyncHandler(async (req, res) => {
-    const userId = req.params.id;
-    const applications = await Application.find({ internId: userId })
-        .populate('gigId', 'title budget status')
-        .sort({ createdAt: -1 });
-    sendResponse(res, 200, true, 'User applications fetched successfully', applications);
-    logger.info(`Fetched applications for user: ${userId}`);
-});
+
 
 // @desc    Upload avatar image
 // @route   POST /api/v1/users/upload-avatar
@@ -213,4 +161,4 @@ const uploadBanner = asyncHandler(async (req, res) => {
     });
 });
 
-export { getUserById, updateUserProfile, getUserGigs, getUserApplications, uploadAvatar, uploadBanner };
+export { getUserById, getUserGigs, uploadAvatar, uploadBanner };

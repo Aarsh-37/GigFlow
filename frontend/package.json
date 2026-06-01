@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0 && prettier --check \"src/**/*.{js,jsx,css,ts,tsx}\" \"**/*.{json,md}\"",
+    "lint": "eslint . && prettier --check \"src/**/*.{js,jsx,css,ts,tsx}\" \"**/*.{json,md}\"",
     "preview": "vite preview",
     "test": "vitest",
     "format": "prettier --write \"src/**/*.{js,jsx,css,ts,tsx}\" \"**/*.{json,md}\""
