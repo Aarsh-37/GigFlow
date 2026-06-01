@@ -11,16 +11,6 @@ const api = axios.create({
     },
 });
 
-// Request interceptor for adding tokens if needed (though we use cookies)
-api.interceptors.request.use(
-    (config) => {
-        return config;
-    },
-    (error) => {
-        return Promise.reject(error);
-    }
-);
-
 // Response interceptor for centralized error handling and data extraction
 api.interceptors.response.use(
     (response) => {
@@ -39,11 +29,13 @@ api.interceptors.response.use(
         
         if (error.response?.status === 401) {
             // Check if it's an auth route, if so, don't logout automatically to avoid infinite loops
-            const isAuthRoute = error.config.url.includes('/auth/login') || error.config.url.includes('/auth/register');
+            const isAuthRoute = error.config.url.includes('/auth/login') || 
+                               error.config.url.includes('/auth/register') ||
+                               error.config.url.includes('/auth/me'); // Don't redirect if initial check fails
+            
             if (!isAuthRoute) {
                 store.dispatch(logout());
-                // Redirect to login only if not already there
-                if (window.location.pathname !== '/login') {
+                if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
                     window.location.href = '/login';
                 }
             }

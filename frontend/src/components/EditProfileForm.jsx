@@ -21,7 +21,7 @@ const EditProfileForm = ({ profile, onClose, onSave }) => {
                 name: profile.name || '',
                 bio: profile.bio || '',
                 skills: profile.skills || [],
-                avatar: profile.profilePic || '',
+                avatar: profile.avatar || '',
                 linkedin: profile.linkedin || '',
                 github: profile.github || '',
                 twitter: profile.twitter || ''

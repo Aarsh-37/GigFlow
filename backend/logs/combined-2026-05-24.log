@@ -1,0 +1,64 @@
+{"level":"info","message":"Environment variables validated successfully.","timestamp":"2026-05-24T15:45:51.345Z"}
+{"level":"info","message":"Google OAuth Strategy initialized successfully.","timestamp":"2026-05-24T15:45:51.361Z"}
+{"level":"info","message":"Server started on port 5000","timestamp":"2026-05-24T15:45:51.374Z"}
+{"level":"info","message":"MongoDB Connected: localhost","timestamp":"2026-05-24T15:45:51.391Z"}
+{"level":"debug","message":"Socket.IO authentication middleware started.","timestamp":"2026-05-24T15:45:55.664Z"}
+{"level":"info","message":"Socket authenticated successfully. User ID: 6963a574d37ce0a1722c4da7","timestamp":"2026-05-24T15:45:55.665Z"}
+{"level":"info","message":"A user connected: 6963a574d37ce0a1722c4da7","timestamp":"2026-05-24T15:45:55.667Z"}
+{"level":"info","message":"Socket lE1B4KKzd9sjuataAAAC joined room for user 6963a574d37ce0a1722c4da7","timestamp":"2026-05-24T15:45:55.667Z"}
+{"level":"info","message":"Environment variables validated successfully.","timestamp":"2026-05-24T15:51:02.975Z"}
+{"level":"info","message":"Google OAuth Strategy initialized successfully.","timestamp":"2026-05-24T15:51:02.989Z"}
+{"level":"info","message":"Server started on port 5000","timestamp":"2026-05-24T15:51:02.998Z"}
+{"level":"info","message":"MongoDB Connected: localhost","timestamp":"2026-05-24T15:51:03.017Z"}
+{"level":"debug","message":"Socket.IO authentication middleware started.","timestamp":"2026-05-24T15:51:03.225Z"}
+{"level":"info","message":"Socket authenticated successfully. User ID: 6963a574d37ce0a1722c4da7","timestamp":"2026-05-24T15:51:03.227Z"}
+{"level":"info","message":"A user connected: 6963a574d37ce0a1722c4da7","timestamp":"2026-05-24T15:51:03.228Z"}
+{"level":"info","message":"Socket EfHl5s3PkExN58TiAAAB joined room for user 6963a574d37ce0a1722c4da7","timestamp":"2026-05-24T15:51:03.228Z"}
+{"level":"info","message":"User 6963a574d37ce0a1722c4da7 disconnected from socket EfHl5s3PkExN58TiAAAB","timestamp":"2026-05-24T15:51:09.957Z"}
+{"level":"debug","message":"Socket.IO authentication middleware started.","timestamp":"2026-05-24T15:51:10.101Z"}
+{"level":"info","message":"Socket authenticated successfully. User ID: 6963a574d37ce0a1722c4da7","timestamp":"2026-05-24T15:51:10.102Z"}
+{"level":"info","message":"A user connected: 6963a574d37ce0a1722c4da7","timestamp":"2026-05-24T15:51:10.102Z"}
+{"level":"info","message":"Socket 1-hmLsSs4S-enKviAAAE joined room for user 6963a574d37ce0a1722c4da7","timestamp":"2026-05-24T15:51:10.102Z"}
+{"level":"info","message":"User 6963a574d37ce0a1722c4da7 disconnected from socket 1-hmLsSs4S-enKviAAAE","timestamp":"2026-05-24T15:51:10.892Z"}
+{"level":"debug","message":"Socket.IO authentication middleware started.","timestamp":"2026-05-24T15:51:10.945Z"}
+{"level":"info","message":"Socket authenticated successfully. User ID: 6963a574d37ce0a1722c4da7","timestamp":"2026-05-24T15:51:10.946Z"}
+{"level":"info","message":"A user connected: 6963a574d37ce0a1722c4da7","timestamp":"2026-05-24T15:51:10.946Z"}
+{"level":"info","message":"Socket kz_fFawL2-8YwC4KAAAH joined room for user 6963a574d37ce0a1722c4da7","timestamp":"2026-05-24T15:51:10.947Z"}
+{"level":"info","message":"Environment variables validated successfully.","timestamp":"2026-05-24T15:51:15.161Z"}
+{"level":"info","message":"Google OAuth Strategy initialized successfully.","timestamp":"2026-05-24T15:51:15.174Z"}
+{"level":"info","message":"Server started on port 5000","timestamp":"2026-05-24T15:51:15.182Z"}
+{"level":"info","message":"MongoDB Connected: localhost","timestamp":"2026-05-24T15:51:15.200Z"}
+{"level":"debug","message":"Socket.IO authentication middleware started.","timestamp":"2026-05-24T15:51:15.222Z"}
+{"level":"info","message":"Socket authenticated successfully. User ID: 6963a574d37ce0a1722c4da7","timestamp":"2026-05-24T15:51:15.224Z"}
+{"level":"info","message":"A user connected: 6963a574d37ce0a1722c4da7","timestamp":"2026-05-24T15:51:15.225Z"}
+{"level":"info","message":"Socket O0_zNhKCQPbSx3V4AAAB joined room for user 6963a574d37ce0a1722c4da7","timestamp":"2026-05-24T15:51:15.225Z"}
+{"level":"info","message":"Environment variables validated successfully.","timestamp":"2026-05-24T15:51:27.230Z"}
+{"level":"info","message":"Google OAuth Strategy initialized successfully.","timestamp":"2026-05-24T15:51:27.244Z"}
+{"level":"info","message":"Server started on port 5000","timestamp":"2026-05-24T15:51:27.253Z"}
+{"level":"info","message":"MongoDB Connected: localhost","timestamp":"2026-05-24T15:51:27.268Z"}
+{"level":"debug","message":"Socket.IO authentication middleware started.","timestamp":"2026-05-24T15:51:27.301Z"}
+{"level":"info","message":"Socket authenticated successfully. User ID: 6963a574d37ce0a1722c4da7","timestamp":"2026-05-24T15:51:27.305Z"}
+{"level":"info","message":"A user connected: 6963a574d37ce0a1722c4da7","timestamp":"2026-05-24T15:51:27.306Z"}
+{"level":"info","message":"Socket VtCZwpaazY6YifZUAAAB joined room for user 6963a574d37ce0a1722c4da7","timestamp":"2026-05-24T15:51:27.306Z"}
+{"level":"info","message":"User 6963a574d37ce0a1722c4da7 disconnected from socket VtCZwpaazY6YifZUAAAB","timestamp":"2026-05-24T15:52:01.267Z"}
+{"level":"debug","message":"Socket.IO authentication middleware started.","timestamp":"2026-05-24T15:52:01.357Z"}
+{"level":"info","message":"Socket authenticated successfully. User ID: 6963a574d37ce0a1722c4da7","timestamp":"2026-05-24T15:52:01.358Z"}
+{"level":"info","message":"A user connected: 6963a574d37ce0a1722c4da7","timestamp":"2026-05-24T15:52:01.358Z"}
+{"level":"info","message":"Socket 7Ib4qclLKN9T9e63AAAE joined room for user 6963a574d37ce0a1722c4da7","timestamp":"2026-05-24T15:52:01.358Z"}
+{"level":"info","message":"User 6963a574d37ce0a1722c4da7 disconnected from socket 7Ib4qclLKN9T9e63AAAE","timestamp":"2026-05-24T15:52:03.388Z"}
+{"level":"info","message":"Environment variables validated successfully.","timestamp":"2026-05-24T15:52:06.690Z"}
+{"level":"info","message":"Google OAuth Strategy initialized successfully.","timestamp":"2026-05-24T15:52:06.704Z"}
+{"level":"info","message":"Server started on port 5000","timestamp":"2026-05-24T15:52:06.713Z"}
+{"level":"info","message":"MongoDB Connected: localhost","timestamp":"2026-05-24T15:52:06.733Z"}
+{"level":"info","message":"Environment variables validated successfully.","timestamp":"2026-05-24T16:07:33.043Z"}
+{"level":"info","message":"Google OAuth Strategy initialized successfully.","timestamp":"2026-05-24T16:07:33.057Z"}
+{"level":"info","message":"Server started on port 5000","timestamp":"2026-05-24T16:07:33.065Z"}
+{"level":"info","message":"MongoDB Connected: localhost","timestamp":"2026-05-24T16:07:33.077Z"}
+{"level":"info","message":"Environment variables validated successfully.","timestamp":"2026-05-24T16:07:51.100Z"}
+{"level":"info","message":"Google OAuth Strategy initialized successfully.","timestamp":"2026-05-24T16:07:51.115Z"}
+{"level":"info","message":"Server started on port 5000","timestamp":"2026-05-24T16:07:51.124Z"}
+{"level":"info","message":"MongoDB Connected: localhost","timestamp":"2026-05-24T16:07:51.146Z"}
+{"level":"info","message":"Environment variables validated successfully.","timestamp":"2026-05-24T18:05:25.186Z"}
+{"level":"info","message":"Google OAuth Strategy initialized successfully.","timestamp":"2026-05-24T18:05:25.201Z"}
+{"level":"info","message":"Server started on port 5000","timestamp":"2026-05-24T18:05:25.211Z"}
+{"level":"info","message":"MongoDB Connected: localhost","timestamp":"2026-05-24T18:05:25.225Z"}

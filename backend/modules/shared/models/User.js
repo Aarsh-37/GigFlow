@@ -1,0 +1,104 @@
+import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
+
+const userSchema = new mongoose.Schema({
+    name: {
+        type: String,
+        required: true,
+        trim: true // Added trim for consistency
+    },
+    email: {
+        type: String,
+        required: true,
+        unique: true,
+        lowercase: true // Added lowercase for consistency
+    },
+    password: {
+        type: String,
+        // required: true, // Removed as googleId can bypass password
+    },
+    googleId: { // Added from remote
+        type: String,
+        unique: true,
+        sparse: true
+    },
+    bio: { // Added from remote
+        type: String,
+        default: ''
+    },
+    skills: { // Added from remote
+        type: [String],
+        default: []
+    },
+    avatar: { 
+        type: String,
+        default: ''
+    },
+    banner: { 
+        type: String,
+        default: ''
+    },
+    linkedin: {
+        type: String,
+        default: ''
+    },
+    github: {
+        type: String,
+        default: ''
+    },
+    twitter: {
+        type: String,
+        default: ''
+    },
+    totalGigs: { 
+        type: Number,
+        default: 0
+    },
+    rating: { 
+        type: Number,
+        default: 0
+    },
+    balance: { // Added from remote (for payment simulation)
+        type: Number,
+        default: 10000
+    },
+    escrowBalance: {
+        type: Number,
+        default: 0
+    },
+    role: { // Added from remote
+        type: String,
+        enum: ['admin', 'hirer', 'intern'], // Updated roles for Internship platform
+        default: 'intern' 
+    },
+    mfaSecret: {
+        type: String
+    },
+    isMfaEnabled: {
+        type: Boolean,
+        default: false
+    }
+}, {
+    timestamps: true
+});
+
+userSchema.pre('save', async function () {
+    if (!this.isModified('password') || !this.password) {
+        return;
+    }
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+});
+
+userSchema.methods.matchPassword = async function (enteredPassword) {
+    // Only compare if a password exists (for google auth users, this will be false)
+    if (!this.password) return false;
+    return await bcrypt.compare(enteredPassword, this.password);
+};
+
+userSchema.index({ email: 1 });
+userSchema.index({ role: 1 });
+
+const User = mongoose.model('User', userSchema);
+
+export default User;

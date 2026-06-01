@@ -1,10 +1,10 @@
-import User from '../models/User.js';
+import User from '../modules/shared/models/User.js';
 
 /**
  * Service for user registration.
  */
 export const register = async (userData) => {
-    const { name, email, password } = userData;
+    const { name, email, password, role } = userData;
 
     const userExists = await User.findOne({ email });
     if (userExists) {
@@ -16,7 +16,8 @@ export const register = async (userData) => {
     const user = await User.create({
         name,
         email,
-        password
+        password,
+        role: role || 'intern'
     });
 
     return user;

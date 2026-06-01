@@ -87,8 +87,8 @@ const Chat = ({ gigId }) => {
                         >
                             <div className={`max-w-[80%] flex items-end gap-2 ${msg.senderId._id === userInfo._id ? 'flex-row-reverse' : 'flex-row'}`}>
                                 <div className="w-6 h-6 rounded-full bg-slate-200 flex-shrink-0 flex items-center justify-center overflow-hidden">
-                                    {msg.senderId.profilePic ? (
-                                        <img src={msg.senderId.profilePic} alt="" className="w-full h-full object-cover" />
+                                    {msg.senderId.avatar ? (
+                                        <img src={msg.senderId.avatar} alt="" className="w-full h-full object-cover" />
                                     ) : (
                                         <User size={12} className="text-slate-400" />
                                     )}

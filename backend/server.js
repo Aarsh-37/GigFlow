@@ -1,48 +1,48 @@
-import express from 'express';
 import dotenv from 'dotenv';
+dotenv.config();
+
+import express from 'express';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import morgan from 'morgan';
-import connectDB from './config/db.js';
-import { notFound, errorHandler } from './middleware/errorMiddleware.js';
+import connectDB from './modules/shared/config/db.js';
+import { notFound, errorHandler } from './modules/shared/middleware/errorMiddleware.js';
 import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
-import authRoutes from './routes/authRoutes.js';
-import gigRoutes from './routes/gigRoutes.js';
-import applicationRoutes from './routes/applicationRoutes.js';
-import hirerRoutes from './routes/hirerRoutes.js';
-import internRoutes from './routes/internRoutes.js';
-import userRoutes from './routes/userRoutes.js';
-import reviewRoutes from './routes/reviewRoutes.js';
-import dashboardRoutes from './routes/dashboardRoutes.js';
-import notificationRoutes from './routes/notificationRoutes.js';
-import chatRoutes from './routes/chatRoutes.js';
-import adminRoutes from './routes/adminRoutes.js';
-import disputeRoutes from './routes/disputeRoutes.js';
+import { globalLimiter, authLimiter, strictLimiter } from './modules/shared/config/rateLimiter.js';
+import authRoutes from './modules/shared/routes/authRoutes.js';
+import gigRoutes from './modules/hiring/routes/gigRoutes.js';
+import applicationRoutes from './modules/intern/routes/applicationRoutes.js';
+import userRoutes from './modules/shared/routes/userRoutes.js';
+import reviewRoutes from './modules/shared/routes/reviewRoutes.js';
+import dashboardRoutes from './modules/shared/routes/dashboardRoutes.js';
+import notificationRoutes from './modules/shared/routes/notificationRoutes.js';
+import chatRoutes from './modules/shared/routes/chatRoutes.js';
+import adminRoutes from './modules/hiring/routes/adminRoutes.js';
+import disputeRoutes from './modules/hiring/routes/disputeRoutes.js';
 import passport from 'passport';
-import configurePassport from './config/passportConfig.js';
-import logger from './config/logger.js'; // Import Winston logger
+import configurePassport from './modules/shared/config/passportConfig.js';
+import logger from './modules/shared/config/logger.js'; // Import Winston logger
 import jwt from 'jsonwebtoken'; // Import JWT for verification
 import { parse } from 'cookie'; // Import parse for cookie handling
-import validateEnv from './config/envValidator.js';
-import './config/bullmq.js'; 
-import './config/cloudinary.js';
+import validateEnv from './modules/shared/config/envValidator.js';
+import { requestIdMiddleware } from './modules/shared/middleware/requestId.js';
+import './modules/shared/config/bullmq.js';
 
 // Import Gig and Application models for authorization check
-import Gig from './models/Gig.js';
-import Application from './models/Application.js';
+import Gig from './modules/shared/models/Gig.js';
+import Application from './modules/shared/models/Application.js';
 
 
 // Import Swagger dependencies
-import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
-import specs from './swaggerDef.js'; // Import Swagger definitions
+import { openApiDocument } from './docs/openapi.js';
 
 import { createServer } from 'http';
 import { Server } from 'socket.io';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-// Load environment variables
-dotenv.config();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Validate environment variables
 validateEnv();
@@ -56,32 +56,47 @@ configurePassport();
 
 const app = express();
 
-// Request logging
+// 1. Request ID & Logging
+app.use(requestIdMiddleware);
 if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'));
 }
 
-// Trust proxy is required for secure cookies on Render/Heroku
+// 2. CORS (Must be before routes and other security middleware)
+const corsOptions = {
+    origin: [
+        'http://localhost:5173',
+        'http://localhost:5174',
+        'http://localhost:5175',
+        'http://localhost:5176',
+        process.env.FRONTEND_URL,
+    ].filter(Boolean),
+    credentials: true,
+};
+app.use(cors(corsOptions));
+
+// 3. Security & Parsing
 app.set('trust proxy', 1);
+app.use(helmet({
+    crossOriginResourcePolicy: false,
+    contentSecurityPolicy: process.env.NODE_ENV === 'production' ? undefined : false,
+}));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+app.use(passport.initialize());
 
-// Security Middlewares
-app.use(helmet());
-
-// Global Rate Limiting
-const globalLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: process.env.NODE_ENV === 'development' ? 10000 : 100, // Limit each IP to 100 requests per windowMs
-    message: 'Too many requests from this IP, please try again after 15 minutes'
-});
+// 4. Rate Limiting (Applied to /api/v1)
 app.use('/api/v1', globalLimiter);
+app.use('/api/v1/gigs/:id/start', strictLimiter);
+app.use('/api/v1/gigs/:id/complete', strictLimiter);
+app.use('/api/v1/gigs/:id/close', strictLimiter);
 
-// Strict Rate Limiting for Auth
-const authLimiter = rateLimit({
-    windowMs: 60 * 60 * 1000, // 1 hour
-    max: process.env.NODE_ENV === 'development' ? 1000 : 10, // Limit each IP to 1 login/register attempts per hour
-    message: 'Too many authentication attempts, please try again after an hour'
-});
-app.use('/api/v1/auth', authLimiter);
+// 5. Documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));
+
+// 6. Static file serving for locally uploaded resumes (fallback when Cloudinary is not configured)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
@@ -96,10 +111,6 @@ const io = new Server(httpServer, {
         credentials: true
     }
 });
-
-// Swagger UI Setup
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
-
 
 // Socket.IO Authentication Middleware
 io.use((socket, next) => {
@@ -125,7 +136,7 @@ io.use((socket, next) => {
 });
 
 io.on('connection', (socket) => {
-    logger.info(`A user connected: ${socket.userId}`); // Use socket.userId now
+    logger.info(`A user connected: ${socket.userId}`);
 
     // Join a room based on authenticated userId
     socket.join(socket.userId);
@@ -138,30 +149,29 @@ io.on('connection', (socket) => {
             const gig = await Gig.findById(gigId);
             if (!gig) {
                 logger.warn(`Join gig failed: Gig not found for ID ${gigId}.`);
-                return; // Gig not found, do nothing
+                socket.emit('join_error', { message: 'Internship not found.' });
+                return;
             }
 
-            // Check if the user is the owner or has applied for the gig
             const isOwner = gig.ownerId.toString() === socket.userId;
-            const hasApplied = await Application.exists({ gigId: gigId, internId: socket.userId });
+            const isHiredIntern = gig.hiredInternId && gig.hiredInternId.toString() === socket.userId;
 
-            if (isOwner || hasApplied) {
+            if (isOwner || isHiredIntern) {
                 socket.join(`gig_${gigId}`);
                 logger.info(`Socket ${socket.id} (User: ${socket.userId}) joined gig room: gig_${gigId}`);
+                socket.emit('joined_gig', { gigId });
             } else {
                 logger.warn(`Socket ${socket.id} (User: ${socket.userId}) unauthorized to join gig room: gig_${gigId}`);
-                // Optionally, emit an error back to the client
-                socket.emit('join_error', { message: 'Unauthorized to join this gig room.' });
+                socket.emit('join_error', { message: 'Unauthorized to join this chat room.' });
             }
         } catch (error) {
             logger.error(`Error processing join_gig for gig ${gigId}:`, error);
-            socket.emit('join_error', { message: 'An error occurred while trying to join the gig room.' });
+            socket.emit('join_error', { message: 'An error occurred while trying to join the chat room.' });
         }
     });
 
     socket.on('disconnect', () => {
         logger.info(`User ${socket.userId} disconnected from socket ${socket.id}`);
-        // Potentially clean up rooms or user presence here if needed
     });
 });
 
@@ -171,28 +181,9 @@ app.use((req, res, next) => {
     next();
 });
 
-const corsOptions = {
-    origin: [
-        'http://localhost:5173',
-        'http://localhost:5174',
-        'http://localhost:5175',
-        'http://localhost:5176',
-        process.env.FRONTEND_URL,
-    ].filter(Boolean),
-    credentials: true,
-};
-
-app.use(cors(corsOptions));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
-app.use(passport.initialize());
-
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/gigs', gigRoutes);
 app.use('/api/v1/applications', applicationRoutes);
-app.use('/api/v1/hirer', hirerRoutes);
-app.use('/api/v1/intern', internRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/reviews', reviewRoutes);
 app.use('/api/v1/dashboard', dashboardRoutes);

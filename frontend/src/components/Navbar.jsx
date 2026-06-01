@@ -1,28 +1,188 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { logout } from '../slices/authSlice';
+import { logout, setCredentials } from '../slices/authSlice';
 import { toggleTheme } from '../slices/themeSlice';
 import api from '../utils/api';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
     LogOut, PlusCircle, User, Briefcase, Bell, Home, 
-    Menu, X, Sun, Moon, Search, Settings, ChevronDown 
+    Menu, X, Sun, Moon, Search, Settings, ChevronDown, Zap,
+    Wallet, IndianRupee, Plus, Loader2, CheckCircle
 } from 'lucide-react';
 import NotificationDrawer from './NotificationDrawer';
 import { toast } from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// Quick-add preset amounts
+const PRESETS = [500, 1000, 2000, 5000, 10000];
+
+const WalletModal = ({ onClose }) => {
+    const dispatch = useDispatch();
+    const queryClient = useQueryClient();
+    const { userInfo } = useSelector((state) => state.auth);
+    const [amount, setAmount] = useState('');
+    const [success, setSuccess] = useState(false);
+
+    const addBalanceMutation = useMutation({
+        mutationFn: (amt) => api.post('/auth/add-balance', { amount: amt }),
+        onSuccess: (response) => {
+            const updatedUser = response.data;
+            if (updatedUser) dispatch(setCredentials(updatedUser));
+            // Refresh dashboard so all stats reflect new balance
+            queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+            setSuccess(true);
+            setTimeout(() => { setSuccess(false); onClose(); }, 1800);
+        },
+        onError: (err) => {
+            toast.error(err.response?.data?.message || 'Failed to add balance.');
+        }
+    });
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        const parsed = parseFloat(amount);
+        if (!parsed || parsed <= 0) return toast.error('Enter a valid amount.');
+        if (parsed > 100000) return toast.error('Max ₹1,00,000 per transaction.');
+        addBalanceMutation.mutate(parsed);
+    };
+
+    return (
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
+            onClick={(e) => e.target === e.currentTarget && onClose()}
+        >
+            <motion.div
+                initial={{ scale: 0.92, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.92, opacity: 0, y: 20 }}
+                transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+                className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 w-full max-w-md overflow-hidden"
+            >
+                {/* Header */}
+                <div className="bg-gradient-to-r from-brand-600 to-indigo-600 p-8 relative overflow-hidden">
+                    <div className="absolute inset-0 opacity-20">
+                        <div className="absolute -top-8 -right-8 w-40 h-40 bg-white rounded-full blur-3xl"></div>
+                    </div>
+                    <div className="relative flex items-center justify-between">
+                        <div>
+                            <p className="text-white/70 text-xs font-black uppercase tracking-widest mb-1">Current Balance</p>
+                            <p className="text-4xl font-black text-white">
+                                ₹{(userInfo?.balance || 0).toLocaleString('en-IN')}
+                            </p>
+                        </div>
+                        <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center">
+                            <Wallet size={28} className="text-white" />
+                        </div>
+                    </div>
+                    <button
+                        onClick={onClose}
+                        className="absolute top-4 right-4 p-1.5 rounded-xl bg-white/20 hover:bg-white/30 text-white transition-colors"
+                    >
+                        <X size={18} />
+                    </button>
+                </div>
+
+                {/* Body */}
+                <div className="p-8">
+                    {success ? (
+                        <motion.div
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            className="flex flex-col items-center py-6 gap-4"
+                        >
+                            <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+                                <CheckCircle size={36} className="text-green-600" />
+                            </div>
+                            <p className="text-xl font-black text-gray-900 dark:text-white">Balance Added!</p>
+                            <p className="text-gray-500 text-sm">Your wallet has been topped up.</p>
+                        </motion.div>
+                    ) : (
+                        <form onSubmit={handleSubmit} className="space-y-6">
+                            <div>
+                                <p className="text-sm font-black text-gray-700 dark:text-gray-300 uppercase tracking-widest mb-3">Quick Add</p>
+                                <div className="flex flex-wrap gap-2">
+                                    {PRESETS.map((p) => (
+                                        <button
+                                            key={p}
+                                            type="button"
+                                            onClick={() => setAmount(String(p))}
+                                            className={`px-4 py-2 rounded-xl text-sm font-black border-2 transition-all ${
+                                                amount === String(p)
+                                                    ? 'bg-brand-600 border-brand-600 text-white shadow-lg shadow-brand-500/25'
+                                                    : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-brand-400 hover:text-brand-600'
+                                            }`}
+                                        >
+                                            ₹{p.toLocaleString('en-IN')}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-black text-gray-700 dark:text-gray-300 uppercase tracking-widest">
+                                    Custom Amount
+                                </label>
+                                <div className="relative">
+                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-black text-lg">₹</span>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        max="100000"
+                                        step="1"
+                                        value={amount}
+                                        onChange={(e) => setAmount(e.target.value)}
+                                        placeholder="Enter amount"
+                                        className="w-full pl-10 pr-4 py-4 rounded-2xl bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 focus:border-brand-500 focus:bg-white dark:focus:bg-gray-900 outline-none transition-all dark:text-white font-bold text-lg"
+                                    />
+                                </div>
+                                <p className="text-xs text-gray-400 ml-1">Max ₹1,00,000 per transaction</p>
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={addBalanceMutation.isPending || !amount}
+                                className="w-full py-4 bg-brand-600 hover:bg-brand-700 text-white rounded-2xl font-black text-base shadow-lg shadow-brand-500/25 transition-all flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                            >
+                                {addBalanceMutation.isPending
+                                    ? <><Loader2 size={18} className="animate-spin" /> Adding...</>
+                                    : <><Plus size={18} /> Add to Wallet</>
+                                }
+                            </button>
+                        </form>
+                    )}
+                </div>
+            </motion.div>
+        </motion.div>
+    );
+};
+
 const Navbar = () => {
     const { userInfo } = useSelector((state) => state.auth);
-    const { unreadCount } = useSelector((state) => state.notifications);
     const { mode } = useSelector((state) => state.theme);
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const location = useLocation();
 
+    // Fetch notifications to get unread count via TanStack Query
+    const { data: notifications = [] } = useQuery({
+        queryKey: ['notifications'],
+        queryFn: async () => {
+            const { data } = await api.get('/notifications');
+            return Array.isArray(data) ? data : [];
+        },
+        enabled: !!userInfo,
+    });
+
+    const unreadCount = notifications.filter(n => !n.isRead).length;
+
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isNotificationOpen, setIsNotificationOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [isWalletOpen, setIsWalletOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
 
     useEffect(() => {
@@ -46,9 +206,20 @@ const Navbar = () => {
         }
     };
 
+    const role = userInfo?.role;
+    const isHirer = role === 'hirer' || role === 'admin';
+    const isIntern = role === 'intern' || role === 'admin';
+
+    const roleBadge = {
+        hirer: { label: 'Hirer', color: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300' },
+        intern: { label: 'Intern', color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' },
+        admin: { label: 'Admin', color: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300' },
+    };
+
     const navLinks = [
-        { name: 'Explore Gigs', path: '/gigs', icon: <Search size={18} /> },
-        { name: 'Post a Gig', path: '/gigs/create', icon: <PlusCircle size={18} /> },
+        ...(isIntern ? [{ name: 'Find Internships', path: '/gigs', icon: <Search size={18} /> }] : []),
+        ...(isHirer ? [{ name: 'Post Internship', path: '/gigs/create', icon: <PlusCircle size={18} /> }] : []),
+        ...(!userInfo ? [{ name: 'Explore Internships', path: '/gigs', icon: <Search size={18} /> }] : []),
         { name: 'Dashboard', path: '/dashboard', icon: <Briefcase size={18} /> },
     ];
 
@@ -103,6 +274,21 @@ const Navbar = () => {
 
                                 {userInfo ? (
                                     <>
+                                        {/* Wallet Balance Chip — Hirers only */}
+                                        {isHirer && (
+                                            <button
+                                                onClick={() => setIsWalletOpen(true)}
+                                                className="flex items-center gap-2 px-4 py-2 rounded-xl glass border border-green-200 dark:border-green-800/50 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all group"
+                                                title="Top up wallet"
+                                            >
+                                                <Wallet size={16} className="text-green-600 dark:text-green-400 group-hover:scale-110 transition-transform" />
+                                                <span className="text-sm font-black text-green-700 dark:text-green-400">
+                                                    ₹{(userInfo.balance || 0).toLocaleString('en-IN')}
+                                                </span>
+                                                <Plus size={13} className="text-green-500 opacity-60 group-hover:opacity-100 transition-opacity" />
+                                            </button>
+                                        )}
+
                                         {/* Notifications */}
                                         <button 
                                             onClick={() => setIsNotificationOpen(true)}
@@ -127,7 +313,14 @@ const Navbar = () => {
                                                         userInfo.name?.charAt(0) || 'U'
                                                     )}
                                                 </div>
-                                                <span className="text-sm font-bold text-gray-700 dark:text-gray-300">{userInfo.name?.split(' ')[0] || 'User'}</span>
+                                                <div className="flex flex-col items-start">
+                                                    <span className="text-sm font-bold text-gray-700 dark:text-gray-300 leading-tight">{userInfo.name?.split(' ')[0] || 'User'}</span>
+                                                    {role && roleBadge[role] && (
+                                                        <span className={`text-[10px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-full ${roleBadge[role].color}`}>
+                                                            {roleBadge[role].label}
+                                                        </span>
+                                                    )}
+                                                </div>
                                                 <ChevronDown size={14} className={`text-gray-400 transition-transform duration-300 ${isProfileOpen ? 'rotate-180' : ''}`} />
                                             </button>
 
@@ -142,9 +335,19 @@ const Navbar = () => {
                                                         <Link to="/profile" className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" onClick={() => setIsProfileOpen(false)}>
                                                             <User size={18} /> My Profile
                                                         </Link>
-                                                        <Link to="/gigs/create" className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" onClick={() => setIsProfileOpen(false)}>
-                                                            <PlusCircle size={18} /> Post a Gig
-                                                        </Link>
+                                                        {isHirer && (
+                                                            <>
+                                                                <Link to="/gigs/create" className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" onClick={() => setIsProfileOpen(false)}>
+                                                                    <PlusCircle size={18} /> Post Internship
+                                                                </Link>
+                                                                <button
+                                                                    onClick={() => { setIsProfileOpen(false); setIsWalletOpen(true); }}
+                                                                    className="flex items-center gap-3 w-full px-4 py-3 text-sm font-bold text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/10 transition-colors"
+                                                                >
+                                                                    <Wallet size={18} /> Top Up Wallet
+                                                                </button>
+                                                            </>
+                                                        )}
                                                         <div className="h-px bg-gray-100 dark:bg-gray-700 my-2"></div>
                                                         <button 
                                                             onClick={handleLogout}
@@ -212,8 +415,20 @@ const Navbar = () => {
                                         <Link to="/profile" className="flex items-center gap-4 px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 text-lg font-bold text-gray-900 dark:text-white">
                                             <User size={20} /> My Profile
                                         </Link>
+                                        {isHirer && (
+                                            <button
+                                                onClick={() => { setIsMobileMenuOpen(false); setIsWalletOpen(true); }}
+                                                className="flex items-center gap-4 w-full px-4 py-3 rounded-xl bg-green-50 dark:bg-green-900/20 text-lg font-bold text-green-700 dark:text-green-400"
+                                            >
+                                                <Wallet size={20} />
+                                                Wallet — ₹{(userInfo.balance || 0).toLocaleString('en-IN')}
+                                            </button>
+                                        )}
                                         <button 
-                                            onClick={() => setIsNotificationOpen(true)}
+                                            onClick={() => {
+                                                setIsNotificationOpen(true);
+                                                setIsMobileMenuOpen(false);
+                                            }}
                                             className="flex items-center gap-4 w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-800 text-lg font-bold text-gray-900 dark:text-white"
                                         >
                                             <Bell size={20} /> Notifications ({unreadCount})
@@ -241,22 +456,15 @@ const Navbar = () => {
                 isOpen={isNotificationOpen} 
                 onClose={() => setIsNotificationOpen(false)} 
             />
+
+            {/* Wallet Top-Up Modal */}
+            <AnimatePresence>
+                {isWalletOpen && (
+                    <WalletModal onClose={() => setIsWalletOpen(false)} />
+                )}
+            </AnimatePresence>
         </>
     );
 };
-
-// Simple Zap icon component for the logo
-const Zap = ({ className, size }) => (
-    <svg 
-        className={className} 
-        width={size} 
-        height={size} 
-        viewBox="0 0 24 24" 
-        fill="none" 
-        xmlns="http://www.w3.org/2000/svg"
-    >
-        <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    </svg>
-);
 
 export default Navbar;

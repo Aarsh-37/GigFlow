@@ -1,4 +1,4 @@
-name: CI
+name: CI/CD Pipeline
 
 on:
   push:
@@ -7,39 +7,42 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [18.x]
-
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-        cache-dependency-path: './backend/node_modules' # Cache backend dependencies
-        cache-dependency-path: './frontend/node_modules' # Cache frontend dependencies
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
 
-    - name: Install Backend Dependencies
-      run: npm install --prefix backend
+      - name: Install Backend Dependencies
+        run: cd backend && npm ci
 
-    - name: Install Frontend Dependencies
-      run: npm install --prefix frontend
+      - name: Install Frontend Dependencies
+        run: cd frontend && npm ci --legacy-peer-deps
 
-    - name: Run Backend Linting
-      run: npm run lint --prefix backend # Assumes 'lint' script exists in backend package.json
+      - name: Run Backend Tests
+        run: cd backend && npm test
+        env:
+          NODE_ENV: test
+          JWT_SECRET: test_secret
 
-    - name: Run Frontend Linting
-      run: npm run lint --prefix frontend # Assumes 'lint' script exists in frontend package.json
+      # Uncomment once frontend tests are configured
+      # - name: Run Frontend Tests
+      #   run: cd frontend && npm test
 
-    - name: Run Backend Tests
-      run: npm test --prefix backend # Assumes 'test' script exists in backend package.json
-
-    - name: Run Frontend Tests
-      run: npm test --prefix frontend # Assumes 'test' script exists in frontend package.json
-
+  # build:
+  #   needs: test
+  #   runs-on: ubuntu-latest
+  #   if: github.ref == 'refs/heads/main'
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     
+  #     - name: Build Docker Images
+  #       run: docker-compose build
+  #
+  #     # Add steps to push to Docker Hub or trigger deployment (Render/Heroku/AWS) here

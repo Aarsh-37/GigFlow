@@ -3,14 +3,15 @@
 This document outlines the architecture, database structure, and connectivity for the GigFlow Internship Hiring Platform.
 
 ## 1. Backend Architecture
-GigFlow follows a modular **Controller-Service-Model** architecture using Node.js and Express.js.
+GigFlow follows a modular **Controller-Service-Model** architecture using Node.js and Express.js, organized into role-based modules.
 
 *   **Entry Point:** `server.js` (Express + Socket.IO)
-*   **Controllers (`/controllers`):** Request/Response handling.
-*   **Services (`/services`):** Business logic layer.
-*   **Models (`/models`):** Mongoose schemas.
-*   **Routes (`/routes`):** API route definitions and middleware orchestration.
-*   **Middleware (`/middleware`):** Auth, RBAC (`authorizeRoles`), Validation, and Error handling.
+*   **Modules (`/backend/modules`):**
+    *   **Shared:** Common logic, models, config, middleware, utils, and shared controllers (Auth, User, Chat, Notifications, Review, Dashboard).
+    *   **Hiring:** Hirer-specific logic (Gigs, Admin, Disputes).
+    *   **Intern:** Intern-specific logic (Applications).
+*   **Services (`/backend/services`):** Core business logic layer (GigService, AuthService, ApplicationService).
+*   **Middleware:** Centralized in `backend/modules/shared/middleware`.
 
 ### Tech Stack
 *   **Framework:** Node.js, Express.js
@@ -20,7 +21,13 @@ GigFlow follows a modular **Controller-Service-Model** architecture using Node.j
 *   **Async Tasks:** BullMQ
 *   **File Storage:** Cloudinary
 
-## 2. Database Models & Connectivity
+## 2. Frontend Architecture
+The frontend is also modularized to match the backend structure.
+*   **Modules (`/frontend/src/modules`):**
+    *   **Shared:** Shared pages (Login, Register, Profile, Dashboard, GigDetail, LandingPage) and components.
+    *   **Hiring:** Hirer-specific pages (CreateGig).
+    *   **Intern:** Intern-specific pages (GigsFeed, MyInternshipsPage).
+*   **State Management:** Redux Toolkit manages global state (`authSlice`, `applicationSlice`, `gigSlice`).
 
 | Model | Relationships | Primary API Route |
 | :--- | :--- | :--- |

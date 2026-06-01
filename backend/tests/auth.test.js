@@ -1,27 +1,22 @@
 import request from 'supertest';
 import mongoose from 'mongoose';
 import app from '../server.js';
-import User from '../models/User.js';
-
-let server;
+import User from '../modules/shared/models/User.js';
 
 // Mock environment variables
 process.env.JWT_SECRET = 'testsecret';
-process.env.NODE_ENV = 'development';
-process.env.PORT = 5001;
-process.env.MONGO_URI = 'mongodb://127.0.0.1:27017/gigflow_test';
+process.env.NODE_ENV = 'test';
 
 beforeAll(async () => {
     // Wait for DB connection
+    const mongoURI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/gigflow_test';
     if (mongoose.connection.readyState === 0) {
-        await mongoose.connect(process.env.MONGO_URI);
+        await mongoose.connect(mongoURI);
     }
-    server = app.listen(5001);
 });
 
 afterAll(async () => {
     await mongoose.connection.close();
-    await new Promise(resolve => server.close(resolve));
 });
 
 beforeEach(async () => {
@@ -29,10 +24,10 @@ beforeEach(async () => {
 });
 
 describe('Auth API Endpoints', () => {
-    const registerEndpoint = '/api/auth/register';
-    const loginEndpoint = '/api/auth/login';
-    const meEndpoint = '/api/auth/me';
-    const logoutEndpoint = '/api/auth/logout';
+    const registerEndpoint = '/api/v1/auth/register';
+    const loginEndpoint = '/api/v1/auth/login';
+    const meEndpoint = '/api/v1/auth/me';
+    const logoutEndpoint = '/api/v1/auth/logout';
 
     const testUser = {
         name: 'Test User',
@@ -40,12 +35,13 @@ describe('Auth API Endpoints', () => {
         password: 'password123',
     };
 
-    describe('POST /api/auth/register', () => {
+    describe('POST /api/v1/auth/register', () => {
         it('should register a new user and set cookie', async () => {
-            const res = await request(server)
+            const res = await request(app)
                 .post(registerEndpoint)
                 .send(testUser);
 
+            if (res.statusCode !== 201) console.log('Register Error:', res.body);
             expect(res.statusCode).toEqual(201);
             expect(res.headers['set-cookie']).toBeDefined();
             expect(res.body.data.name).toBe(testUser.name);
@@ -55,7 +51,7 @@ describe('Auth API Endpoints', () => {
         it('should return 400 if user already exists', async () => {
             await User.create(testUser);
 
-            const res = await request(server)
+            const res = await request(app)
                 .post(registerEndpoint)
                 .send(testUser);
 
@@ -63,13 +59,13 @@ describe('Auth API Endpoints', () => {
         });
     });
 
-    describe('POST /api/auth/login', () => {
+    describe('POST /api/v1/auth/login', () => {
         beforeEach(async () => {
-            await request(server).post(registerEndpoint).send(testUser);
+            await request(app).post(registerEndpoint).send(testUser);
         });
 
         it('should log in a user and set cookie', async () => {
-            const res = await request(server)
+            const res = await request(app)
                 .post(loginEndpoint)
                 .send({ email: testUser.email, password: testUser.password });
 
@@ -79,7 +75,7 @@ describe('Auth API Endpoints', () => {
         });
 
         it('should return 401 for invalid credentials', async () => {
-            const res = await request(server)
+            const res = await request(app)
                 .post(loginEndpoint)
                 .send({ email: testUser.email, password: 'wrongpassword' });
 
@@ -87,15 +83,19 @@ describe('Auth API Endpoints', () => {
         });
     });
 
-    describe('GET /api/auth/me', () => {
+    describe('GET /api/v1/auth/me', () => {
+        beforeEach(async () => {
+            await request(app).post(registerEndpoint).send(testUser);
+        });
+
         it('should return user info if cookie is present', async () => {
-            const loginRes = await request(server)
-                .post(registerEndpoint)
-                .send(testUser);
+            const loginRes = await request(app)
+                .post(loginEndpoint)
+                .send({ email: testUser.email, password: testUser.password });
             
             const cookie = loginRes.headers['set-cookie'];
 
-            const res = await request(server)
+            const res = await request(app)
                 .get(meEndpoint)
                 .set('Cookie', cookie);
 
@@ -104,14 +104,14 @@ describe('Auth API Endpoints', () => {
         });
 
         it('should return 401 if cookie is missing', async () => {
-            const res = await request(server).get(meEndpoint);
+            const res = await request(app).get(meEndpoint);
             expect(res.statusCode).toEqual(401);
         });
     });
 
-    describe('POST /api/auth/logout', () => {
+    describe('POST /api/v1/auth/logout', () => {
         it('should clear the cookie', async () => {
-            const res = await request(server).post(logoutEndpoint);
+            const res = await request(app).post(logoutEndpoint);
             expect(res.statusCode).toEqual(200);
             expect(res.headers['set-cookie'][0]).toContain('jwt=;');
         });

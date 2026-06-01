@@ -1,23 +1,45 @@
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Bell, X, CheckCircle2, MessageSquare, Briefcase, Trash2, IndianRupee } from 'lucide-react';
-import { fetchNotifications, markRead, removeNotification } from '../slices/notificationSlice';
+import React from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Bell, X, CheckCircle2, MessageSquare, Briefcase, Trash2, IndianRupee, Loader2 } from 'lucide-react';
+import api from '../utils/api';
 import { formatDistanceToNow } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const NotificationDrawer = ({ isOpen, onClose }) => {
-    const dispatch = useDispatch();
-    const { notifications, unreadCount, loading } = useSelector((state) => state.notifications);
+    const queryClient = useQueryClient();
 
-    useEffect(() => {
-        if (isOpen) {
-            dispatch(fetchNotifications());
+    const { data: notifications = [], isLoading } = useQuery({
+        queryKey: ['notifications'],
+        queryFn: async () => {
+            const { data } = await api.get('/notifications');
+            // Backend returns an array of notifications via sendResponse
+            return Array.isArray(data) ? data : [];
+        },
+        enabled: isOpen,
+    });
+
+    const markReadMutation = useMutation({
+        mutationFn: (id) => api.patch(`/notifications/${id}/read`),
+        onSuccess: () => {
+            queryClient.invalidateQueries(['notifications']);
         }
-    }, [isOpen, dispatch]);
+    });
 
-    const handleMarkAsRead = (id) => {
-        dispatch(markRead(id));
-    };
+    const deleteMutation = useMutation({
+        mutationFn: (id) => api.delete(`/notifications/${id}`),
+        onSuccess: () => {
+            queryClient.invalidateQueries(['notifications']);
+        }
+    });
+
+    const markAllReadMutation = useMutation({
+        mutationFn: () => api.patch('/notifications/read-all'),
+        onSuccess: () => {
+            queryClient.invalidateQueries(['notifications']);
+        }
+    });
+
+    const unreadCount = notifications.filter(n => !n.isRead).length;
 
     const getIcon = (type) => {
         switch (type) {
@@ -68,9 +90,9 @@ const NotificationDrawer = ({ isOpen, onClose }) => {
 
                         {/* Content */}
                         <div className="flex-grow overflow-y-auto">
-                            {loading && notifications.length === 0 ? (
+                            {isLoading ? (
                                 <div className="flex flex-col items-center justify-center h-64 space-y-4">
-                                    <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                                    <Loader2 className="w-10 h-10 text-indigo-600 animate-spin" />
                                     <p className="text-gray-500 dark:text-gray-400 font-bold">Fetching updates...</p>
                                 </div>
                             ) : notifications.length === 0 ? (
@@ -86,22 +108,22 @@ const NotificationDrawer = ({ isOpen, onClose }) => {
                                     {notifications.map((n) => (
                                         <div 
                                             key={n._id}
-                                            className={`p-6 transition-all hover:bg-gray-50 dark:hover:bg-gray-700/50 group relative ${!n.read ? 'bg-indigo-50/30 dark:bg-indigo-900/10' : ''}`}
-                                            onClick={() => !n.read && handleMarkAsRead(n._id)}
+                                            className={`p-6 transition-all hover:bg-gray-50 dark:hover:bg-gray-700/50 group relative ${!n.isRead ? 'bg-indigo-50/30 dark:bg-indigo-900/10' : ''}`}
+                                            onClick={() => !n.isRead && markReadMutation.mutate(n._id)}
                                         >
                                             <div className="flex gap-4">
                                                 <div className="mt-1 w-10 h-10 rounded-xl bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-center shrink-0">
                                                     {getIcon(n.type)}
                                                 </div>
                                                 <div className="flex-grow">
-                                                    <p className={`text-sm mb-1 ${!n.read ? 'font-bold text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400'}`}>
+                                                    <p className={`text-sm mb-1 ${!n.isRead ? 'font-bold text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-400'}`}>
                                                         {n.message}
                                                     </p>
                                                     <div className="flex items-center gap-3">
                                                         <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
                                                             {formatDistanceToNow(new Date(n.createdAt), { addSuffix: true })}
                                                         </span>
-                                                        {!n.read && (
+                                                        {!n.isRead && (
                                                             <span className="w-1.5 h-1.5 bg-indigo-600 rounded-full"></span>
                                                         )}
                                                     </div>
@@ -109,7 +131,7 @@ const NotificationDrawer = ({ isOpen, onClose }) => {
                                                 <button 
                                                     onClick={(e) => {
                                                         e.stopPropagation();
-                                                        dispatch(removeNotification(n._id));
+                                                        deleteMutation.mutate(n._id);
                                                     }}
                                                     className="opacity-0 group-hover:opacity-100 p-2 text-gray-400 hover:text-red-500 transition-all"
                                                 >
@@ -131,13 +153,14 @@ const NotificationDrawer = ({ isOpen, onClose }) => {
                         </div>
 
                         {/* Footer */}
-                        {notifications.length > 0 && (
+                        {notifications.length > 0 && unreadCount > 0 && (
                             <div className="p-6 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50">
                                 <button 
-                                    onClick={() => notifications.forEach(n => !n.read && handleMarkAsRead(n._id))}
-                                    className="w-full py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl font-bold text-sm text-gray-700 dark:text-white hover:bg-gray-50 transition-colors"
+                                    onClick={() => markAllReadMutation.mutate()}
+                                    disabled={markAllReadMutation.isLoading}
+                                    className="w-full py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl font-bold text-sm text-gray-700 dark:text-white hover:bg-gray-50 transition-colors disabled:opacity-50"
                                 >
-                                    Mark All as Read
+                                    {markAllReadMutation.isLoading ? 'Marking...' : 'Mark All as Read'}
                                 </button>
                             </div>
                         )}

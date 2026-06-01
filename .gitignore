@@ -17,6 +17,12 @@ dist/
 .env.development.local
 .env.test.local
 .env.production.local
+backend/.env
+frontend/.env
+*.env
+
+# Local file uploads (resume files stored when Cloudinary is not configured)
+backend/uploads/
 
 # Logs
 npm-debug.log*

@@ -32,7 +32,7 @@ class ErrorBoundary extends Component {
                         We're sorry, but an unexpected error occurred. Please try refreshing the page.
                     </p>
                     {/* Optionally display error details in development */}
-                    {process.env.NODE_ENV === 'development' && this.state.errorInfo && (
+                    {import.meta.env.MODE === 'development' && this.state.errorInfo && (
                         <details style={{ marginTop: '20px', whiteSpace: 'pre-wrap', textAlign: 'left', display: 'inline-block', backgroundColor: '#f0f0f0', padding: '15px', borderRadius: '5px' }}>
                             <summary style={{ cursor: 'pointer', fontWeight: 'bold' }}>Error Details</summary>
                             {this.state.error && this.state.error.toString()}
