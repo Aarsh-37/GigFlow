@@ -3,7 +3,10 @@ import logger from './logger.js';
 
 let redis;
 
-if (process.env.REDIS_URL) {
+const isRedisConfigured = process.env.REDIS_URL && 
+    !(process.env.NODE_ENV === 'production' && process.env.REDIS_URL.includes('127.0.0.1'));
+
+if (isRedisConfigured) {
     redis = new Redis(process.env.REDIS_URL, {
         maxRetriesPerRequest: null,
         enableReadyCheck: false

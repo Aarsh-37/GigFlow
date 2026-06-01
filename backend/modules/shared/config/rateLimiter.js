@@ -4,9 +4,11 @@ import Redis from 'ioredis';
 import logger from './logger.js';
 
 let redisClient;
-let store;
+// Only use Redis if configured and NOT pointing to localhost in production
+const isRedisConfigured = process.env.REDIS_URL && 
+    !(process.env.NODE_ENV === 'production' && process.env.REDIS_URL.includes('127.0.0.1'));
 
-if (process.env.REDIS_URL && process.env.NODE_ENV !== 'test') {
+if (isRedisConfigured && process.env.NODE_ENV !== 'test') {
     try {
         redisClient = new Redis(process.env.REDIS_URL, {
             maxRetriesPerRequest: null,
@@ -20,16 +22,22 @@ if (process.env.REDIS_URL && process.env.NODE_ENV !== 'test') {
         redisClient.on('connect', () => {
             logger.info('Rate Limiter Redis connected successfully');
         });
-
-        store = new RedisStore({
-            // @ts-expect-error - Known issue with rate-limit-redis types and ioredis
-            sendCommand: (...args) => redisClient.call(...args),
-        });
     } catch (error) {
         logger.error(`Failed to initialize Redis for rate limiting: ${error.message}`);
     }
 }
 
+// Factory function to create a new store instance for each limiter
+const createStore = (prefix) => {
+    if (redisClient) {
+        return new RedisStore({
+            // @ts-expect-error - Known issue with rate-limit-redis types and ioredis
+            sendCommand: (...args) => redisClient.call(...args),
+            prefix: prefix
+        });
+    }
+    return undefined; // Let express-rate-limit fall back to MemoryStore
+};
 /**
  * Global Rate Limiter
  * Limits each IP to 5000 requests per 15 minutes.
@@ -40,7 +48,7 @@ export const globalLimiter = rateLimit({
     message: 'Too many requests from this IP, please try again after 15 minutes',
     standardHeaders: true,
     legacyHeaders: false,
-    store: store,
+    store: createStore('rl:global:'),
 });
 
 /**
@@ -53,7 +61,7 @@ export const authLimiter = rateLimit({
     message: { success: false, message: 'Too many authentication attempts, please try again after 15 minutes' },
     standardHeaders: true,
     legacyHeaders: false,
-    store: store,
+    store: createStore('rl:auth:'),
 });
 
 /**
@@ -66,5 +74,5 @@ export const strictLimiter = rateLimit({
     message: 'Too many attempts for this action, please try again later',
     standardHeaders: true,
     legacyHeaders: false,
-    store: store,
+    store: createStore('rl:strict:'),
 });
