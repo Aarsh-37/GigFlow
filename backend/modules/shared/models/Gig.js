@@ -21,9 +21,17 @@ const gigSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
-    hiredInternId: {
+    teamMembers: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
+    }],
+    hiredInternId: { // Kept for backwards compatibility with older gigs
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    },
+    workspaceEnabled: {
+        type: Boolean,
+        default: false
     },
     status: {
         type: String,

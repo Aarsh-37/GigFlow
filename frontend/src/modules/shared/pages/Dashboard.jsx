@@ -166,43 +166,51 @@ const Dashboard = ({ role: forcedRole, section }) => {
                                     <p className="text-gray-500 dark:text-gray-400 font-bold">Nothing to show yet.</p>
                                 </div>
                             ) : (
-                                ((activeTab === 'hirer' ? hirerGigs : internApplications) || []).slice(0, 5).map((item, idx) => (
-                                    <motion.div
-                                        initial={{ opacity: 0, x: -20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: idx * 0.1 }}
-                                        key={item._id}
-                                        className="p-8 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group"
-                                    >
-                                        <div className="flex gap-6 items-center">
-                                            <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-2xl flex items-center justify-center text-gray-500 shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition-all">
-                                                {activeTab === 'hirer' ? <FileText size={24} /> : <Briefcase size={24} />}
-                                            </div>
-                                            <div>
-                                                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1 group-hover:text-indigo-600 transition-colors">
-                                                    {activeTab === 'hirer' ? item.title : (item.gigId?.title || 'Deleted Internship')}
-                                                </h3>
-                                                <div className="flex items-center gap-4 text-xs font-bold text-gray-500">
-                                                    <span className="flex items-center gap-1 text-indigo-600">
-                                                        <IndianRupee size={12} /> {(activeTab === 'hirer' ? item.budget : (item.gigId?.budget || 0)).toLocaleString()}
-                                                    </span>
-                                                    <span className="text-gray-300">|</span>
-                                                    <span className={`uppercase tracking-widest ${(item.status === 'open' || item.status === 'HIRED' || item.status === 'closed')
-                                                            ? 'text-green-500'
-                                                            : item.status === 'REJECTED' ? 'text-red-500' : 'text-orange-500'
-                                                        }`}>
-                                                        {activeTab === 'intern' && item.status === 'HIRED'
-                                                            ? `Hired • ${item.gigId?.status || 'Unknown'}`
-                                                            : item.status}
-                                                    </span>
+                                ((activeTab === 'hirer' ? hirerGigs : internApplications) || []).slice(0, 5).map((item, idx) => {
+                                    const gigId = activeTab === 'hirer' ? item._id : item.gigId?._id;
+                                    const statusToWorkspace = ['assigned', 'in-progress', 'completed', 'closed'];
+                                    const isWorkspaceActive = activeTab === 'hirer' ? statusToWorkspace.includes(item.status) : item.status === 'HIRED';
+                                    const destination = isWorkspaceActive ? `/workspace/${gigId}` : `/gigs/${gigId}`;
+
+                                    return (
+                                        <motion.div
+                                            initial={{ opacity: 0, x: -20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ delay: idx * 0.1 }}
+                                            key={item._id}
+                                            className="p-8 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group"
+                                        >
+                                            <div className="flex gap-6 items-center">
+                                                <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-2xl flex items-center justify-center text-gray-500 shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                                                    {activeTab === 'hirer' ? <FileText size={24} /> : <Briefcase size={24} />}
+                                                </div>
+                                                <div>
+                                                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1 group-hover:text-indigo-600 transition-colors">
+                                                        {activeTab === 'hirer' ? item.title : (item.gigId?.title || 'Deleted Internship')}
+                                                    </h3>
+                                                    <div className="flex items-center gap-4 text-xs font-bold text-gray-500">
+                                                        <span className="flex items-center gap-1 text-indigo-600">
+                                                            <IndianRupee size={12} /> {(activeTab === 'hirer' ? item.budget : (item.gigId?.budget || 0)).toLocaleString()}
+                                                        </span>
+                                                        <span className="text-gray-300">|</span>
+                                                        <span className={`uppercase tracking-widest ${(item.status === 'open' || item.status === 'HIRED' || item.status === 'closed')
+                                                                ? 'text-green-500'
+                                                                : item.status === 'REJECTED' ? 'text-red-500' : 'text-orange-500'
+                                                            }`}>
+                                                            {activeTab === 'intern' && item.status === 'HIRED'
+                                                                ? `Hired • ${item.gigId?.status || 'Unknown'}`
+                                                                : item.status}
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <Link to={`/gigs/${activeTab === 'hirer' ? item._id : item.gigId?._id}`} className="p-3 bg-gray-100 dark:bg-gray-700 rounded-xl text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all">
-                                            <ArrowRight size={20} />
-                                        </Link>
-                                    </motion.div>
-                                ))
+                                            <Link to={destination} className="p-3 bg-gray-100 dark:bg-gray-700 rounded-xl text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all flex items-center gap-2">
+                                                {isWorkspaceActive ? <span className="text-xs font-bold uppercase tracking-widest hidden sm:block">Workspace</span> : null}
+                                                <ArrowRight size={20} />
+                                            </Link>
+                                        </motion.div>
+                                    );
+                                })
                             )}
                         </div>
                     </div>
@@ -220,7 +228,7 @@ const Dashboard = ({ role: forcedRole, section }) => {
                                 <p className="text-gray-500 dark:text-gray-400 text-sm italic">No active projects currently.</p>
                             ) : (
                                 ((activeTab === 'hirer' ? stats?.hirer?.activeInterns : stats?.intern?.activeInternships) || []).map(active => (
-                                    <div key={active._id} className="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 dark:bg-gray-700/50">
+                                    <Link to={`/workspace/${activeTab === 'hirer' ? active.gigId?._id || active.gigId : active.gigId?._id}`} key={active._id} className="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                                         <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold shrink-0">
                                             {(activeTab === 'hirer' ? active.internName : active.gigId?.title)?.charAt(0) || 'I'}
                                         </div>
@@ -232,7 +240,7 @@ const Dashboard = ({ role: forcedRole, section }) => {
                                                 {activeTab === 'hirer' ? (active.gigId?.title || 'Unknown Gig') : active.gigId?.status?.replace('-', ' ')}
                                             </p>
                                         </div>
-                                    </div>
+                                    </Link>
                                 ))
                             )}
                         </div>

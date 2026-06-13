@@ -220,7 +220,8 @@ const Navbar = () => {
         ...(isIntern ? [{ name: 'Find Internships', path: '/gigs', icon: <Search size={18} /> }] : []),
         ...(isHirer ? [{ name: 'Post Internship', path: '/gigs/create', icon: <PlusCircle size={18} /> }] : []),
         ...(!userInfo ? [{ name: 'Explore Internships', path: '/gigs', icon: <Search size={18} /> }] : []),
-        { name: 'Dashboard', path: '/dashboard', icon: <Briefcase size={18} /> },
+        { name: 'Dashboard', path: '/dashboard', icon: <Home size={18} /> },
+        ...(userInfo ? [{ name: 'Workspaces', path: '/workspaces', icon: <Briefcase size={18} /> }] : []),
     ];
 
     return (

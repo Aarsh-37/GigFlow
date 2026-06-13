@@ -195,21 +195,26 @@ export const transitionStatus = async (id, userId, newStatus) => {
             }
         }
 
-        const hiredApp = await Application.findOne({ gigId: gig._id, status: 'HIRED' });
-        if (hiredApp) {
-            const intern = await User.findById(hiredApp.internId);
+        const teamSize = gig.teamMembers ? gig.teamMembers.length : 0;
+        if (teamSize > 0) {
             const hirer = await User.findById(gig.ownerId);
+            const totalReleaseAmount = gig.escrowAmount;
+            const amountPerMember = totalReleaseAmount / teamSize;
 
-            const releaseAmount = gig.escrowAmount;
-
-            // Release funds: Deduct from hirer's escrow, add to intern's balance
-            hirer.escrowBalance -= releaseAmount;
-            intern.balance += releaseAmount;
-            intern.totalGigs += 1;
-
+            // Release funds: Deduct from hirer's escrow
+            hirer.escrowBalance -= totalReleaseAmount;
             await hirer.save();
-            await intern.save();
 
+            // Add to each intern's balance
+            for (const memberId of gig.teamMembers) {
+                const intern = await User.findById(memberId);
+                if (intern) {
+                    intern.balance += amountPerMember;
+                    intern.totalGigs += 1;
+                    await intern.save();
+                }
+            }
+            
             gig.escrowAmount = 0;
         }
     }

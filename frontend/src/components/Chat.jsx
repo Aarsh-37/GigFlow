@@ -5,7 +5,7 @@ import socket from '../socket';
 import { Send, User, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 
-const Chat = ({ gigId }) => {
+const Chat = ({ gigId, isEmbedded }) => {
     const { userInfo } = useSelector((state) => state.auth);
     const [messages, setMessages] = useState([]);
     const [content, setContent] = useState('');
@@ -60,12 +60,12 @@ const Chat = ({ gigId }) => {
 
     if (loading) return (
         <div className="flex items-center justify-center p-12">
-            <Loader2 className="animate-spin text-primary-500" size={32} />
+            <Loader2 className="animate-spin text-indigo-500" size={32} />
         </div>
     );
 
     return (
-        <div className="flex flex-col h-[500px] bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden">
+        <div className={`flex flex-col ${isEmbedded ? 'h-full' : 'h-[500px] rounded-2xl shadow-xl border border-gray-100 dark:border-gray-700'} bg-white dark:bg-gray-800 overflow-hidden`}>
             <div className="p-4 border-b border-slate-50 bg-slate-50/50">
                 <h3 className="font-bold text-slate-900">Project Chat</h3>
                 <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Secure Scoped Channel</p>

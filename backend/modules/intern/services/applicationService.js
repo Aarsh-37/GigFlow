@@ -85,10 +85,15 @@ export const updateApplicationStatus = async (applicationId, hirerId, status) =>
         hirer.escrowBalance += gig.budget;
         await hirer.save();
 
-        // Update gig to assigned state
+        // Update gig to assigned state and enable workspace
         gig.status = GIG_STATUS.ASSIGNED;
-        gig.hiredInternId = application.internId;
-        gig.escrowAmount = gig.budget;
+        gig.workspaceEnabled = true;
+        gig.hiredInternId = application.internId; // Set for workspace access
+        if (!gig.teamMembers) gig.teamMembers = [];
+        if (!gig.teamMembers.some(id => id.toString() === application.internId.toString())) {
+            gig.teamMembers.push(application.internId);
+        }
+        gig.escrowAmount += gig.budget; // Ensure escrow increments if multiple hires
         await gig.save();
 
         // Reject all other pending applications for this gig

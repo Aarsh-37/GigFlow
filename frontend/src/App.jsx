@@ -10,6 +10,8 @@ import GigsFeed from './modules/intern/pages/GigsFeed';
 import Dashboard from './modules/shared/pages/Dashboard';
 import CreateGig from './modules/hiring/pages/CreateGig';
 import GigDetail from './modules/shared/pages/GigDetail';
+import Workspace from './modules/shared/pages/Workspace';
+import WorkspaceList from './modules/shared/pages/WorkspaceList';
 import Profile from './modules/shared/pages/Profile';
 import AdminPanel from './modules/shared/pages/AdminPanel';
 import LandingPage from './modules/shared/pages/LandingPage';
@@ -129,6 +131,8 @@ function App() {
             {/* Common Protected Routes */}
             <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
             <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+            <Route path="/workspaces" element={<PrivateRoute><WorkspaceList /></PrivateRoute>} />
+            <Route path="/workspace/:gigId" element={<PrivateRoute><Workspace /></PrivateRoute>} />
 
             {/* Hirer Routes */}
             <Route path="/hirer/dashboard" element={<HirerRoute><Dashboard role="hirer" /></HirerRoute>} />

@@ -17,6 +17,7 @@ import reviewRoutes from './modules/shared/routes/reviewRoutes.js';
 import dashboardRoutes from './modules/shared/routes/dashboardRoutes.js';
 import notificationRoutes from './modules/shared/routes/notificationRoutes.js';
 import chatRoutes from './modules/shared/routes/chatRoutes.js';
+import workspaceRoutes from './modules/shared/routes/workspaceRoutes.js';
 import adminRoutes from './modules/hiring/routes/adminRoutes.js';
 import disputeRoutes from './modules/hiring/routes/disputeRoutes.js';
 import passport from 'passport';
@@ -154,7 +155,7 @@ io.on('connection', (socket) => {
             }
 
             const isOwner = gig.ownerId.toString() === socket.userId;
-            const isHiredIntern = gig.hiredInternId && gig.hiredInternId.toString() === socket.userId;
+            const isHiredIntern = gig.teamMembers && gig.teamMembers.some(id => id.toString() === socket.userId);
 
             if (isOwner || isHiredIntern) {
                 socket.join(`gig_${gigId}`);
@@ -189,6 +190,7 @@ app.use('/api/v1/reviews', reviewRoutes);
 app.use('/api/v1/dashboard', dashboardRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
 app.use('/api/v1/chat', chatRoutes);
+app.use('/api/v1/workspaces', workspaceRoutes);
 app.use('/api/v1/admin', adminRoutes);
 app.use('/api/v1/disputes', disputeRoutes);
 
